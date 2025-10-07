@@ -219,7 +219,18 @@ const App: React.FC = () => {
           <GrowthChart data={growthData} />
         </div>
       </main>
-      <footer className="text-center py-6 text-sm text-slate-600">
+      <footer className="text-center py-6 text-sm text-slate-600 space-y-2">
+        <p>
+          Made with <span role="img" aria-label="love">❤️</span> by{' '}
+          <a
+            href="https://www.linkedin.com/in/its-aditya-parab/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-indigo-600 hover:underline"
+          >
+            Aditya Parab
+          </a>
+        </p>
         <p>Disclaimer: The calculations are for illustrative purposes only.</p>
       </footer>
     </div>

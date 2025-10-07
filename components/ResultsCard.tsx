@@ -79,9 +79,9 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                 <Pie
                   data={chartData}
                   cx="50%"
-                  cy="45%"
+                  cy="50%"
                   innerRadius={60}
-                  outerRadius={100}
+                  outerRadius={90}
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
@@ -92,7 +92,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '16px' }} />
+                <Legend iconType="circle" verticalAlign="bottom" height={40} />
               </PieChart>
             </ResponsiveContainer>
            ) : (
@@ -106,7 +106,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
       {(sipResults.investedAmount > 0 || lumpsumResults.investedAmount > 0) && (
         <div className="mt-8 pt-6 border-t border-white/30 grid grid-cols-1 sm:grid-cols-2 gap-6">
             {sipResults.investedAmount > 0 && (
-                <div className="bg-white/40 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                     <h3 className="font-bold text-slate-700 mb-2 text-center sm:text-left">SIP Details</h3>
                     <div className="space-y-1 text-sm">
                         <p className="flex justify-between sm:grid sm:grid-cols-2">
@@ -125,7 +125,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                 </div>
             )}
              {lumpsumResults.investedAmount > 0 && (
-                <div className="bg-white/40 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/60">
                     <h3 className="font-bold text-slate-700 mb-2 text-center sm:text-left">Lumpsum Details</h3>
                     <div className="space-y-1 text-sm">
                         <p className="flex justify-between sm:grid sm:grid-cols-2">
