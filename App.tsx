@@ -5,29 +5,42 @@ import ResultsCard from './components/ResultsCard';
 import GrowthChart from './components/GrowthChart';
 
 const App: React.FC = () => {
-  const [monthlyInvestment, setMonthlyInvestment] = useState<number>(10000);
+  const [monthlyInvestment, setMonthlyInvestment] = useState<number>(25000);
+  const [stepUpPercentage, setStepUpPercentage] = useState<number>(0);
   const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
   const [returnRate, setReturnRate] = useState<number>(12);
   const [timePeriod, setTimePeriod] = useState<number>(10);
   const [inflationRate, setInflationRate] = useState<number>(0);
 
   const totalResults = useMemo(() => {
-    const months = timePeriod * 12;
     const annualRate = returnRate / 100;
+    const stepUpRate = stepUpPercentage / 100;
+    const annualInflationRate = inflationRate / 100;
 
-    // SIP Calculations
-    const sipInvestedAmount = monthlyInvestment * months;
-    let sipTotalValue = sipInvestedAmount;
-    if (monthlyInvestment > 0 && timePeriod > 0 && returnRate > 0) {
-      const monthlyRate = annualRate / 12;
-      sipTotalValue =
-        monthlyInvestment *
-        ((((1 + monthlyRate) ** months) - 1) / monthlyRate) *
-        (1 + monthlyRate);
+    // Use effective monthly rate for accuracy, assuming investment at the start of the month
+    const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+    const months = timePeriod * 12;
+
+    // SIP Calculations with month-by-month compounding
+    let sipTotalValue = 0;
+    let sipInvestedAmount = 0;
+    let currentMonthlySip = monthlyInvestment;
+
+    if (monthlyInvestment > 0 && timePeriod > 0) {
+      for (let month = 1; month <= months; month++) {
+        // Add investment at the start of the month, then compound
+        sipTotalValue = (sipTotalValue + currentMonthlySip) * (1 + monthlyRate);
+        sipInvestedAmount += currentMonthlySip;
+        
+        // Apply step-up for the next year
+        if (month % 12 === 0 && month < months) {
+          currentMonthlySip *= (1 + stepUpRate);
+        }
+      }
     }
     const sipEstimatedReturns = sipTotalValue - sipInvestedAmount;
 
-    // Lumpsum Calculations
+    // Lumpsum Calculations (compounded annually)
     const lumpsumInvestedAmount = lumpsumAmount;
     let lumpsumTotalValue = lumpsumInvestedAmount;
     if (lumpsumAmount > 0 && timePeriod > 0 && returnRate > 0) {
@@ -41,7 +54,6 @@ const App: React.FC = () => {
     const estimatedReturns = totalValue - investedAmount;
 
     // Inflation adjustment (compounded annually on the final value)
-    const annualInflationRate = inflationRate / 100;
     const inflationAdjustedTotalValue = annualInflationRate > 0 
       ? totalValue / Math.pow(1 + annualInflationRate, timePeriod)
       : totalValue;
@@ -63,7 +75,7 @@ const App: React.FC = () => {
         totalValue: lumpsumTotalValue,
       },
     };
-  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate]);
+  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate, stepUpPercentage]);
 
   const growthData = useMemo(() => {
     if ((monthlyInvestment <= 0 && lumpsumAmount <= 0) || timePeriod <= 0) {
@@ -72,21 +84,19 @@ const App: React.FC = () => {
 
     const data = [];
     const annualRate = returnRate / 100;
-    const monthlyRate =
-      annualRate > 0 ? annualRate / 12 : 0;
+    const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
     const annualInflationRate = inflationRate > 0 ? inflationRate / 100 : 0;
+    const stepUpRate = stepUpPercentage / 100;
+
+    let runningSipValue = 0;
+    let runningSipInvested = 0;
+    let currentMonthlySip = monthlyInvestment;
 
     for (let year = 1; year <= timePeriod; year++) {
-      const months = year * 12;
-
-      // SIP part for this year
-      const sipInvested = monthlyInvestment * months;
-      let sipValue = sipInvested;
-      if (monthlyRate > 0 && monthlyInvestment > 0) {
-        sipValue =
-          monthlyInvestment *
-          ((((1 + monthlyRate) ** months) - 1) / monthlyRate) *
-          (1 + monthlyRate);
+      // Run monthly calculation for the current year
+      for (let monthInYear = 1; monthInYear <= 12; monthInYear++) {
+        runningSipValue = (runningSipValue + currentMonthlySip) * (1 + monthlyRate);
+        runningSipInvested += currentMonthlySip;
       }
 
       // Lumpsum part for this year
@@ -95,26 +105,28 @@ const App: React.FC = () => {
           ? lumpsumAmount * Math.pow(1 + annualRate, year)
           : lumpsumAmount;
 
-      const totalInvested = sipInvested + lumpsumAmount;
-      const totalValue = sipValue + lumpsumValue;
+      const totalInvested = runningSipInvested + lumpsumAmount;
+      const totalValue = runningSipValue + lumpsumValue;
       const estimatedReturns = totalValue - totalInvested;
       const inflationAdjustedTotalValue = annualInflationRate > 0
         ? totalValue / Math.pow(1 + annualInflationRate, year)
         : totalValue;
-
 
       data.push({
         year,
         investedAmount: Math.round(totalInvested),
         estimatedReturns: Math.round(estimatedReturns),
         totalValue: Math.round(totalValue),
-        sipValue: Math.round(sipValue),
+        sipValue: Math.round(runningSipValue),
         lumpsumValue: Math.round(lumpsumValue),
         inflationAdjustedTotalValue: Math.round(inflationAdjustedTotalValue),
       });
+
+      // Step up for the next year
+      currentMonthlySip *= (1 + stepUpRate);
     }
     return data;
-  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate]);
+  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate, stepUpPercentage]);
 
   return (
     <div className="min-h-screen font-sans text-slate-900 antialiased">
@@ -135,13 +147,22 @@ const App: React.FC = () => {
             <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-lg border border-white/20">
               <div className="space-y-8">
                 <SliderInput
-                  label="Monthly Investment"
+                  label="Monthly Investment (SIP)"
                   value={monthlyInvestment}
                   onChange={setMonthlyInvestment}
                   min={0}
                   max={1000000}
                   step={1000}
                   unit="₹"
+                />
+                <SliderInput
+                  label="SIP Annual Step-up"
+                  value={stepUpPercentage}
+                  onChange={setStepUpPercentage}
+                  min={0}
+                  max={50}
+                  step={1}
+                  unit="%"
                 />
                 <SliderInput
                   label="Lumpsum Investment"

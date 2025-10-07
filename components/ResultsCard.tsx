@@ -92,7 +92,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" />
+                <Legend iconType="circle" wrapperStyle={{ paddingTop: '16px' }} />
               </PieChart>
             </ResponsiveContainer>
            ) : (
