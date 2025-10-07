@@ -1,0 +1,5 @@
+{
+  "name": "Mutual Fund SIP Calculator",
+  "description": "A clean and intuitive mutual fund calculator to estimate returns on your Systematic Investment Plan (SIP). Input your monthly investment, expected return rate, and time period using sliders to see your potential wealth growth, including invested amount, estimated returns, and total value, visualized with a helpful chart.",
+  "requestFramePermissions": []
+}
