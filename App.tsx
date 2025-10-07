@@ -146,60 +146,71 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
             <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-lg border border-white/20">
               <div className="space-y-8">
-                <SliderInput
-                  label="Monthly Investment (SIP)"
-                  value={monthlyInvestment}
-                  onChange={setMonthlyInvestment}
-                  min={0}
-                  max={1000000}
-                  step={1000}
-                  unit="₹"
-                />
-                <SliderInput
-                  label="SIP Annual Step-up"
-                  value={stepUpPercentage}
-                  onChange={setStepUpPercentage}
-                  min={0}
-                  max={50}
-                  step={1}
-                  unit="%"
-                />
-                <SliderInput
-                  label="Lumpsum Investment"
-                  value={lumpsumAmount}
-                  onChange={setLumpsumAmount}
-                  min={0}
-                  max={100000000}
-                  step={100000}
-                  unit="₹"
-                />
-                <SliderInput
-                  label="Expected Return Rate (p.a.)"
-                  value={returnRate}
-                  onChange={setReturnRate}
-                  min={1}
-                  max={30}
-                  step={0.1}
-                  unit="%"
-                />
-                <SliderInput
-                  label="Time Period"
-                  value={timePeriod}
-                  onChange={setTimePeriod}
-                  min={1}
-                  max={40}
-                  step={1}
-                  unit="Yr"
-                />
-                <SliderInput
-                  label="Inflation Rate (p.a.)"
-                  value={inflationRate}
-                  onChange={setInflationRate}
-                  min={0}
-                  max={20}
-                  step={0.1}
-                  unit="%"
-                />
+                <div className="bg-indigo-50/40 border border-indigo-200/50 rounded-2xl p-4 sm:p-6 space-y-8">
+                  <h3 className="text-lg font-semibold text-indigo-800 -mb-4">
+                    Core Calculation
+                  </h3>
+                  <SliderInput
+                    label="Monthly Investment (SIP)"
+                    value={monthlyInvestment}
+                    onChange={setMonthlyInvestment}
+                    min={0}
+                    max={1000000}
+                    step={1000}
+                    unit="₹"
+                  />
+                  <SliderInput
+                    label="Expected Return Rate (p.a.)"
+                    value={returnRate}
+                    onChange={setReturnRate}
+                    min={1}
+                    max={30}
+                    step={0.1}
+                    unit="%"
+                  />
+                  <SliderInput
+                    label="Time Period"
+                    value={timePeriod}
+                    onChange={setTimePeriod}
+                    min={1}
+                    max={40}
+                    step={1}
+                    unit="Yr"
+                  />
+                </div>
+
+                <div className="space-y-8 pt-4">
+                  <h3 className="text-lg font-semibold text-slate-700 -mb-2">
+                    Optional Adjustments
+                  </h3>
+                  <SliderInput
+                    label="SIP Annual Step-up"
+                    value={stepUpPercentage}
+                    onChange={setStepUpPercentage}
+                    min={0}
+                    max={50}
+                    step={1}
+                    unit="%"
+                  />
+                  <SliderInput
+                    label="Lumpsum Investment"
+                    value={lumpsumAmount}
+                    onChange={setLumpsumAmount}
+                    min={0}
+                    max={100000000}
+                    step={100000}
+                    unit="₹"
+                  />
+                  <SliderInput
+                    label="Inflation Rate (p.a.)"
+                    value={inflationRate}
+                    onChange={setInflationRate}
+                    min={0}
+                    max={20}
+                    step={0.1}
+                    unit="%"
+                  />
+                </div>
               </div>
             </div>
 
