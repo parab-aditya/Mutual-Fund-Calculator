@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatIndianCurrency, numberToIndianWords } from '../utils/formatters';
+import { formatIndianCurrency, numberToIndianWords, formatIndianNumber } from '../utils/formatters';
 
 interface SliderInputProps {
   label: string;
@@ -21,34 +21,41 @@ const SliderInput: React.FC<SliderInputProps> = ({
   step,
   unit,
 }) => {
+  const isCurrency = unit === '₹';
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const numValue = Number(e.target.value);
+    // Remove commas before converting to number. Works for range input too (no-op).
+    const rawValue = e.target.value.replace(/,/g, '');
+    let numValue = Number(rawValue);
+
     if (!isNaN(numValue)) {
       if (numValue > max) {
-        onChange(max);
+        numValue = max;
       } else if (numValue < min) {
-        onChange(min);
-      } else {
-        onChange(numValue);
+        numValue = min;
       }
+      
+      onChange(numValue);
+    } else if (rawValue === '') {
+      // Handle user clearing the field
+      onChange(min);
     }
   };
-
-  const displayValue = unit === '₹' ? formatIndianCurrency(value) : value;
 
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-baseline">
         <label className="text-base font-medium text-slate-700">{label}</label>
-        <div className="flex items-center bg-slate-100 rounded-md border border-slate-200">
-          <span className="pl-3 text-slate-500">{unit}</span>
+        <div className="flex items-center rounded-md">
+          <span className="pr-2 text-slate-500">{unit}</span>
           <input
-            type="number"
-            value={value}
+            type={isCurrency ? 'text' : 'number'}
+            value={isCurrency ? formatIndianNumber(value) : value}
             onChange={handleInputChange}
-            className="w-32 sm:w-36 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none"
+            className="w-32 sm:w-36 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none border-b-2 border-slate-300/70 focus:border-indigo-500 transition-colors"
             min={min}
             max={max}
+            step={isCurrency ? undefined : step}
           />
         </div>
       </div>
@@ -60,7 +67,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
           step={step}
           value={value}
           onChange={handleInputChange}
-          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          className="w-full h-2 bg-slate-200/50 rounded-lg appearance-none cursor-pointer accent-indigo-600"
         />
         {unit === '₹' && value > 0 && (
           <p className="text-xs text-slate-500 text-right pt-1 h-4">

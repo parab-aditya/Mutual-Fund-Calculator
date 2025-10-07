@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
   const [returnRate, setReturnRate] = useState<number>(12);
   const [timePeriod, setTimePeriod] = useState<number>(10);
+  const [inflationRate, setInflationRate] = useState<number>(0);
 
   const totalResults = useMemo(() => {
     const months = timePeriod * 12;
@@ -18,7 +19,7 @@ const App: React.FC = () => {
     const sipInvestedAmount = monthlyInvestment * months;
     let sipTotalValue = sipInvestedAmount;
     if (monthlyInvestment > 0 && timePeriod > 0 && returnRate > 0) {
-      const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+      const monthlyRate = annualRate / 12;
       sipTotalValue =
         monthlyInvestment *
         ((((1 + monthlyRate) ** months) - 1) / monthlyRate) *
@@ -39,10 +40,18 @@ const App: React.FC = () => {
     const totalValue = sipTotalValue + lumpsumTotalValue;
     const estimatedReturns = totalValue - investedAmount;
 
+    // Inflation adjustment (compounded annually on the final value)
+    const annualInflationRate = inflationRate / 100;
+    const inflationAdjustedTotalValue = annualInflationRate > 0 
+      ? totalValue / Math.pow(1 + annualInflationRate, timePeriod)
+      : totalValue;
+
+
     return {
       investedAmount,
       estimatedReturns,
       totalValue,
+      inflationAdjustedTotalValue,
       sip: {
         investedAmount: sipInvestedAmount,
         estimatedReturns: sipEstimatedReturns,
@@ -54,7 +63,7 @@ const App: React.FC = () => {
         totalValue: lumpsumTotalValue,
       },
     };
-  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount]);
+  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate]);
 
   const growthData = useMemo(() => {
     if ((monthlyInvestment <= 0 && lumpsumAmount <= 0) || timePeriod <= 0) {
@@ -64,7 +73,8 @@ const App: React.FC = () => {
     const data = [];
     const annualRate = returnRate / 100;
     const monthlyRate =
-      annualRate > 0 ? Math.pow(1 + annualRate, 1 / 12) - 1 : 0;
+      annualRate > 0 ? annualRate / 12 : 0;
+    const annualInflationRate = inflationRate > 0 ? inflationRate / 100 : 0;
 
     for (let year = 1; year <= timePeriod; year++) {
       const months = year * 12;
@@ -88,6 +98,10 @@ const App: React.FC = () => {
       const totalInvested = sipInvested + lumpsumAmount;
       const totalValue = sipValue + lumpsumValue;
       const estimatedReturns = totalValue - totalInvested;
+      const inflationAdjustedTotalValue = annualInflationRate > 0
+        ? totalValue / Math.pow(1 + annualInflationRate, year)
+        : totalValue;
+
 
       data.push({
         year,
@@ -96,28 +110,29 @@ const App: React.FC = () => {
         totalValue: Math.round(totalValue),
         sipValue: Math.round(sipValue),
         lumpsumValue: Math.round(lumpsumValue),
+        inflationAdjustedTotalValue: Math.round(inflationAdjustedTotalValue),
       });
     }
     return data;
-  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount]);
+  }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate]);
 
   return (
-    <div className="min-h-screen font-sans text-slate-800 antialiased">
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+    <div className="min-h-screen font-sans text-slate-900 antialiased">
+       <header>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
             Mutual Fund SIP Calculator
           </h1>
-          <p className="text-slate-500 mt-1">
-            Plan your future investments with ease and clarity.
+          <p className="text-slate-600 mt-2 text-lg">
+            Visualize your wealth creation journey.
           </p>
         </div>
       </header>
 
-      <main className="container mx-auto py-8 sm:py-12">
+      <main className="container mx-auto pb-8 sm:pb-12">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-            <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200/80">
+            <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-lg border border-white/20">
               <div className="space-y-8">
                 <SliderInput
                   label="Monthly Investment"
@@ -143,7 +158,7 @@ const App: React.FC = () => {
                   onChange={setReturnRate}
                   min={1}
                   max={30}
-                  step={0.5}
+                  step={0.1}
                   unit="%"
                 />
                 <SliderInput
@@ -155,6 +170,15 @@ const App: React.FC = () => {
                   step={1}
                   unit="Yr"
                 />
+                <SliderInput
+                  label="Inflation Rate (p.a.)"
+                  value={inflationRate}
+                  onChange={setInflationRate}
+                  min={0}
+                  max={20}
+                  step={0.1}
+                  unit="%"
+                />
               </div>
             </div>
 
@@ -163,6 +187,7 @@ const App: React.FC = () => {
                 investedAmount={totalResults.investedAmount}
                 estimatedReturns={totalResults.estimatedReturns}
                 totalValue={totalResults.totalValue}
+                inflationAdjustedTotalValue={totalResults.inflationAdjustedTotalValue}
                 sipResults={totalResults.sip}
                 lumpsumResults={totalResults.lumpsum}
               />
@@ -173,7 +198,7 @@ const App: React.FC = () => {
           <GrowthChart data={growthData} />
         </div>
       </main>
-      <footer className="text-center py-6 text-sm text-slate-500">
+      <footer className="text-center py-6 text-sm text-slate-600">
         <p>Disclaimer: The calculations are for illustrative purposes only.</p>
       </footer>
     </div>

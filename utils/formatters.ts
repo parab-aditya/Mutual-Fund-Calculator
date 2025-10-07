@@ -13,6 +13,13 @@ export const formatIndianCurrency = (value: number): string => {
   }).format(Math.round(value));
 };
 
+export const formatIndianNumber = (value: number): string => {
+  if (isNaN(value) || !isFinite(value)) {
+    return '0';
+  }
+  return new Intl.NumberFormat('en-IN').format(Math.round(value));
+};
+
 export const formatAxisTick = (tickValue: number): string => {
   if (isNaN(tickValue)) return '0';
   
