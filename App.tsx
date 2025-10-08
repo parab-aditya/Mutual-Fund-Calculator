@@ -107,7 +107,7 @@ const App: React.FC = () => {
           <SwpCalculator sipProjectedValue={sipProjectedValue} />
         </div>
         <div className={activeTab === 'stp' ? '' : 'hidden'}>
-          <StpCalculator sipProjectedValue={sipProjectedValue} />
+          <StpCalculator />
         </div>
       </main>
       <footer className="text-center py-6 text-sm text-slate-500 space-y-2">

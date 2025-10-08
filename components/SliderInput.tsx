@@ -23,23 +23,30 @@ const SliderInput: React.FC<SliderInputProps> = ({
   const isCurrency = unit === '₹';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove commas before converting to number. Works for range input too (no-op).
+    // Remove commas before converting to number.
     const rawValue = e.target.value.replace(/,/g, '');
     let numValue = Number(rawValue);
 
     if (!isNaN(numValue)) {
       if (numValue > max) {
         numValue = max;
-      } else if (numValue < min) {
-        numValue = min;
       }
-      
+      // We no longer clamp to min here to allow users to type values freely.
+      // The min value will be enforced on blur.
       onChange(numValue);
     } else if (rawValue === '') {
-      // Handle user clearing the field
+      // Handle user clearing the field. Set to 0 to allow them to type a new value.
+      onChange(0);
+    }
+  };
+  
+  const handleBlur = () => {
+    // On blur, enforce the minimum value if the current value is below it.
+    if (value < min) {
       onChange(min);
     }
   };
+
 
   return (
     <div className="space-y-3">
@@ -51,6 +58,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
             type={isCurrency ? 'text' : 'number'}
             value={isCurrency ? formatIndianNumber(value) : value}
             onChange={handleInputChange}
+            onBlur={handleBlur}
             className="w-28 sm:w-32 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none"
             min={min}
             max={max}
