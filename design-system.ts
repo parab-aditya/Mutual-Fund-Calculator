@@ -21,11 +21,14 @@ export const Palette = {
   border: {
     default: 'border-slate-300',
     subtle: 'border-slate-200/60',
+    interactive: 'border-slate-200/75', // e.g., nested cards
   },
 
   // Accent Colors
   accent: {
     primary: 'indigo-600', // For interactive elements, links
+    primaryStrong: 'indigo-700', // For stronger text highlights
+    interactive: 'indigo-500', // For focus borders/rings
     focusRing: 'ring-indigo-500/20',
   },
 
@@ -45,12 +48,13 @@ export const Palette = {
 
   // Chart Colors
   chart: {
-    invested: '#4338ca', // Deep Indigo
+    invested: '#4338ca', // Deep Indigo (for Pie charts, areas)
     returns: '#10b981',  // Emerald
     totalValueArea: '#334155', // Slate
     totalValueLine: '#1e293b', // Dark Slate
     lumpsum: '#8b5cf6', // Violet
     inflation: '#475569', // Slate Gray
+    investedLine: '#3b82f6', // Blue (for line charts)
   }
 };
 
@@ -92,6 +96,8 @@ export const Layout = {
 export const Components = {
   card: {
     base: 'bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60',
+    nested: `bg-slate-100/50 p-4 sm:p-6 rounded-xl border ${Palette.border.subtle}`,
+    placeholder: 'flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg',
   },
 
   tabs: {
@@ -103,9 +109,13 @@ export const Components = {
   },
 
   sliderInput: {
-    numericInputWrapper: `flex items-center rounded-md border ${Palette.border.default} focus-within:border-${Palette.accent.primary} focus-within:ring-2 focus-within:${Palette.accent.focusRing}`,
+    numericInputWrapper: `flex items-center rounded-md border ${Palette.border.default} focus-within:border-${Palette.accent.interactive} focus-within:ring-2 focus-within:${Palette.accent.focusRing}`,
     numericInput: 'w-28 sm:w-32 p-2 text-right font-semibold bg-transparent focus:outline-none',
     range: `w-full h-2 bg-slate-200/80 rounded-lg appearance-none cursor-pointer accent-${Palette.accent.primary}`,
+  },
+  
+  select: {
+    base: `p-2 rounded-md border ${Palette.border.default} focus:border-${Palette.accent.interactive} focus:ring-2 focus:${Palette.accent.focusRing} transition-all duration-200 bg-white/50`,
   },
   
   tooltip: {
@@ -113,7 +123,7 @@ export const Components = {
   },
 
   checkbox: {
-    base: `h-4 w-4 rounded border-slate-300 text-${Palette.accent.primary} focus:ring-indigo-500 cursor-pointer`,
+    base: `h-4 w-4 rounded border-slate-300 text-${Palette.accent.primary} focus:ring-${Palette.accent.interactive} cursor-pointer`,
   },
 
   footer: {
