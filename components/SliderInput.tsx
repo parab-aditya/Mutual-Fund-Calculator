@@ -46,14 +46,18 @@ const SliderInput: React.FC<SliderInputProps> = ({
       onChange(min);
     }
   };
-
+  
+  const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  const sliderStyle = {
+    background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
+  };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <label className="text-sm font-medium text-slate-600">{label}</label>
-        <div className="flex items-center rounded-md border border-slate-300 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all duration-200">
-          <span className="pl-3 text-slate-500">{unit}</span>
+        <div className="flex items-center rounded-lg bg-emerald-50 border border-emerald-200/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
+          <span className="pl-3 text-emerald-800 font-medium">{unit}</span>
           <input
             type={isCurrency ? 'text' : 'number'}
             value={isCurrency ? formatIndianNumber(value) : value}
@@ -73,11 +77,12 @@ const SliderInput: React.FC<SliderInputProps> = ({
           max={max}
           step={step}
           value={value}
-          onChange={handleInputChange}
-          className="w-full h-2 bg-slate-200/80 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={sliderStyle}
+          className="w-full custom-slider"
         />
         {unit === '₹' && value > 0 && (
-          <p className="text-xs text-slate-500 text-right pt-1 h-4">
+          <p className="text-xs text-slate-500 text-right pt-2 h-4">
             {numberToIndianWords(value)}
           </p>
         )}

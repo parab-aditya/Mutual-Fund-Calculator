@@ -117,7 +117,7 @@ const App: React.FC = () => {
             href="https://www.linkedin.com/in/its-aditya-parab/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-indigo-600 hover:underline"
+            className="font-semibold text-emerald-600 hover:underline"
           >
             Aditya Parab
           </a>

@@ -26,10 +26,10 @@ export const Palette = {
 
   // Accent Colors
   accent: {
-    primary: 'indigo-600', // For interactive elements, links
-    primaryStrong: 'indigo-700', // For stronger text highlights
-    interactive: 'indigo-500', // For focus borders/rings
-    focusRing: 'ring-indigo-500/20',
+    primary: 'emerald-600', // For interactive elements, links
+    primaryStrong: 'emerald-700', // For stronger text highlights
+    interactive: 'emerald-500', // For focus borders/rings
+    focusRing: 'ring-emerald-500/30',
   },
 
   // Semantic Colors
@@ -48,13 +48,13 @@ export const Palette = {
 
   // Chart Colors
   chart: {
-    invested: '#4338ca', // Deep Indigo (for Pie charts, areas)
+    invested: '#3b82f6', // Blue (for Pie charts, areas)
     returns: '#10b981',  // Emerald
     totalValueArea: '#334155', // Slate
     totalValueLine: '#1e293b', // Dark Slate
     lumpsum: '#8b5cf6', // Violet
     inflation: '#475569', // Slate Gray
-    investedLine: '#3b82f6', // Blue (for line charts)
+    sourceFund: '#4338ca', // Indigo
   }
 };
 
@@ -109,7 +109,7 @@ export const Components = {
   },
 
   sliderInput: {
-    numericInputWrapper: `flex items-center rounded-md border ${Palette.border.default} focus-within:border-${Palette.accent.interactive} focus-within:ring-2 focus-within:${Palette.accent.focusRing}`,
+    numericInputWrapper: `flex items-center rounded-lg bg-emerald-50 border ${Palette.border.interactive} focus-within:border-${Palette.accent.interactive} focus-within:ring-2 focus-within:${Palette.accent.focusRing}`,
     numericInput: 'w-28 sm:w-32 p-2 text-right font-semibold bg-transparent focus:outline-none',
     range: `w-full h-2 bg-slate-200/80 rounded-lg appearance-none cursor-pointer accent-${Palette.accent.primary}`,
   },

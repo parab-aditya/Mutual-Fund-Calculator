@@ -84,7 +84,7 @@ const StpCalculator: React.FC<StpCalculatorProps> = ({ isActive }) => {
                             <select
                                 value={transferFrequency}
                                 onChange={(e) => setTransferFrequency(e.target.value as TransferFrequency)}
-                                className="w-36 p-2 rounded-md border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 bg-white/50"
+                                className="w-36 p-2 rounded-md border border-slate-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 bg-white/50"
                             >
                                 <option>Monthly</option>
                                 <option>Weekly</option>

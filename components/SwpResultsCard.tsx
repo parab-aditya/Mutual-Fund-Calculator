@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
+import { Palette } from '../design-system';
 
 interface SwpResultsCardProps {
   totalInvestment: number;
@@ -10,7 +11,7 @@ interface SwpResultsCardProps {
   isActive: boolean;
 }
 
-const COLORS = ['#4338ca', '#10b981']; // Deep Indigo for invested, Emerald for withdrawal
+const COLORS = [Palette.chart.invested, Palette.chart.returns];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {

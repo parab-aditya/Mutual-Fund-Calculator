@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
+import { Palette } from '../design-system';
 
 interface ResultBreakdown {
   investedAmount: number;
@@ -19,7 +20,7 @@ interface ResultsCardProps {
   isActive: boolean;
 }
 
-const COLORS = ['#4338ca', '#10b981']; // Deep Indigo for invested, Emerald for returns
+const COLORS = [Palette.chart.invested, Palette.chart.returns];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -142,7 +143,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                     </p>
                     <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
                         <span className="text-slate-600 font-semibold">Total:</span>
-                        <span className="font-semibold text-indigo-700 text-right sm:text-left">{formatIndianCurrency(sipResults.totalValue)}</span>
+                        <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(sipResults.totalValue)}</span>
                     </p>
                 </div>
             </div>
@@ -159,7 +160,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                     </p>
                      <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
                         <span className="text-slate-600 font-semibold">Total:</span>
-                        <span className="font-semibold text-indigo-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.totalValue)}</span>
+                        <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.totalValue)}</span>
                     </p>
                 </div>
             </div>
