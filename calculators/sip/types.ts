@@ -3,6 +3,7 @@ export interface SipInputs {
     stepUpPercentage: number;
     lumpsumAmount: number;
     returnRate: number;
+    lumpsumReturnRate: number;
     timePeriod: number;
     inflationRate: number;
 }

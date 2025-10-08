@@ -1,19 +1,129 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import SliderInput from '../../components/SliderInput';
+import { useSwpCalculator } from './useSwpCalculator';
+import { formatIndianCurrency } from '../../utils/formatters';
 
-const SwpCalculator: React.FC = () => {
+interface SwpCalculatorProps {
+    sipProjectedValue?: number;
+}
+
+const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
+    const [totalInvestment, setTotalInvestment] = useState<number>(1000000);
+    const [withdrawalPerMonth, setWithdrawalPerMonth] = useState<number>(8000);
+    const [expectedReturnRate, setExpectedReturnRate] = useState<number>(8);
+    const [timePeriod, setTimePeriod] = useState<number>(20);
+    const [syncWithSip, setSyncWithSip] = useState(false);
+
+    useEffect(() => {
+        if (syncWithSip && sipProjectedValue && sipProjectedValue > 0) {
+            setTotalInvestment(sipProjectedValue);
+        }
+    }, [sipProjectedValue, syncWithSip]);
+
+    const { results } = useSwpCalculator({
+        totalInvestment,
+        withdrawalPerMonth,
+        expectedReturnRate,
+        timePeriod,
+    });
+    
+    const handleTotalInvestmentChange = (value: number) => {
+        setSyncWithSip(false);
+        setTotalInvestment(value);
+    };
+
+    const handleSyncToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setSyncWithSip(isChecked);
+        if (isChecked && sipProjectedValue && sipProjectedValue > 0) {
+            setTotalInvestment(sipProjectedValue);
+        }
+    };
+
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 flex items-center justify-center min-h-[500px]">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-slate-700">SWP Inputs</h3>
-                  <p className="text-slate-500 mt-2">Configuration for SWP will be available here soon.</p>
-                </div>
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
+                 <div className="space-y-8">
+                    <h3 className="text-lg font-semibold text-slate-800 -mb-2">
+                      SWP Configuration
+                    </h3>
+                    <div>
+                        <SliderInput
+                            label="Total Investment"
+                            value={totalInvestment}
+                            onChange={handleTotalInvestmentChange}
+                            min={100000}
+                            max={100000000}
+                            step={100000}
+                            unit="₹"
+                        />
+                        <div className="flex items-center justify-end pt-4">
+                            <label htmlFor="syncSwpInvestment" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                                Use SIP Projected Value
+                            </label>
+                            <input
+                                type="checkbox"
+                                id="syncSwpInvestment"
+                                checked={syncWithSip}
+                                onChange={handleSyncToggle}
+                                disabled={!sipProjectedValue || sipProjectedValue <= 0}
+                                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
+                        </div>
+                    </div>
+                     <SliderInput
+                        label="Withdrawal per Month"
+                        value={withdrawalPerMonth}
+                        onChange={setWithdrawalPerMonth}
+                        min={1000}
+                        max={1000000}
+                        step={1000}
+                        unit="₹"
+                    />
+                    <SliderInput
+                        label="Expected Return Rate (p.a.)"
+                        value={expectedReturnRate}
+                        onChange={setExpectedReturnRate}
+                        min={1}
+                        max={30}
+                        step={0.1}
+                        unit="%"
+                    />
+                    <SliderInput
+                        label="Time Period"
+                        value={timePeriod}
+                        onChange={setTimePeriod}
+                        min={1}
+                        max={40}
+                        step={1}
+                        unit="Yr"
+                    />
+                 </div>
               </div>
               <div className="lg:col-span-3 flex flex-col gap-8 lg:gap-12">
-                <div className="bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center items-center text-center">
-                  <h3 className="text-lg font-semibold text-slate-700">SWP Results</h3>
-                  <p className="text-slate-500 mt-2">Projected SWP metrics will appear here.</p>
+                <div className="bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
+                    <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">SWP Projection</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                            <p className="text-sm text-slate-500">Total Investment</p>
+                            <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(results.totalInvestment)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500">Total Withdrawal</p>
+                            <p className="text-2xl font-bold text-emerald-600">{formatIndianCurrency(results.totalWithdrawal)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500">Number of Withdrawals</p>
+                            <p className="text-2xl font-bold text-slate-800">{results.numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
+                        </div>
+                         <div className="pt-2">
+                            <p className="text-sm text-slate-500">Final Balance</p>
+                            <p className={`text-3xl font-extrabold ${results.finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
+                                {formatIndianCurrency(results.finalValue)}
+                            </p>
+                        </div>
+                    </div>
                 </div>
                 <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 text-center">
                   <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal Growth Over Time</h2>

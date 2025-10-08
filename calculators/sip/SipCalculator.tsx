@@ -4,11 +4,17 @@ import ResultsCard from '../../components/ResultsCard';
 import GrowthChart from '../../components/GrowthChart';
 import { useSipCalculator } from './useSipCalculator';
 
-const SipCalculator: React.FC = () => {
+interface SipCalculatorProps {
+  onResultsChange?: (value: number) => void;
+}
+
+const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange }) => {
     const [monthlyInvestment, setMonthlyInvestment] = useState<number>(25000);
     const [stepUpPercentage, setStepUpPercentage] = useState<number>(0);
     const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
     const [returnRate, setReturnRate] = useState<number>(12);
+    const [lumpsumReturnRate, setLumpsumReturnRate] = useState<number>(returnRate);
+    const [syncLumpsumRate, setSyncLumpsumRate] = useState<boolean>(true);
     const [timePeriod, setTimePeriod] = useState<number>(10);
     const [inflationRate, setInflationRate] = useState<number>(0);
     
@@ -28,14 +34,41 @@ const SipCalculator: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    useEffect(() => {
+        if (syncLumpsumRate) {
+            setLumpsumReturnRate(returnRate);
+        }
+    }, [returnRate, syncLumpsumRate]);
+
     const { totalResults, growthData } = useSipCalculator({
         monthlyInvestment,
         stepUpPercentage,
         lumpsumAmount,
         returnRate,
+        lumpsumReturnRate,
         timePeriod,
         inflationRate,
     });
+    
+     useEffect(() => {
+        if (onResultsChange) {
+            onResultsChange(totalResults.totalValue);
+        }
+    }, [totalResults.totalValue, onResultsChange]);
+
+    const handleLumpsumRateChange = (value: number) => {
+        setSyncLumpsumRate(false);
+        setLumpsumReturnRate(value);
+    };
+
+    const handleSyncToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setSyncLumpsumRate(isChecked);
+        if (isChecked) {
+            setLumpsumReturnRate(returnRate);
+        }
+    };
+
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
@@ -95,7 +128,7 @@ const SipCalculator: React.FC = () => {
                       className={`grid transition-all duration-500 ease-in-out ${isMobile ? (isOptionalAdjustmentsOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0') : 'grid-rows-[1fr] opacity-100 mt-2'}`}
                     >
                       <div className="overflow-hidden">
-                        <div className="space-y-8 pt-6">
+                        <div className="space-y-8 pt-6 pb-4">
                           <SliderInput
                             label="SIP Annual Step-up"
                             value={stepUpPercentage}
@@ -114,6 +147,31 @@ const SipCalculator: React.FC = () => {
                             step={100000}
                             unit="₹"
                           />
+                           {lumpsumAmount > 0 && (
+                            <div className="space-y-1 pl-4 border-l-2 border-slate-200/75">
+                              <SliderInput
+                                label="Lumpsum Return Rate (p.a.)"
+                                value={lumpsumReturnRate}
+                                onChange={handleLumpsumRateChange}
+                                min={1}
+                                max={30}
+                                step={0.1}
+                                unit="%"
+                              />
+                              <div className="flex items-center justify-end pt-1">
+                                <label htmlFor="syncRate" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                                  Same as SIP
+                                </label>
+                                <input
+                                  type="checkbox"
+                                  id="syncRate"
+                                  checked={syncLumpsumRate}
+                                  onChange={handleSyncToggle}
+                                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                              </div>
+                            </div>
+                          )}
                           <SliderInput
                             label="Inflation Rate (p.a.)"
                             value={inflationRate}

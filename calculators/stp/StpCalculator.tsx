@@ -1,6 +1,10 @@
 import React from 'react';
 
-const StpCalculator: React.FC = () => {
+interface StpCalculatorProps {
+  sipProjectedValue?: number;
+}
+
+const StpCalculator: React.FC<StpCalculatorProps> = ({ sipProjectedValue }) => {
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
