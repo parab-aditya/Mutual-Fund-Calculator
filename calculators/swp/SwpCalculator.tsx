@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SliderInput from '../../components/SliderInput';
 import { useSwpCalculator } from './useSwpCalculator';
-import { formatIndianCurrency } from '../../utils/formatters';
+import SwpResultsCard from '../../components/SwpResultsCard';
 
 interface SwpCalculatorProps {
     sipProjectedValue?: number;
@@ -102,29 +102,12 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
                  </div>
               </div>
               <div className="lg:col-span-3 flex flex-col gap-8 lg:gap-12">
-                <div className="bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">SWP Projection</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                        <div>
-                            <p className="text-sm text-slate-500">Total Investment</p>
-                            <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(results.totalInvestment)}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500">Total Withdrawal</p>
-                            <p className="text-2xl font-bold text-emerald-600">{formatIndianCurrency(results.totalWithdrawal)}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-slate-500">Number of Withdrawals</p>
-                            <p className="text-2xl font-bold text-slate-800">{results.numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
-                        </div>
-                         <div className="pt-2">
-                            <p className="text-sm text-slate-500">Final Balance</p>
-                            <p className={`text-3xl font-extrabold ${results.finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
-                                {formatIndianCurrency(results.finalValue)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <SwpResultsCard
+                  totalInvestment={results.totalInvestment}
+                  totalWithdrawal={results.totalWithdrawal}
+                  finalValue={results.finalValue}
+                  numberOfWithdrawals={results.numberOfWithdrawals}
+                />
                 <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 text-center">
                   <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal Growth Over Time</h2>
                    <div style={{ width: '100%', height: 400 }} className="flex justify-center items-center">
