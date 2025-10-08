@@ -1,4 +1,5 @@
 
+
 export const formatIndianCurrency = (value: number): string => {
   if (isNaN(value) || !isFinite(value)) {
     return '₹ 0';
@@ -60,30 +61,33 @@ const numToWords = (n: number): string => {
 
 export const numberToIndianWords = (value: number): string => {
   if (value === 0) return 'Zero';
-  if (value >= 1000000000) return '100 Crore or more'; // Handle edge case
+
+  let num = Math.round(value);
+
+  if (num >= 1000000000) return '100 Crore or more'; // Handle edge case
 
   let result = '';
   
-  const crore = Math.floor(value / 10000000);
-  value %= 10000000;
+  const crore = Math.floor(num / 10000000);
+  num %= 10000000;
   if (crore > 0) {
     result += numToWords(crore) + ' Crore ';
   }
   
-  const lakh = Math.floor(value / 100000);
-  value %= 100000;
+  const lakh = Math.floor(num / 100000);
+  num %= 100000;
   if (lakh > 0) {
     result += numToWords(lakh) + ' Lakh ';
   }
   
-  const thousand = Math.floor(value / 1000);
-  value %= 1000;
+  const thousand = Math.floor(num / 1000);
+  num %= 1000;
   if (thousand > 0) {
     result += numToWords(thousand) + ' Thousand ';
   }
   
-  if (value > 0) {
-    result += numToWords(value);
+  if (num > 0) {
+    result += numToWords(num);
   }
   
   return result.trim();
