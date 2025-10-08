@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   ComposedChart,
@@ -60,7 +59,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/70 backdrop-blur-lg p-4 border border-white/20 rounded-lg shadow-lg text-sm space-y-2">
+        <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2">
           <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
           <p className="flex justify-between">
             <span className="text-slate-500 mr-4">Invested:</span>
@@ -68,26 +67,26 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
           </p>
           {showBreakdown && (
             <>
-              <div className="border-t border-slate-200/50 my-1"></div>
+              <div className="border-t border-slate-200/75 my-1"></div>
               <p className="flex justify-between">
                 <span className="text-slate-500 mr-4">SIP Value:</span>
                 <span className="font-semibold text-emerald-600">{formatIndianCurrency(data.sipValue)}</span>
               </p>
               <p className="flex justify-between">
                 <span className="text-slate-500 mr-4">Lumpsum Value:</span>
-                <span className="font-semibold text-orange-500">{formatIndianCurrency(data.lumpsumValue)}</span>
+                <span className="font-semibold text-violet-500">{formatIndianCurrency(data.lumpsumValue)}</span>
               </p>
             </>
           )}
-          <div className="border-t border-slate-200/50 my-1"></div>
+          <div className="border-t border-slate-200/75 my-1"></div>
           <p className="flex justify-between mt-1 font-bold">
             <span className="text-slate-600 mr-4">Total Value:</span>
-            <span className="text-violet-600">{formatIndianCurrency(data.totalValue)}</span>
+            <span className="text-slate-800">{formatIndianCurrency(data.totalValue)}</span>
           </p>
           {inflationRate > 0 && (
              <p className="flex justify-between">
               <span className="text-slate-500 mr-4">Value (Today's terms):</span>
-              <span className="font-semibold text-slate-700">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
+              <span className="font-semibold text-slate-600">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
             </p>
           )}
         </div>
@@ -98,7 +97,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
 
   if (!data || data.length === 0) {
     return (
-        <div className="bg-white/60 backdrop-blur-xl p-8 rounded-3xl shadow-lg border border-white/20 text-center">
+        <div className="bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow-md border border-slate-200/60 text-center">
             <h2 className="text-xl font-bold text-slate-800 mb-2">Investment Growth Over Time</h2>
             <p className="text-slate-600">Your growth chart will appear here once you enter investment details.</p>
         </div>
@@ -106,7 +105,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
   }
 
   return (
-    <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-3xl shadow-lg border border-white/20">
+    <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
       <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>
       <div style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
@@ -116,30 +115,30 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
               top: 10,
               right: 20,
               left: 20,
-              bottom: isMobile ? 50 : 10,
+              bottom: isMobile ? 50 : 20,
             }}
           >
             <defs>
               <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.7}/>
-                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#334155" stopOpacity={0.4}/>
+                <stop offset="95%" stopColor="#334155" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.6} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
             <XAxis 
               dataKey="year" 
               tick={{ fontSize: 12, fill: '#64748b' }} 
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
               interval="preserveStartEnd"
-              label={{ value: 'Years', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 12 }}
+              label={{ value: 'Years', position: 'insideBottom', offset: isMobile ? -40: -10, fill: '#64748b', fontSize: 12 }}
             />
             <YAxis
               tickFormatter={formatAxisTick}
               tick={{ fontSize: 12, fill: '#64748b' }}
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
-              width={80}
+              width={70}
               domain={['dataMin', 'auto']}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -148,8 +147,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
               type="monotone"
               dataKey="totalValue"
               name="Total Value"
-              stroke="#8b5cf6"
-              strokeWidth={2.5}
+              stroke="#1e293b"
+              strokeWidth={3}
               dot={false}
               hide={!visibility.totalValue}
               fillOpacity={1} 
@@ -179,7 +178,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                   type="monotone"
                   dataKey="lumpsumValue"
                   name="Lumpsum Value"
-                  stroke="#f97316"
+                  stroke="#8b5cf6"
                   strokeWidth={2}
                   dot={false}
                   hide={!visibility.lumpsumValue}
@@ -191,7 +190,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 type="monotone"
                 dataKey="inflationAdjustedTotalValue"
                 name="Inflation Adjusted Value"
-                stroke="#718096"
+                stroke="#475569"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}

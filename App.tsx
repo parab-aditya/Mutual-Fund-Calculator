@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import SliderInput from './components/SliderInput';
 import ResultsCard from './components/ResultsCard';
@@ -372,14 +371,14 @@ const App: React.FC = () => {
   }, [monthlyInvestment, returnRate, timePeriod, lumpsumAmount, inflationRate, stepUpPercentage]);
 
   return (
-    <div className="min-h-screen font-sans text-slate-900 antialiased">
+    <div className="min-h-screen text-slate-800 antialiased">
        <header>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
             Mutual Fund SIP Calculator
           </h1>
-          <p className="text-slate-600 mt-2 text-lg">
-            Visualize your wealth creation journey.
+          <p className="text-slate-500 mt-3 text-lg max-w-2xl mx-auto">
+            Plan your investments with precision and visualize your wealth creation journey.
           </p>
         </div>
       </header>
@@ -387,10 +386,10 @@ const App: React.FC = () => {
       <main className="container mx-auto pb-8 sm:pb-12">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-            <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-lg border border-white/20">
+            <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
               <div className="space-y-8">
-                <div className="bg-indigo-50/40 border border-indigo-200/50 rounded-2xl p-4 sm:p-6 space-y-8">
-                  <h3 className="text-lg font-semibold text-indigo-800 -mb-4">
+                <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-4 sm:p-6 space-y-8">
+                  <h3 className="text-lg font-semibold text-slate-800 -mb-4">
                     Core Calculation
                   </h3>
                   <SliderInput
@@ -472,9 +471,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
-      <footer className="text-center py-6 text-sm text-slate-600 space-y-2">
+      <footer className="text-center py-6 text-sm text-slate-500 space-y-2">
         <p>
-          Made with <span role="img" aria-label="love">❤️</span> by{' '}
+          Made by{' '}
           <a
             href="https://www.linkedin.com/in/its-aditya-parab/"
             target="_blank"
