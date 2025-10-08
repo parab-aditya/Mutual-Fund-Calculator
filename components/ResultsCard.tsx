@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatIndianCurrency } from '../utils/formatters';
+import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
 
 interface ResultBreakdown {
   investedAmount: number;
@@ -50,6 +50,9 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
 
   const hasData = investedAmount > 0;
   const [isMobile, setIsMobile] = useState(false);
+  
+  const formattedTotalValue = formatIndianCurrency(totalValue);
+  const totalValueClass = getDynamicValueClass(formattedTotalValue);
 
   useEffect(() => {
     const handleResize = () => {
@@ -74,8 +77,8 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
           </div>
           <div className="pt-2">
             <p className="text-sm text-slate-500">Projected Total Value</p>
-            <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
-              {formatIndianCurrency(totalValue)}
+            <p className={`${totalValueClass} font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700`}>
+              {formattedTotalValue}
             </p>
             {inflationRate > 0 && (
               <div className="mt-4 pt-4 border-t border-slate-200/75">

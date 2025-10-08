@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatIndianCurrency } from '../utils/formatters';
+import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
 
 interface SwpResultsCardProps {
   totalInvestment: number;
@@ -38,6 +38,9 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
 
   const hasData = totalInvestment > 0;
   const [isMobile, setIsMobile] = useState(false);
+  
+  const formattedFinalValue = formatIndianCurrency(finalValue);
+  const finalValueClass = getDynamicValueClass(formattedFinalValue);
 
   useEffect(() => {
     const handleResize = () => {
@@ -66,8 +69,8 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
           </div>
           <div className="pt-2">
             <p className="text-sm text-slate-500">Final Balance</p>
-            <p className={`text-4xl font-extrabold ${finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
-              {formatIndianCurrency(finalValue)}
+            <p className={`${finalValueClass} font-extrabold ${finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
+              {formattedFinalValue}
             </p>
           </div>
         </div>

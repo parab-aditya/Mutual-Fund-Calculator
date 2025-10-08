@@ -43,6 +43,26 @@ export const formatAxisTick = (tickValue: number): string => {
   return String(Math.round(tickValue));
 };
 
+/**
+ * Returns a dynamic Tailwind CSS font size class based on the length of a string.
+ * This is used to prevent large currency values from clipping their containers.
+ * @param text The string to measure.
+ * @returns A Tailwind CSS class string (e.g., 'text-4xl', 'text-3xl').
+ */
+export const getDynamicValueClass = (text: string): string => {
+  const len = text.length;
+  // Thresholds are chosen based on typical formatted currency string lengths.
+  // Example: "₹1,00,00,000" is 12 chars. "₹10,00,00,000" is 13 chars.
+  if (len > 16) {
+    return 'text-2xl'; // For very large numbers like "₹1,00,00,00,000" (16 chars)
+  }
+  if (len > 13) {
+    return 'text-3xl'; // For numbers like "₹10,00,00,000"
+  }
+  return 'text-4xl'; // Default for smaller numbers
+};
+
+
 const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
 const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
