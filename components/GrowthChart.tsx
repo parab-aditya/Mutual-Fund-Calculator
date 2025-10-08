@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   ComposedChart,
@@ -24,44 +25,12 @@ interface GrowthData {
 
 interface GrowthChartProps {
   data: GrowthData[];
+  inflationRate: number;
+  lumpsumAmount: number;
+  monthlyInvestment: number;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-white/70 backdrop-blur-lg p-4 border border-white/20 rounded-lg shadow-lg text-sm space-y-2">
-        <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
-        <p className="flex justify-between">
-          <span className="text-slate-500 mr-4">Invested:</span>
-          <span className="font-semibold text-blue-600">{formatIndianCurrency(data.investedAmount)}</span>
-        </p>
-        <div className="border-t border-slate-200/50 my-1"></div>
-        <p className="flex justify-between">
-          <span className="text-slate-500 mr-4">SIP Value:</span>
-          <span className="font-semibold text-emerald-600">{formatIndianCurrency(data.sipValue)}</span>
-        </p>
-         <p className="flex justify-between">
-          <span className="text-slate-500 mr-4">Lumpsum Value:</span>
-          <span className="font-semibold text-orange-500">{formatIndianCurrency(data.lumpsumValue)}</span>
-        </p>
-        <div className="border-t border-slate-200/50 my-1"></div>
-        <p className="flex justify-between mt-1 font-bold">
-          <span className="text-slate-600 mr-4">Total Value:</span>
-          <span className="text-violet-600">{formatIndianCurrency(data.totalValue)}</span>
-        </p>
-         <p className="flex justify-between">
-          <span className="text-slate-500 mr-4">Value (Today's terms):</span>
-          <span className="font-semibold text-slate-700">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
-
-
-const GrowthChart: React.FC<GrowthChartProps> = ({ data }) => {
+const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumAmount, monthlyInvestment }) => {
   const [visibility, setVisibility] = useState({
     investedAmount: true,
     totalValue: true,
@@ -83,6 +52,48 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data }) => {
   const handleLegendClick = (data: any) => {
     const { dataKey } = data;
     setVisibility(prev => ({ ...prev, [dataKey]: !prev[dataKey as keyof typeof visibility] }));
+  };
+  
+  const showBreakdown = monthlyInvestment > 0 && lumpsumAmount > 0;
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white/70 backdrop-blur-lg p-4 border border-white/20 rounded-lg shadow-lg text-sm space-y-2">
+          <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
+          <p className="flex justify-between">
+            <span className="text-slate-500 mr-4">Invested:</span>
+            <span className="font-semibold text-blue-600">{formatIndianCurrency(data.investedAmount)}</span>
+          </p>
+          {showBreakdown && (
+            <>
+              <div className="border-t border-slate-200/50 my-1"></div>
+              <p className="flex justify-between">
+                <span className="text-slate-500 mr-4">SIP Value:</span>
+                <span className="font-semibold text-emerald-600">{formatIndianCurrency(data.sipValue)}</span>
+              </p>
+              <p className="flex justify-between">
+                <span className="text-slate-500 mr-4">Lumpsum Value:</span>
+                <span className="font-semibold text-orange-500">{formatIndianCurrency(data.lumpsumValue)}</span>
+              </p>
+            </>
+          )}
+          <div className="border-t border-slate-200/50 my-1"></div>
+          <p className="flex justify-between mt-1 font-bold">
+            <span className="text-slate-600 mr-4">Total Value:</span>
+            <span className="text-violet-600">{formatIndianCurrency(data.totalValue)}</span>
+          </p>
+          {inflationRate > 0 && (
+             <p className="flex justify-between">
+              <span className="text-slate-500 mr-4">Value (Today's terms):</span>
+              <span className="font-semibold text-slate-700">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
+            </p>
+          )}
+        </div>
+      );
+    }
+    return null;
   };
 
   if (!data || data.length === 0) {
@@ -153,34 +164,40 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data }) => {
               dot={false}
               hide={!visibility.investedAmount}
             />
-             <Line
-              type="monotone"
-              dataKey="sipValue"
-              name="SIP Value"
-              stroke="#10b981"
-              strokeWidth={2}
-              dot={false}
-              hide={!visibility.sipValue}
-            />
-             <Line
-              type="monotone"
-              dataKey="lumpsumValue"
-              name="Lumpsum Value"
-              stroke="#f97316"
-              strokeWidth={2}
-              dot={false}
-              hide={!visibility.lumpsumValue}
-            />
-            <Line
-              type="monotone"
-              dataKey="inflationAdjustedTotalValue"
-              name="Inflation Adjusted Value"
-              stroke="#718096"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-              hide={!visibility.inflationAdjustedTotalValue}
-            />
+            {showBreakdown && (
+              <>
+                <Line
+                  type="monotone"
+                  dataKey="sipValue"
+                  name="SIP Value"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={false}
+                  hide={!visibility.sipValue}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="lumpsumValue"
+                  name="Lumpsum Value"
+                  stroke="#f97316"
+                  strokeWidth={2}
+                  dot={false}
+                  hide={!visibility.lumpsumValue}
+                />
+              </>
+            )}
+            {inflationRate > 0 && (
+                <Line
+                type="monotone"
+                dataKey="inflationAdjustedTotalValue"
+                name="Inflation Adjusted Value"
+                stroke="#718096"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                hide={!visibility.inflationAdjustedTotalValue}
+                />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>

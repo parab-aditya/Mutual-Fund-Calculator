@@ -197,7 +197,7 @@ const App: React.FC = () => {
                     value={lumpsumAmount}
                     onChange={setLumpsumAmount}
                     min={0}
-                    max={100000000}
+                    max={50000000}
                     step={100000}
                     unit="₹"
                   />
@@ -222,12 +222,13 @@ const App: React.FC = () => {
                 inflationAdjustedTotalValue={totalResults.inflationAdjustedTotalValue}
                 sipResults={totalResults.sip}
                 lumpsumResults={totalResults.lumpsum}
+                inflationRate={inflationRate}
               />
             </div>
           </div>
         </div>
         <div className="mt-8 lg:mt-12 px-4 sm:px-6 lg:px-8">
-          <GrowthChart data={growthData} />
+          <GrowthChart data={growthData} inflationRate={inflationRate} lumpsumAmount={lumpsumAmount} monthlyInvestment={monthlyInvestment} />
         </div>
       </main>
       <footer className="text-center py-6 text-sm text-slate-600 space-y-2">
