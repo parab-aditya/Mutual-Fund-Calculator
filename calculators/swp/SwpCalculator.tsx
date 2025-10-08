@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SliderInput from '../../components/SliderInput';
 import { useSwpCalculator } from './useSwpCalculator';
 import SwpResultsCard from '../../components/SwpResultsCard';
+import SwpGrowthChart from '../../components/SwpGrowthChart';
 
 interface SwpCalculatorProps {
     sipProjectedValue?: number;
@@ -20,7 +21,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
         }
     }, [sipProjectedValue, syncWithSip]);
 
-    const { results } = useSwpCalculator({
+    const { results, growthData } = useSwpCalculator({
         totalInvestment,
         withdrawalPerMonth,
         expectedReturnRate,
@@ -108,11 +109,9 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
                   finalValue={results.finalValue}
                   numberOfWithdrawals={results.numberOfWithdrawals}
                 />
-                <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 text-center">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal Growth Over Time</h2>
-                   <div style={{ width: '100%', height: 400 }} className="flex justify-center items-center">
-                    <p className="text-slate-600">The SWP chart will be displayed here.</p>
-                  </div>
+                <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
+                  <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
+                   <SwpGrowthChart data={growthData} />
                 </div>
               </div>
             </div>

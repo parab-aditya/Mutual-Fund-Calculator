@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { SwpInputs, SwpResults } from './types';
+import { SwpInputs, SwpResults, SwpGrowthData } from './types';
 
 const EMPTY_RESULTS: SwpResults = {
     totalInvestment: 0,
@@ -16,11 +16,14 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
         timePeriod
     } = inputs;
 
-    const results = useMemo<SwpResults>(() => {
-        if (totalInvestment <= 0 || withdrawalPerMonth <= 0 || timePeriod <= 0) {
+    const { results, growthData } = useMemo<{ results: SwpResults; growthData: SwpGrowthData[] }>(() => {
+        if (totalInvestment <= 0 || timePeriod <= 0) {
             return {
-                ...EMPTY_RESULTS,
-                totalInvestment: totalInvestment,
+                results: {
+                    ...EMPTY_RESULTS,
+                    totalInvestment: totalInvestment,
+                },
+                growthData: []
             };
         }
 
@@ -28,43 +31,48 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
         const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
         const totalMonths = timePeriod * 12;
 
-        let finalValue = totalInvestment;
-        let totalWithdrawn = 0;
+        const yearlyData: SwpGrowthData[] = [];
+
+        let currentBalance = totalInvestment;
+        let totalWithdrawnFromCorpus = 0;
         let monthsWithdrawn = 0;
-        let corpusDepleted = false;
 
         for (let month = 1; month <= totalMonths; month++) {
-            // Investment grows
-            finalValue *= (1 + monthlyRate);
+            // Investment grows for the month
+            currentBalance *= (1 + monthlyRate);
 
-            if (!corpusDepleted) {
-                if (finalValue >= withdrawalPerMonth) {
-                    // Full withdrawal is possible
+            // Process withdrawal
+            if (currentBalance > 0) {
+                const withdrawalAmount = Math.min(currentBalance, withdrawalPerMonth);
+                totalWithdrawnFromCorpus += withdrawalAmount;
+                 if (withdrawalAmount > 0) {
                     monthsWithdrawn++;
-                    totalWithdrawn += withdrawalPerMonth;
-                } else {
-                    // Partial withdrawal, after this corpus is depleted
-                    if (finalValue > 0) {
-                        monthsWithdrawn++;
-                        totalWithdrawn += finalValue;
-                    }
-                    corpusDepleted = true;
-                }
+                 }
             }
-            
-            // The withdrawal attempt happens every month regardless, for the simulation
-            finalValue -= withdrawalPerMonth;
+             // The withdrawal is attempted every month, reducing the balance.
+            currentBalance -= withdrawalPerMonth;
+
+            // Record data at the end of each year
+            if (month % 12 === 0) {
+                yearlyData.push({
+                    year: month / 12,
+                    balance: Math.round(currentBalance),
+                    totalWithdrawal: Math.round(totalWithdrawnFromCorpus),
+                    initialInvestment: totalInvestment,
+                });
+            }
         }
 
-
-        return {
+        const finalResults: SwpResults = {
             totalInvestment: totalInvestment,
-            totalWithdrawal: totalWithdrawn,
+            totalWithdrawal: Math.round(totalWithdrawnFromCorpus),
             numberOfWithdrawals: monthsWithdrawn,
-            finalValue: finalValue,
+            finalValue: Math.round(currentBalance),
         };
+
+        return { results: finalResults, growthData: yearlyData };
 
     }, [totalInvestment, withdrawalPerMonth, expectedReturnRate, timePeriod]);
 
-    return { results };
+    return { results, growthData };
 };

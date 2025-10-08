@@ -11,3 +11,10 @@ export interface SwpResults {
     numberOfWithdrawals: number;
     finalValue: number;
 }
+
+export interface SwpGrowthData {
+  year: number;
+  balance: number;
+  totalWithdrawal: number;
+  initialInvestment: number;
+}
