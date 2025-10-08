@@ -7,6 +7,7 @@ interface SwpResultsCardProps {
   totalWithdrawal: number;
   finalValue: number;
   numberOfWithdrawals: number;
+  isActive: boolean;
 }
 
 const COLORS = ['#4338ca', '#10b981']; // Deep Indigo for invested, Emerald for withdrawal
@@ -28,6 +29,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
   totalWithdrawal,
   finalValue,
   numberOfWithdrawals,
+  isActive,
 }) => {
   const chartData = [
     { name: 'Initial Investment', value: totalInvestment > 0 ? totalInvestment : 1 }, // Min value for chart visibility
@@ -71,7 +73,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
         </div>
 
         <div className="order-1 md:order-2 h-64 sm:h-72 w-full">
-           {hasData ? (
+           {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

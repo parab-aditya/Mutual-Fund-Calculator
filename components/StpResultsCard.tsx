@@ -7,6 +7,7 @@ interface StpResultsCardProps {
   sourceFundValue: number;
   destinationFundValue: number;
   totalValue: number;
+  isActive: boolean;
 }
 
 const COLORS = ['#4338ca', '#10b981']; // Deep Indigo for invested, Emerald for gains
@@ -28,6 +29,7 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
   sourceFundValue,
   destinationFundValue,
   totalValue,
+  isActive,
 }) => {
   const hasData = investedAmount > 0;
   const estimatedGains = totalValue - investedAmount;
@@ -73,7 +75,7 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
         </div>
 
         <div className="order-1 md:order-2 h-64 sm:h-72 w-full">
-           {hasData ? (
+           {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

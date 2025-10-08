@@ -5,7 +5,11 @@ import { TransferFrequency } from './types';
 import StpResultsCard from '../../components/StpResultsCard';
 import StpGrowthChart from '../../components/StpGrowthChart';
 
-const StpCalculator: React.FC = () => {
+interface StpCalculatorProps {
+  isActive: boolean;
+}
+
+const StpCalculator: React.FC<StpCalculatorProps> = ({ isActive }) => {
     const [investmentAmount, setInvestmentAmount] = useState<number>(1000000);
     const [sourceReturnRate, setSourceReturnRate] = useState<number>(8);
     const [transferAmount, setTransferAmount] = useState<number>(10000);
@@ -38,7 +42,7 @@ const StpCalculator: React.FC = () => {
                             value={investmentAmount}
                             onChange={setInvestmentAmount}
                             min={1000}
-                            max={50000000}
+                            max={10000000}
                             step={1000}
                             unit="₹"
                         />
@@ -71,7 +75,7 @@ const StpCalculator: React.FC = () => {
                             value={transferAmount}
                             onChange={setTransferAmount}
                             min={1000}
-                            max={50000000}
+                            max={10000000}
                             step={1000}
                             unit="₹"
                         />
@@ -117,8 +121,9 @@ const StpCalculator: React.FC = () => {
                   sourceFundValue={results.sourceFundValue}
                   destinationFundValue={results.destinationFundValue}
                   totalValue={results.totalValue}
+                  isActive={isActive}
                 />
-                <StpGrowthChart data={growthData} />
+                <StpGrowthChart data={growthData} isActive={isActive} />
               </div>
             </div>
         </div>

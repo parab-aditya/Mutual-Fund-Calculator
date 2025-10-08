@@ -16,6 +16,7 @@ interface ResultsCardProps {
   sipResults: ResultBreakdown;
   lumpsumResults: ResultBreakdown;
   inflationRate: number;
+  isActive: boolean;
 }
 
 const COLORS = ['#4338ca', '#10b981']; // Deep Indigo for invested, Emerald for returns
@@ -40,6 +41,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
   sipResults,
   lumpsumResults,
   inflationRate,
+  isActive,
 }) => {
   const chartData = [
     { name: 'Invested Amount', value: investedAmount > 0 ? investedAmount : 1 }, // Min value for chart visibility
@@ -87,7 +89,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
         </div>
 
         <div className="order-1 md:order-2 h-64 sm:h-72 w-full">
-           {hasData ? (
+           {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

@@ -101,13 +101,13 @@ const App: React.FC = () => {
 
       <main className="container mx-auto pb-8 sm:pb-12">
         <div className={activeTab === 'sip' ? '' : 'hidden'}>
-          <SipCalculator onResultsChange={setSipProjectedValue} />
+          <SipCalculator onResultsChange={setSipProjectedValue} isActive={activeTab === 'sip'} />
         </div>
         <div className={activeTab === 'swp' ? '' : 'hidden'}>
-          <SwpCalculator sipProjectedValue={sipProjectedValue} />
+          <SwpCalculator sipProjectedValue={sipProjectedValue} isActive={activeTab === 'swp'} />
         </div>
         <div className={activeTab === 'stp' ? '' : 'hidden'}>
-          <StpCalculator />
+          <StpCalculator isActive={activeTab === 'stp'} />
         </div>
       </main>
       <footer className="text-center py-6 text-sm text-slate-500 space-y-2">

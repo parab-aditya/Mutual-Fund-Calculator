@@ -6,9 +6,10 @@ import { useSipCalculator } from './useSipCalculator';
 
 interface SipCalculatorProps {
   onResultsChange?: (value: number) => void;
+  isActive: boolean;
 }
 
-const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange }) => {
+const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive }) => {
     const [monthlyInvestment, setMonthlyInvestment] = useState<number>(25000);
     const [stepUpPercentage, setStepUpPercentage] = useState<number>(0);
     const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
@@ -84,7 +85,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange }) => {
                       value={monthlyInvestment}
                       onChange={setMonthlyInvestment}
                       min={0}
-                      max={1000000}
+                      max={500000}
                       step={1000}
                       unit="₹"
                     />
@@ -143,7 +144,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange }) => {
                             value={lumpsumAmount}
                             onChange={setLumpsumAmount}
                             min={0}
-                            max={50000000}
+                            max={10000000}
                             step={100000}
                             unit="₹"
                           />
@@ -197,8 +198,15 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange }) => {
                   sipResults={totalResults.sip}
                   lumpsumResults={totalResults.lumpsum}
                   inflationRate={inflationRate}
+                  isActive={isActive}
                 />
-                 <GrowthChart data={growthData} inflationRate={inflationRate} lumpsumAmount={lumpsumAmount} monthlyInvestment={monthlyInvestment} />
+                 <GrowthChart 
+                   data={growthData} 
+                   inflationRate={inflationRate} 
+                   lumpsumAmount={lumpsumAmount} 
+                   monthlyInvestment={monthlyInvestment}
+                   isActive={isActive}
+                  />
               </div>
             </div>
         </div>

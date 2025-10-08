@@ -6,9 +6,10 @@ import SwpGrowthChart from '../../components/SwpGrowthChart';
 
 interface SwpCalculatorProps {
     sipProjectedValue?: number;
+    isActive: boolean;
 }
 
-const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
+const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActive }) => {
     const [totalInvestment, setTotalInvestment] = useState<number>(1000000);
     const [withdrawalPerMonth, setWithdrawalPerMonth] = useState<number>(8000);
     const [expectedReturnRate, setExpectedReturnRate] = useState<number>(8);
@@ -55,7 +56,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
                             value={totalInvestment}
                             onChange={handleTotalInvestmentChange}
                             min={100000}
-                            max={100000000}
+                            max={50000000}
                             step={100000}
                             unit="₹"
                         />
@@ -108,10 +109,11 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue }) => {
                   totalWithdrawal={results.totalWithdrawal}
                   finalValue={results.finalValue}
                   numberOfWithdrawals={results.numberOfWithdrawals}
+                  isActive={isActive}
                 />
                 <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
                   <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
-                   <SwpGrowthChart data={growthData} />
+                   <SwpGrowthChart data={growthData} isActive={isActive} />
                 </div>
               </div>
             </div>

@@ -27,9 +27,10 @@ interface GrowthChartProps {
   inflationRate: number;
   lumpsumAmount: number;
   monthlyInvestment: number;
+  isActive: boolean;
 }
 
-const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumAmount, monthlyInvestment }) => {
+const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumAmount, monthlyInvestment, isActive }) => {
   const [visibility, setVisibility] = useState({
     investedAmount: true,
     totalValue: true,
@@ -54,6 +55,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
   };
   
   const showBreakdown = monthlyInvestment > 0 && lumpsumAmount > 0;
+  const showChart = isActive && data && data.length > 0;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -95,110 +97,107 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     return null;
   };
 
-  if (!data || data.length === 0) {
-    return (
-        <div className="bg-white/60 backdrop-blur-xl p-8 rounded-2xl shadow-md border border-slate-200/60 text-center">
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Investment Growth Over Time</h2>
-            <p className="text-slate-600">Your growth chart will appear here once you enter investment details.</p>
-        </div>
-    );
-  }
-
   return (
     <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
       <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>
       <div style={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer>
-          <ComposedChart
-            data={data}
-            margin={{
-              top: 10,
-              right: 20,
-              left: 20,
-              bottom: isMobile ? 50 : 20,
-            }}
-          >
-            <defs>
-              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#334155" stopOpacity={0.4}/>
-                <stop offset="95%" stopColor="#334155" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
-            <XAxis 
-              dataKey="year" 
-              tick={{ fontSize: 12, fill: '#64748b' }} 
-              axisLine={{ stroke: '#cbd5e1' }}
-              tickLine={{ stroke: '#cbd5e1' }}
-              interval="preserveStartEnd"
-              label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
-            />
-            <YAxis
-              tickFormatter={formatAxisTick}
-              tick={{ fontSize: 12, fill: '#64748b' }}
-              axisLine={{ stroke: '#cbd5e1' }}
-              tickLine={{ stroke: '#cbd5e1' }}
-              width={70}
-              domain={['dataMin', 'auto']}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend verticalAlign={isMobile ? 'bottom' : 'top'} height={36} iconType="circle" onClick={handleLegendClick} />
-             <Area
-              type="monotone"
-              dataKey="totalValue"
-              name="Total Value"
-              stroke="#1e293b"
-              strokeWidth={3}
-              dot={false}
-              hide={!visibility.totalValue}
-              fillOpacity={1} 
-              fill="url(#colorTotal)"
-            />
-            <Line
-              type="monotone"
-              dataKey="investedAmount"
-              name="Invested Amount"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={false}
-              hide={!visibility.investedAmount}
-            />
-            {showBreakdown && (
-              <>
-                <Line
-                  type="monotone"
-                  dataKey="sipValue"
-                  name="SIP Value"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  dot={false}
-                  hide={!visibility.sipValue}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="lumpsumValue"
-                  name="Lumpsum Value"
-                  stroke="#8b5cf6"
-                  strokeWidth={2}
-                  dot={false}
-                  hide={!visibility.lumpsumValue}
-                />
-              </>
-            )}
-            {inflationRate > 0 && (
-                <Line
+        {showChart ? (
+          <ResponsiveContainer>
+            <ComposedChart
+              data={data}
+              margin={{
+                top: 10,
+                right: 20,
+                left: 20,
+                bottom: isMobile ? 50 : 20,
+              }}
+            >
+              <defs>
+                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#334155" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#334155" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
+              <XAxis 
+                dataKey="year" 
+                tick={{ fontSize: 12, fill: '#64748b' }} 
+                axisLine={{ stroke: '#cbd5e1' }}
+                tickLine={{ stroke: '#cbd5e1' }}
+                interval="preserveStartEnd"
+                label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
+              />
+              <YAxis
+                tickFormatter={formatAxisTick}
+                tick={{ fontSize: 12, fill: '#64748b' }}
+                axisLine={{ stroke: '#cbd5e1' }}
+                tickLine={{ stroke: '#cbd5e1' }}
+                width={70}
+                domain={['dataMin', 'auto']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend verticalAlign={isMobile ? 'bottom' : 'top'} height={36} iconType="circle" onClick={handleLegendClick} />
+              <Area
                 type="monotone"
-                dataKey="inflationAdjustedTotalValue"
-                name="Inflation Adjusted Value"
-                stroke="#475569"
-                strokeWidth={2}
-                strokeDasharray="5 5"
+                dataKey="totalValue"
+                name="Total Value"
+                stroke="#1e293b"
+                strokeWidth={3}
                 dot={false}
-                hide={!visibility.inflationAdjustedTotalValue}
-                />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
+                hide={!visibility.totalValue}
+                fillOpacity={1} 
+                fill="url(#colorTotal)"
+              />
+              <Line
+                type="monotone"
+                dataKey="investedAmount"
+                name="Invested Amount"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={false}
+                hide={!visibility.investedAmount}
+              />
+              {showBreakdown && (
+                <>
+                  <Line
+                    type="monotone"
+                    dataKey="sipValue"
+                    name="SIP Value"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    dot={false}
+                    hide={!visibility.sipValue}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="lumpsumValue"
+                    name="Lumpsum Value"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={false}
+                    hide={!visibility.lumpsumValue}
+                  />
+                </>
+              )}
+              {inflationRate > 0 && (
+                  <Line
+                  type="monotone"
+                  dataKey="inflationAdjustedTotalValue"
+                  name="Inflation Adjusted Value"
+                  stroke="#475569"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                  hide={!visibility.inflationAdjustedTotalValue}
+                  />
+              )}
+            </ComposedChart>
+          </ResponsiveContainer>
+        ) : (
+           <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
+              <p className="text-slate-500 text-center px-4">Your growth chart will appear here once you enter investment details.</p>
+          </div>
+        )}
       </div>
     </div>
   );
