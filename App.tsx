@@ -457,7 +457,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 flex flex-col gap-8 lg:gap-12">
               <ResultsCard
                 investedAmount={totalResults.investedAmount}
                 estimatedReturns={totalResults.estimatedReturns}
@@ -467,11 +467,9 @@ const App: React.FC = () => {
                 lumpsumResults={totalResults.lumpsum}
                 inflationRate={inflationRate}
               />
+               <GrowthChart data={growthData} inflationRate={inflationRate} lumpsumAmount={lumpsumAmount} monthlyInvestment={monthlyInvestment} />
             </div>
           </div>
-        </div>
-        <div className="mt-8 lg:mt-12 px-4 sm:px-6 lg:px-8">
-          <GrowthChart data={growthData} inflationRate={inflationRate} lumpsumAmount={lumpsumAmount} monthlyInvestment={monthlyInvestment} />
         </div>
       </main>
       <footer className="text-center py-6 text-sm text-slate-600 space-y-2">
