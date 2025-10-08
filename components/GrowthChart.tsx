@@ -131,7 +131,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
               interval="preserveStartEnd"
-              label={{ value: 'Years', position: 'insideBottom', offset: isMobile ? -40: -10, fill: '#64748b', fontSize: 12 }}
+              label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
             />
             <YAxis
               tickFormatter={formatAxisTick}
