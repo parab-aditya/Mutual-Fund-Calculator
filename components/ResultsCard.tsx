@@ -67,7 +67,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
   return (
     <div className="bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="order-2 md:order-1 space-y-4">
+        <div className="space-y-4">
           <div>
             <p className="text-sm text-slate-500">Total Invested Amount</p>
             <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(investedAmount)}</p>
@@ -92,7 +92,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
           </div>
         </div>
 
-        <div className="order-1 md:order-2 h-64 sm:h-72 w-full">
+        <div className="h-64 sm:h-72 w-full">
            {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
