@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/sip-calculator{,/(.*)}",
+      "destination": "/(.*)"
+    }
+  ]
+}
