@@ -29,10 +29,10 @@ const StpCalculator: React.FC<StpCalculatorProps> = ({ isActive }) => {
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-2 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
                 <div className="space-y-4">
                     {/* Source Fund Card */}
-                    <div className="bg-slate-100/50 border border-slate-200/60 rounded-2xl p-6 space-y-6">
+                    <div className="bg-slate-100/50 border border-slate-200/60 rounded-2xl p-2 sm:p-6 space-y-6">
                         <div className="space-y-1">
                             <h3 className="text-lg font-semibold text-slate-800">Source Fund</h3>
                             <p className="text-sm text-slate-500">Where the money comes from.</p>
@@ -65,7 +65,7 @@ const StpCalculator: React.FC<StpCalculatorProps> = ({ isActive }) => {
                     </div>
 
                     {/* Destination Fund & Transfer Plan Card */}
-                    <div className="bg-slate-100/50 border border-slate-200/60 rounded-2xl p-6 space-y-6">
+                    <div className="bg-slate-100/50 border border-slate-200/60 rounded-2xl p-2 sm:p-6 space-y-6">
                         <div className="space-y-1">
                              <h3 className="text-lg font-semibold text-slate-800">Destination & Transfer Plan</h3>
                             <p className="text-sm text-slate-500">Where the money is moved to.</p>

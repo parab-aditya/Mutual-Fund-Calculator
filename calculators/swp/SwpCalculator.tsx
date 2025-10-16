@@ -45,7 +45,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
     return (
         <div className="px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-2 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
                  <div className="space-y-8">
                     <h3 className="text-lg font-semibold text-slate-800 -mb-2">
                       SWP Configuration
