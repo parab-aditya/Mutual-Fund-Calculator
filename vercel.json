@@ -1,1 +1,11 @@
-{}
+{
+  "rewrites": [
+    { "source": "/sip-calculator", "destination": "/index.html" },
+    { "source": "/sip-calculator/", "destination": "/index.html" },
+    { "source": "/sip-calculator/:path((?!assets/).*)", "destination": "/index.html" },
+    { "source": "/sip-calculator/assets/:file*", "destination": "/assets/:file*" }
+  ],
+  "redirects": [
+    { "source": "/", "destination": "/sip-calculator", "permanent": false }
+  ]
+}
