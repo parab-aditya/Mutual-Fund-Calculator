@@ -81,11 +81,11 @@ const SliderInput: React.FC<SliderInputProps> = ({
           style={sliderStyle}
           className="w-full custom-slider"
         />
-        {unit === '₹' && value > 0 && (
-          <p className="text-xs text-slate-500 text-right pt-2 h-4">
-            {numberToIndianWords(value)}
+        {unit === '₹' ? (
+          <p className="text-xs text-slate-500 text-right pt-2 min-h-4">
+            {value > 0 ? numberToIndianWords(value) : <>&nbsp;</>}
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   );
