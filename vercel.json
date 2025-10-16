@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/sip-calculator{,/(.*)}",
-      "destination": "/(.*)"
+      "destination": "/$1"
     }
   ]
 }
