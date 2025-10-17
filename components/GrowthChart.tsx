@@ -39,12 +39,15 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     inflationAdjustedTotalValue: true,
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 1024);
     };
-    handleResize(); // Set initial value
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -97,19 +100,22 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     return null;
   };
 
+  const chartHeight = isMobile ? 350 : isTablet ? 380 : 400;
+  const legendHeight = isMobile ? 80 : 40;
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
-      <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>
-      <div style={{ width: '100%', height: 400 }}>
+    <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
+      <h2 className="text-xl font-bold text-slate-800 mb-4 sm:mb-6 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>
+      <div style={{ width: '100%', height: chartHeight + legendHeight }}>
         {showChart ? (
           <ResponsiveContainer>
             <ComposedChart
               data={data}
               margin={{
-                top: 10,
-                right: 20,
-                left: 20,
-                bottom: isMobile ? 50 : 20,
+                top: legendHeight + 10,
+                right: isMobile ? 10 : 20,
+                left: isMobile ? 5 : 20,
+                bottom: isMobile ? 30 : 20,
               }}
             >
               <defs>
@@ -121,41 +127,69 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
               <XAxis 
                 dataKey="year" 
-                tick={{ fontSize: 12, fill: '#64748b' }} 
+                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }} 
                 axisLine={{ stroke: '#cbd5e1' }}
                 tickLine={{ stroke: '#cbd5e1' }}
-                interval="preserveStartEnd"
+                interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
                 label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
               />
               <YAxis
                 tickFormatter={formatAxisTick}
-                tick={{ fontSize: 12, fill: '#64748b' }}
+                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
                 axisLine={{ stroke: '#cbd5e1' }}
                 tickLine={{ stroke: '#cbd5e1' }}
-                width={70}
+                width={isMobile ? 55 : 70}
                 domain={['dataMin', 'auto']}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend verticalAlign={isMobile ? 'bottom' : 'top'} height={36} iconType="circle" onClick={handleLegendClick} />
+              <Tooltip 
+                content={<CustomTooltip />} 
+                cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
+                animationDuration={200}
+              />
+              <Legend 
+                verticalAlign="top" 
+                height={legendHeight}
+                iconType="circle" 
+                onClick={handleLegendClick}
+                wrapperStyle={{
+                  paddingBottom: isMobile ? '12px' : '8px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+                iconSize={isMobile ? 8 : 10}
+                formatter={(value: string) => (
+                  <span style={{ 
+                    fontSize: isMobile ? '11px' : '13px', 
+                    color: '#475569',
+                    fontWeight: 500,
+                  }}>
+                    {value}
+                  </span>
+                )}
+              />
               <Area
                 type="monotone"
                 dataKey="totalValue"
                 name="Total Value"
                 stroke="#1e293b"
-                strokeWidth={3}
+                strokeWidth={isMobile ? 2 : 3}
                 dot={false}
                 hide={!visibility.totalValue}
                 fillOpacity={1} 
                 fill="url(#colorTotal)"
+                animationDuration={800}
+                animationEasing="ease-in-out"
               />
               <Line
                 type="monotone"
                 dataKey="investedAmount"
                 name="Invested Amount"
                 stroke="#3b82f6"
-                strokeWidth={2}
+                strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 hide={!visibility.investedAmount}
+                animationDuration={800}
+                animationEasing="ease-in-out"
               />
               {showBreakdown && (
                 <>
@@ -164,38 +198,44 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                     dataKey="sipValue"
                     name="SIP Value"
                     stroke="#10b981"
-                    strokeWidth={2}
+                    strokeWidth={isMobile ? 1.5 : 2}
                     dot={false}
                     hide={!visibility.sipValue}
+                    animationDuration={800}
+                    animationEasing="ease-in-out"
                   />
                   <Line
                     type="monotone"
                     dataKey="lumpsumValue"
                     name="Lumpsum Value"
                     stroke="#8b5cf6"
-                    strokeWidth={2}
+                    strokeWidth={isMobile ? 1.5 : 2}
                     dot={false}
                     hide={!visibility.lumpsumValue}
+                    animationDuration={800}
+                    animationEasing="ease-in-out"
                   />
                 </>
               )}
               {inflationRate > 0 && (
                   <Line
-                  type="monotone"
-                  dataKey="inflationAdjustedTotalValue"
-                  name="Inflation Adjusted Value"
-                  stroke="#475569"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  dot={false}
-                  hide={!visibility.inflationAdjustedTotalValue}
+                    type="monotone"
+                    dataKey="inflationAdjustedTotalValue"
+                    name="Inflation Adjusted Value"
+                    stroke="#475569"
+                    strokeWidth={isMobile ? 1.5 : 2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                    hide={!visibility.inflationAdjustedTotalValue}
+                    animationDuration={800}
+                    animationEasing="ease-in-out"
                   />
               )}
             </ComposedChart>
           </ResponsiveContainer>
         ) : (
-           <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-              <p className="text-slate-500 text-center px-4">Your growth chart will appear here once you enter investment details.</p>
+          <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
+            <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
           </div>
         )}
       </div>

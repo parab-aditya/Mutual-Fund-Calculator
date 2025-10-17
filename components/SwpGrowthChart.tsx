@@ -25,9 +25,14 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
     initialInvestment: false, // Hide by default as it's just a reference
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 1024);
+    };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -61,13 +66,21 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
     return null;
   };
 
+  const chartHeight = isMobile ? 350 : isTablet ? 380 : 400;
+  const legendHeight = isMobile ? 70 : 40;
+
   return (
-    <div style={{ width: '100%', height: 400 }}>
+    <div style={{ width: '100%', height: chartHeight + legendHeight }}>
       {showChart ? (
         <ResponsiveContainer>
           <ComposedChart
             data={data}
-            margin={{ top: 10, right: 20, left: 20, bottom: isMobile ? 50 : 20, }}
+            margin={{
+              top: legendHeight + 10,
+              right: isMobile ? 10 : 20,
+              left: isMobile ? 5 : 20,
+              bottom: isMobile ? 30 : 20,
+            }}
           >
             <defs>
               <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
@@ -78,57 +91,87 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
             <XAxis 
               dataKey="year" 
-              tick={{ fontSize: 12, fill: '#64748b' }} 
+              tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }} 
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
-              interval="preserveStartEnd"
+              interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
               label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
             />
             <YAxis
               tickFormatter={formatAxisTick}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
-              width={70}
-              domain={['auto', 'auto']} // Allow negative domain
+              width={isMobile ? 55 : 70}
+              domain={['auto', 'auto']}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend verticalAlign={isMobile ? 'bottom' : 'top'} height={36} iconType="circle" onClick={handleLegendClick} />
+            <Tooltip 
+              content={<CustomTooltip />} 
+              cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
+              animationDuration={200}
+            />
+            <Legend 
+              verticalAlign="top" 
+              height={legendHeight}
+              iconType="circle" 
+              onClick={handleLegendClick}
+              wrapperStyle={{
+                paddingBottom: isMobile ? '12px' : '8px',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+              iconSize={isMobile ? 8 : 10}
+              formatter={(value: string) => (
+                <span style={{ 
+                  fontSize: isMobile ? '11px' : '13px', 
+                  color: '#475569',
+                  fontWeight: 500,
+                }}>
+                  {value}
+                </span>
+              )}
+            />
             <Area
               type="monotone"
               dataKey="balance"
               name="Remaining Balance"
               stroke="#4338ca"
-              strokeWidth={3}
+              strokeWidth={isMobile ? 2 : 3}
               dot={false}
               hide={!visibility.balance}
               fillOpacity={1} 
               fill="url(#colorBalance)"
+              animationDuration={800}
+              animationEasing="ease-in-out"
             />
             <Line
               type="monotone"
               dataKey="totalWithdrawal"
               name="Total Withdrawal"
               stroke="#10b981"
-              strokeWidth={2}
+              strokeWidth={isMobile ? 1.5 : 2}
               dot={false}
               hide={!visibility.totalWithdrawal}
+              animationDuration={800}
+              animationEasing="ease-in-out"
             />
             <Line
               type="monotone"
               dataKey="initialInvestment"
               name="Initial Investment"
               stroke="#3b82f6"
-              strokeWidth={2}
+              strokeWidth={isMobile ? 1.5 : 2}
               strokeDasharray="5 5"
               dot={false}
               hide={!visibility.initialInvestment}
+              animationDuration={800}
+              animationEasing="ease-in-out"
             />
           </ComposedChart>
         </ResponsiveContainer>
       ) : (
-          <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-            <p className="text-slate-500 text-center px-4">Your growth chart will appear here once you enter SWP details.</p>
+          <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
+            <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter SWP details.</p>
           </div>
       )}
     </div>
