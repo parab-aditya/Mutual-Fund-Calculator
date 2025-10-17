@@ -48,8 +48,9 @@ const SliderInput: React.FC<SliderInputProps> = ({
   };
   
   const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
-  const sliderStyle = {
+  const sliderStyle: React.CSSProperties = {
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
+    touchAction: 'pan-y',
   };
 
   return (
