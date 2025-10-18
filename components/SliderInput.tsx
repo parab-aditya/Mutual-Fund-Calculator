@@ -21,6 +21,8 @@ const SliderInput: React.FC<SliderInputProps> = ({
   unit,
 }) => {
   const isCurrency = unit === '₹';
+  const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
+  const [isScrolling, setIsScrolling] = React.useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove commas before converting to number.
@@ -47,6 +49,39 @@ const SliderInput: React.FC<SliderInputProps> = ({
     }
   };
   
+  const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+    setIsScrolling(false);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+    if (!touchStart) return;
+
+    const touch = e.touches[0];
+    const deltaX = Math.abs(touch.clientX - touchStart.x);
+    const deltaY = Math.abs(touch.clientY - touchStart.y);
+
+    // If vertical movement is greater than horizontal, user is scrolling
+    if (deltaY > deltaX && deltaY > 10) {
+      setIsScrolling(true);
+      // Prevent slider from changing during scroll
+      e.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStart(null);
+    setIsScrolling(false);
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only update value if not scrolling
+    if (!isScrolling) {
+      onChange(Number(e.target.value));
+    }
+  };
+
   const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
   const sliderStyle: React.CSSProperties = {
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
@@ -77,7 +112,10 @@ const SliderInput: React.FC<SliderInputProps> = ({
           max={max}
           step={step}
           value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={handleSliderChange}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           style={sliderStyle}
           className="w-full custom-slider"
         />
