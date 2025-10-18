@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { formatIndianCurrency, numberToIndianWords, formatIndianNumber } from '../utils/formatters';
 
 interface SliderInputProps {
@@ -21,90 +21,101 @@ const SliderInput: React.FC<SliderInputProps> = ({
   unit,
 }) => {
   const isCurrency = unit === '₹';
-  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
-  // Use a state machine to track the gesture: undetermined -> scrolling or sliding
-  const gestureStateRef = React.useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
 
+  // Refs for robust touch handling
+  const sliderRef = useRef<HTMLInputElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const gestureStateRef = useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove commas before converting to number.
     const rawValue = e.target.value.replace(/,/g, '');
     let numValue = Number(rawValue);
 
     if (!isNaN(numValue)) {
-      if (numValue > max) {
-        numValue = max;
-      }
-      // We no longer clamp to min here to allow users to type values freely.
-      // The min value will be enforced on blur.
+      if (numValue > max) numValue = max;
       onChange(numValue);
     } else if (rawValue === '') {
-      // Handle user clearing the field. Set to 0 to allow them to type a new value.
       onChange(0);
     }
   };
-  
+
   const handleBlur = () => {
-    // On blur, enforce the minimum value if the current value is below it.
     if (value < min) {
       onChange(min);
     }
   };
-  
+
+  const updateValueFromTouch = (touchX: number) => {
+    if (!sliderRef.current) return;
+
+    const rect = sliderRef.current.getBoundingClientRect();
+    const percent = Math.max(0, Math.min(1, (touchX - rect.left) / rect.width));
+    const rawValue = min + percent * (max - min);
+    
+    // Snap to the nearest step for discrete sliders
+    const steppedValue = Math.round(rawValue / step) * step;
+    const finalValue = Math.max(min, Math.min(max, steppedValue));
+
+    // Only call onChange if the value has actually changed
+    if (finalValue !== value) {
+      onChange(finalValue);
+    }
+  };
+
   const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    gestureStateRef.current = 'undetermined'; // Reset on new touch
+    gestureStateRef.current = 'undetermined';
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
-    if (!touchStartRef.current || gestureStateRef.current === 'scrolling') {
-      // If we've decided it's a scroll, do nothing and let the browser handle it.
-      return;
-    }
-    
-    // If we've decided it's a slide, prevent the page from scrolling.
-    if (gestureStateRef.current === 'sliding') {
-      e.preventDefault();
-      return;
-    }
+    if (!touchStartRef.current) return;
 
-    // If gesture is undetermined, we determine it here.
+    // If we've already determined this is a scroll, we stop processing.
+    if (gestureStateRef.current === 'scrolling') return;
+
     const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
-    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-    const threshold = 5; // A small movement threshold before making a decision.
 
-    // Only decide after a small movement.
-    if (deltaX > threshold || deltaY > threshold) {
-      if (deltaY > deltaX) {
-        // More vertical movement means it's a scroll.
-        gestureStateRef.current = 'scrolling';
+    // On the first significant movement, determine the gesture's intent.
+    if (gestureStateRef.current === 'undetermined') {
+      const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+      const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+      const threshold = 5;
+
+      if (deltaX > threshold || deltaY > threshold) {
+        if (deltaY > deltaX) {
+          gestureStateRef.current = 'scrolling';
+          return;
+        } else {
+          gestureStateRef.current = 'sliding';
+        }
       } else {
-        // More horizontal movement means it's a slide.
-        gestureStateRef.current = 'sliding';
-        // From now on, prevent default on move to stop vertical page scrolling.
-        e.preventDefault();
+        return; // Not enough movement to decide yet.
       }
     }
+    
+    // If we've reached here, the gesture is a slide.
+    e.preventDefault(); // Prevent the browser from scrolling the page.
+    updateValueFromTouch(touch.clientX);
   };
 
   const handleTouchEnd = () => {
     touchStartRef.current = null;
-    gestureStateRef.current = 'undetermined'; // Reset for the next gesture
+    gestureStateRef.current = 'undetermined';
   };
-  
-  // The slider's native onChange is now sufficient, as we prevent it from
-  // triggering during a scroll by managing the browser's default behavior
-  // in onTouchMove.
+
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // If the gesture is identified as scrolling, we must ignore the native
+    // `onChange` event to prevent the value from changing.
+    if (gestureStateRef.current === 'scrolling') {
+      return;
+    }
     onChange(Number(e.target.value));
   };
 
   const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
   const sliderStyle: React.CSSProperties = {
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
-    touchAction: 'pan-y',
   };
 
   return (
@@ -126,6 +137,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
       </div>
       <div>
         <input
+          ref={sliderRef}
           type="range"
           min={min}
           max={max}
