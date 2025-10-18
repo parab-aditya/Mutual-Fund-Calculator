@@ -21,8 +21,8 @@ const SliderInput: React.FC<SliderInputProps> = ({
   unit,
 }) => {
   const isCurrency = unit === '₹';
-  const [touchStart, setTouchStart] = React.useState<{ x: number; y: number } | null>(null);
-  const [isScrolling, setIsScrolling] = React.useState(false);
+  const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
+  const isScrollingRef = React.useRef(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove commas before converting to number.
@@ -51,33 +51,41 @@ const SliderInput: React.FC<SliderInputProps> = ({
   
   const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
     const touch = e.touches[0];
-    setTouchStart({ x: touch.clientX, y: touch.clientY });
-    setIsScrolling(false);
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    isScrollingRef.current = false;
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
-    if (!touchStart) return;
+    if (!touchStartRef.current) return;
+
+    // If we've already decided it's a scroll, we don't need to check again.
+    if (isScrollingRef.current) {
+        e.preventDefault();
+        return;
+    }
 
     const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchStart.x);
-    const deltaY = Math.abs(touch.clientY - touchStart.y);
+    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
 
-    // If vertical movement is greater than horizontal, user is scrolling
-    if (deltaY > deltaX && deltaY > 10) {
-      setIsScrolling(true);
-      // Prevent slider from changing during scroll
+    // If vertical movement is greater than horizontal, user is scrolling.
+    // We set the ref and prevent the slider from moving.
+    // The threshold prevents accidental scroll detection on small jitters.
+    if (deltaY > deltaX && deltaY > 5) {
+      isScrollingRef.current = true;
       e.preventDefault();
     }
   };
 
   const handleTouchEnd = () => {
-    setTouchStart(null);
-    setIsScrolling(false);
+    touchStartRef.current = null;
+    isScrollingRef.current = false;
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only update value if not scrolling
-    if (!isScrolling) {
+    // Only update the value if we're not in a scrolling state.
+    // This ref is checked synchronously, avoiding stale state issues.
+    if (!isScrollingRef.current) {
       onChange(Number(e.target.value));
     }
   };
