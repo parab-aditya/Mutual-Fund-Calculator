@@ -55,9 +55,9 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
   }, []);
   
   return (
-    <div className="bg-white/60 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="space-y-4">
+    <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div className="space-y-3">
           <div>
             <p className="text-sm text-slate-500">Initial Investment</p>
             <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(investedAmount)}</p>
@@ -78,7 +78,7 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
           </div>
         </div>
 
-        <div className="h-64 sm:h-72 w-full">
+        <div className="h-56 sm:h-64 w-full">
            {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -86,8 +86,8 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={70}
-                  outerRadius={90}
+                  innerRadius={60}
+                  outerRadius={80}
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"

@@ -73,11 +73,11 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-2 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
-                <div className="space-y-8">
-                  <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-2 sm:p-6 space-y-8">
-                    <h3 className="text-lg font-semibold text-slate-800 -mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md border border-slate-200/60">
+                <div className="space-y-6">
+                  <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-4 space-y-6">
+                    <h3 className="text-lg font-semibold text-slate-800 -mb-2">
                       Core Calculation
                     </h3>
                     <SliderInput
@@ -109,7 +109,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                     />
                   </div>
                   
-                  <div className="pt-4">
+                  <div>
                     <button
                       onClick={() => { if (isMobile) setIsOptionalAdjustmentsOpen(!isOptionalAdjustmentsOpen); }}
                       className="w-full flex justify-between items-center text-left lg:pointer-events-none"
@@ -129,7 +129,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                       className={`grid transition-all duration-500 ease-in-out ${isMobile ? (isOptionalAdjustmentsOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0') : 'grid-rows-[1fr] opacity-100 mt-2'}`}
                     >
                       <div className="overflow-hidden">
-                        <div className="space-y-8 pt-6 pb-4">
+                        <div className="space-y-6 pt-4 pb-2">
                           <SliderInput
                             label="SIP Annual Step-up"
                             value={stepUpPercentage}
@@ -189,7 +189,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                 </div>
               </div>
 
-              <div className="lg:col-span-3 flex flex-col gap-8 lg:gap-12">
+              <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
                 <ResultsCard
                   investedAmount={totalResults.investedAmount}
                   estimatedReturns={totalResults.estimatedReturns}

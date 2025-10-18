@@ -70,22 +70,22 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
     return null;
   };
 
-  const chartHeight = isMobile ? 350 : isTablet ? 380 : 400;
-  const legendHeight = isMobile ? 70 : 40;
+  const chartHeight = isMobile ? 280 : isTablet ? 300 : 320;
+  const legendHeight = isMobile ? 60 : 40;
 
   return (
-    <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
-      <h2 className="text-xl font-bold text-slate-800 mb-4 sm:mb-6 px-4 sm:px-0 text-center">Growth Over Time</h2>
+    <div className="bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
+      <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Growth Over Time</h2>
       <div style={{ width: '100%', height: chartHeight + legendHeight }}>
         {showChart ? (
           <ResponsiveContainer>
             <ComposedChart
               data={data}
               margin={{
-                top: legendHeight + 10,
+                top: legendHeight,
                 right: isMobile ? 10 : 20,
-                left: isMobile ? 5 : 20,
-                bottom: isMobile ? 30 : 20,
+                left: isMobile ? 0 : 10,
+                bottom: isMobile ? 20 : 15,
               }}
             >
               <defs>
@@ -101,7 +101,7 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
                 axisLine={{ stroke: '#cbd5e1' }}
                 tickLine={{ stroke: '#cbd5e1' }}
                 interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
-                label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
+                label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 12 }}
               />
               <YAxis
                 tickFormatter={formatAxisTick}

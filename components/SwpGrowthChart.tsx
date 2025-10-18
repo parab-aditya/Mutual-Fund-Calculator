@@ -66,8 +66,8 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
     return null;
   };
 
-  const chartHeight = isMobile ? 350 : isTablet ? 380 : 400;
-  const legendHeight = isMobile ? 70 : 40;
+  const chartHeight = isMobile ? 280 : isTablet ? 300 : 320;
+  const legendHeight = isMobile ? 60 : 40;
 
   return (
     <div style={{ width: '100%', height: chartHeight + legendHeight }}>
@@ -76,10 +76,10 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
           <ComposedChart
             data={data}
             margin={{
-              top: legendHeight + 10,
+              top: legendHeight,
               right: isMobile ? 10 : 20,
-              left: isMobile ? 5 : 20,
-              bottom: isMobile ? 30 : 20,
+              left: isMobile ? 0 : 10,
+              bottom: isMobile ? 20 : 15,
             }}
           >
             <defs>
@@ -95,7 +95,7 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
               axisLine={{ stroke: '#cbd5e1' }}
               tickLine={{ stroke: '#cbd5e1' }}
               interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
-              label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -10, fill: '#64748b', fontSize: 12 }}
+              label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 12 }}
             />
             <YAxis
               tickFormatter={formatAxisTick}

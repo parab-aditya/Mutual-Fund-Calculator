@@ -53,11 +53,11 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen text-slate-800 antialiased">
       <header>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
             Mutual Fund Calculator
           </h1>
-          <p className="text-slate-500 mt-3 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-500 mt-2 text-lg max-w-2xl mx-auto">
             Plan your investments with precision and visualize your wealth creation journey.
           </p>
         </div>
@@ -99,7 +99,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <main className="container mx-auto pb-8 sm:pb-12">
+      <main className="container mx-auto pb-6 sm:pb-8">
         <div className={activeTab === 'sip' ? '' : 'hidden'}>
           <SipCalculator onResultsChange={setSipProjectedValue} isActive={activeTab === 'sip'} />
         </div>
@@ -110,7 +110,7 @@ const App: React.FC = () => {
           <StpCalculator isActive={activeTab === 'stp'} />
         </div>
       </main>
-      <footer className="text-center py-6 text-sm text-slate-500 space-y-2">
+      <footer className="text-center py-4 text-sm text-slate-500 space-y-2">
         <p>
           Made by{' '}
           <a

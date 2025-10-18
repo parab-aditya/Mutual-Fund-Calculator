@@ -44,10 +44,10 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
 
     return (
         <div className="px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-2 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
-                 <div className="space-y-8">
-                    <h3 className="text-lg font-semibold text-slate-800 -mb-2">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md border border-slate-200/60">
+                 <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-slate-800 -mb-1">
                       SWP Configuration
                     </h3>
                     <div>
@@ -103,7 +103,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                     />
                  </div>
               </div>
-              <div className="lg:col-span-3 flex flex-col gap-8 lg:gap-12">
+              <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
                 <SwpResultsCard
                   totalInvestment={results.totalInvestment}
                   totalWithdrawal={results.totalWithdrawal}
@@ -111,8 +111,8 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                   numberOfWithdrawals={results.numberOfWithdrawals}
                   isActive={isActive}
                 />
-                <div className="bg-white/60 backdrop-blur-xl py-6 sm:p-8 rounded-2xl shadow-md border border-slate-200/60">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
+                <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
                    <SwpGrowthChart data={growthData} isActive={isActive} />
                 </div>
               </div>
