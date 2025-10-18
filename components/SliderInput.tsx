@@ -22,7 +22,9 @@ const SliderInput: React.FC<SliderInputProps> = ({
 }) => {
   const isCurrency = unit === '₹';
   const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
-  const isScrollingRef = React.useRef(false);
+  // Use a state machine to track the gesture: undetermined -> scrolling or sliding
+  const gestureStateRef = React.useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove commas before converting to number.
@@ -52,42 +54,51 @@ const SliderInput: React.FC<SliderInputProps> = ({
   const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    isScrollingRef.current = false;
+    gestureStateRef.current = 'undetermined'; // Reset on new touch
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
-    if (!touchStartRef.current) return;
-
-    // If we've already decided it's a scroll, we don't need to check again.
-    if (isScrollingRef.current) {
-        e.preventDefault();
-        return;
+    if (!touchStartRef.current || gestureStateRef.current === 'scrolling') {
+      // If we've decided it's a scroll, do nothing and let the browser handle it.
+      return;
+    }
+    
+    // If we've decided it's a slide, prevent the page from scrolling.
+    if (gestureStateRef.current === 'sliding') {
+      e.preventDefault();
+      return;
     }
 
+    // If gesture is undetermined, we determine it here.
     const touch = e.touches[0];
     const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
     const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+    const threshold = 5; // A small movement threshold before making a decision.
 
-    // If vertical movement is greater than horizontal, user is scrolling.
-    // We set the ref and prevent the slider from moving.
-    // The threshold prevents accidental scroll detection on small jitters.
-    if (deltaY > deltaX && deltaY > 5) {
-      isScrollingRef.current = true;
-      e.preventDefault();
+    // Only decide after a small movement.
+    if (deltaX > threshold || deltaY > threshold) {
+      if (deltaY > deltaX) {
+        // More vertical movement means it's a scroll.
+        gestureStateRef.current = 'scrolling';
+      } else {
+        // More horizontal movement means it's a slide.
+        gestureStateRef.current = 'sliding';
+        // From now on, prevent default on move to stop vertical page scrolling.
+        e.preventDefault();
+      }
     }
   };
 
   const handleTouchEnd = () => {
     touchStartRef.current = null;
-    isScrollingRef.current = false;
+    gestureStateRef.current = 'undetermined'; // Reset for the next gesture
   };
-
+  
+  // The slider's native onChange is now sufficient, as we prevent it from
+  // triggering during a scroll by managing the browser's default behavior
+  // in onTouchMove.
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only update the value if we're not in a scrolling state.
-    // This ref is checked synchronously, avoiding stale state issues.
-    if (!isScrollingRef.current) {
-      onChange(Number(e.target.value));
-    }
+    onChange(Number(e.target.value));
   };
 
   const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
