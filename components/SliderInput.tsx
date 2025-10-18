@@ -60,14 +60,13 @@ const SliderInput: React.FC<SliderInputProps> = ({
         <div className="flex items-center rounded-lg bg-emerald-50 border border-emerald-200/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
           <span className="pl-3 text-emerald-800 font-medium">{unit}</span>
           <input
-            type={isCurrency ? 'text' : 'number'}
-            value={isCurrency ? formatIndianNumber(value) : value}
+            type="text"
+            inputMode={step < 1 ? 'decimal' : 'numeric'}
+            pattern={step < 1 ? "[0-9,.]*" : "[0-9,]*"}
+            value={isCurrency ? formatIndianNumber(value) : String(value)}
             onChange={handleInputChange}
             onBlur={handleBlur}
             className="w-28 sm:w-32 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none"
-            min={min}
-            max={max}
-            step={isCurrency ? undefined : step}
           />
         </div>
       </div>

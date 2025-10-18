@@ -72,11 +72,11 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
 
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8">
+        <div className="px-2 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md border border-slate-200/60">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
                 <div className="space-y-6">
-                  <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-4 space-y-6">
+                  <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-3 sm:p-4 space-y-6">
                     <h3 className="text-lg font-semibold text-slate-800 -mb-2">
                       Core Calculation
                     </h3>
