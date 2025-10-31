@@ -57,9 +57,6 @@ const App: React.FC = () => {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
             Mutual Fund Calculator
           </h1>
-          <p className="text-slate-500 mt-2 text-lg max-w-2xl mx-auto">
-            Plan your investments with precision and visualize your wealth creation journey.
-          </p>
         </div>
       </header>
 
