@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+
+import React, { useRef, useCallback } from 'react';
 import { formatIndianCurrency, numberToIndianWords, formatIndianNumber } from '../utils/formatters';
 
 interface SliderInputProps {
@@ -28,7 +29,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
   const gestureStateRef = useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
   const initialValueRef = useRef<number>(value);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/,/g, '');
     let numValue = Number(rawValue);
 
@@ -38,15 +39,15 @@ const SliderInput: React.FC<SliderInputProps> = ({
     } else if (rawValue === '') {
       onChange(0);
     }
-  };
+  }, [max, onChange]);
 
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
     if (value < min) {
       onChange(min);
     }
-  };
+  }, [value, min, onChange]);
 
-  const updateValueFromTouch = (touchX: number) => {
+  const updateValueFromTouch = useCallback((touchX: number) => {
     if (!sliderRef.current) return;
 
     const rect = sliderRef.current.getBoundingClientRect();
@@ -61,16 +62,16 @@ const SliderInput: React.FC<SliderInputProps> = ({
     if (finalValue !== value) {
       onChange(finalValue);
     }
-  };
+  }, [min, max, step, value, onChange]);
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLInputElement>) => {
+  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     gestureStateRef.current = 'undetermined';
     initialValueRef.current = value;
-  };
+  }, [value]);
 
-  const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
+  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     if (!touchStartRef.current) return;
 
     // If we've already determined this is a scroll, we stop processing.
@@ -107,14 +108,14 @@ const SliderInput: React.FC<SliderInputProps> = ({
     // If we've reached here, the gesture is a slide.
     e.preventDefault(); // Prevent the browser from scrolling the page.
     updateValueFromTouch(touch.clientX);
-  };
+  }, [updateValueFromTouch]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     touchStartRef.current = null;
     gestureStateRef.current = 'undetermined';
-  };
+  }, []);
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     // Block native onChange during touch gestures entirely to prevent flicker
     // Touch gestures are handled by handleTouchMove
     if (touchStartRef.current !== null) {
@@ -123,7 +124,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
     }
     // Only allow mouse/keyboard interactions when not in a touch gesture
     onChange(Number(e.target.value));
-  };
+  }, [onChange]);
 
   const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
   const sliderStyle: React.CSSProperties = {

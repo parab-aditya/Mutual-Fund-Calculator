@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ComposedChart,
   Line,
@@ -28,14 +29,23 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+    
     const handleResize = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 640);
-      setIsTablet(width >= 640 && width < 1024);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const width = window.innerWidth;
+        setIsMobile(width < 640);
+        setIsTablet(width >= 640 && width < 1024);
+      }, 150);
     };
+    
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const handleLegendClick = (data: any) => {
@@ -66,8 +76,11 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
     return null;
   };
 
-  const chartHeight = isMobile ? 280 : isTablet ? 300 : 320;
-  const legendHeight = isMobile ? 60 : 40;
+  const chartHeight = useMemo(() => isMobile ? 280 : isTablet ? 300 : 320, [isMobile, isTablet]);
+  const legendHeight = useMemo(() => isMobile ? 60 : 40, [isMobile]);
+  
+  // Disable animations on mobile for better performance
+  const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
   return (
     <div style={{ width: '100%', height: chartHeight + legendHeight }}>
@@ -141,8 +154,8 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
               hide={!visibility.balance}
               fillOpacity={1} 
               fill="url(#colorBalance)"
-              animationDuration={800}
-              animationEasing="ease-in-out"
+              animationDuration={animationDuration}
+              isAnimationActive={!isMobile}
             />
             <Line
               type="monotone"
@@ -152,8 +165,8 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
               strokeWidth={isMobile ? 1.5 : 2}
               dot={false}
               hide={!visibility.totalWithdrawal}
-              animationDuration={800}
-              animationEasing="ease-in-out"
+              animationDuration={animationDuration}
+              isAnimationActive={!isMobile}
             />
             <Line
               type="monotone"
@@ -164,8 +177,8 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
               strokeDasharray="5 5"
               dot={false}
               hide={!visibility.initialInvestment}
-              animationDuration={800}
-              animationEasing="ease-in-out"
+              animationDuration={animationDuration}
+              isAnimationActive={!isMobile}
             />
           </ComposedChart>
         </ResponsiveContainer>

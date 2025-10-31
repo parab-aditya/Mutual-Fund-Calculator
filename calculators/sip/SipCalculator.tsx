@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import SliderInput from '../../components/SliderInput';
 import ResultsCard from '../../components/ResultsCard';
 import GrowthChart from '../../components/GrowthChart';
@@ -23,16 +24,25 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
+        let resizeTimeout: NodeJS.Timeout;
+        
         const handleResize = () => {
-        const mobile = window.innerWidth < 768; // Tailwind's `md` breakpoint
-        setIsMobile(mobile);
-        if (!mobile) {
-            setIsOptionalAdjustmentsOpen(true);
-        }
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const mobile = window.innerWidth < 768;
+                setIsMobile(mobile);
+                if (!mobile) {
+                    setIsOptionalAdjustmentsOpen(true);
+                }
+            }, 150);
         };
+        
         handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener('resize', handleResize, { passive: true });
+        return () => {
+            clearTimeout(resizeTimeout);
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     useEffect(() => {
@@ -57,18 +67,18 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
         }
     }, [totalResults.totalValue, onResultsChange]);
 
-    const handleLumpsumRateChange = (value: number) => {
+    const handleLumpsumRateChange = useCallback((value: number) => {
         setSyncLumpsumRate(false);
         setLumpsumReturnRate(value);
-    };
+    }, []);
 
-    const handleSyncToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSyncToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const isChecked = e.target.checked;
         setSyncLumpsumRate(isChecked);
         if (isChecked) {
             setLumpsumReturnRate(returnRate);
         }
-    };
+    }, [returnRate]);
 
 
     return (

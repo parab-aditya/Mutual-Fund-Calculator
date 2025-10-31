@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
 import { Palette } from '../design-system';
@@ -22,7 +23,7 @@ interface ResultsCardProps {
 
 const COLORS = [Palette.chart.invested, Palette.chart.returns];
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = memo(({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white/70 backdrop-blur-lg p-3 border border-slate-200/60 rounded-lg shadow-lg">
@@ -32,7 +33,9 @@ const CustomTooltip = ({ active, payload }: any) => {
     );
   }
   return null;
-};
+});
+
+CustomTooltip.displayName = 'CustomTooltip';
 
 const ResultsCard: React.FC<ResultsCardProps> = ({
   investedAmount,
@@ -44,10 +47,10 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
   inflationRate,
   isActive,
 }) => {
-  const chartData = [
-    { name: 'Invested Amount', value: investedAmount > 0 ? investedAmount : 1 }, // Min value for chart visibility
+  const chartData = useMemo(() => [
+    { name: 'Invested Amount', value: investedAmount > 0 ? investedAmount : 1 },
     { name: 'Estimated Returns', value: estimatedReturns > 0 ? estimatedReturns : 0 },
-  ];
+  ], [investedAmount, estimatedReturns]);
 
   const hasData = investedAmount > 0;
   const [isMobile, setIsMobile] = useState(false);

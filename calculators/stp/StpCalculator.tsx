@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useCallback } from 'react';
 import SliderInput from '../../components/SliderInput';
 import { useStpCalculator } from './useStpCalculator';
 import { TransferFrequency } from './types';

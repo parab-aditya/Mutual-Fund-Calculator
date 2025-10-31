@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import SliderInput from '../../components/SliderInput';
 import { useSwpCalculator } from './useSwpCalculator';
 import SwpResultsCard from '../../components/SwpResultsCard';
@@ -6,7 +7,7 @@ import SwpGrowthChart from '../../components/SwpGrowthChart';
 import { SwpMonthlyData } from './types';
 import { formatIndianCurrency } from '../../utils/formatters';
 
-const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = ({ data }) => {
+const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = memo(({ data }) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -51,7 +52,9 @@ const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = ({ data }) => {
       </table>
     </div>
   );
-};
+});
+
+DetailedSwpTable.displayName = 'DetailedSwpTable';
 
 
 interface SwpCalculatorProps {

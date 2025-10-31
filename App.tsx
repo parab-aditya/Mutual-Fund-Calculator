@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SipCalculator from './calculators/sip/SipCalculator';
 import SwpCalculator from './calculators/swp/SwpCalculator';
 import StpCalculator from './calculators/stp/StpCalculator';
@@ -20,7 +21,7 @@ const App: React.FC = () => {
     stp: stpTabRef,
   };
 
-  const updateGlider = () => {
+  const updateGlider = useCallback(() => {
     const activeTabRef = tabRefs[activeTab];
     if (activeTabRef.current) {
       setGliderStyle({
@@ -28,27 +29,46 @@ const App: React.FC = () => {
         width: activeTabRef.current.offsetWidth,
       });
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+    
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        setIsMobile(window.innerWidth < 768);
+      }, 150);
     };
-    window.addEventListener('resize', handleResize);
+    
+    window.addEventListener('resize', handleResize, { passive: true });
     handleResize();
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   useEffect(() => {
-    // A small timeout allows the DOM to update (e.g., button text changes) before we measure it.
-    const timer = setTimeout(updateGlider, 50);
-    window.addEventListener('resize', updateGlider);
+    // Use requestAnimationFrame for smooth glider updates
+    const rafId = requestAnimationFrame(() => {
+      updateGlider();
+    });
+
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateGlider, 150);
+    };
+
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateGlider);
+      cancelAnimationFrame(rafId);
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [activeTab, isMobile]);
+  }, [activeTab, isMobile, updateGlider]);
 
   return (
     <div className="min-h-screen text-slate-800 antialiased">

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ComposedChart,
   Line,
@@ -28,14 +29,23 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+    
     const handleResize = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 640);
-      setIsTablet(width >= 640 && width < 1024);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const width = window.innerWidth;
+        setIsMobile(width < 640);
+        setIsTablet(width >= 640 && width < 1024);
+      }, 150);
     };
+    
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const handleLegendClick = (data: any) => {
@@ -70,8 +80,11 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
     return null;
   };
 
-  const chartHeight = isMobile ? 280 : isTablet ? 300 : 320;
-  const legendHeight = isMobile ? 60 : 40;
+  const chartHeight = useMemo(() => isMobile ? 280 : isTablet ? 300 : 320, [isMobile, isTablet]);
+  const legendHeight = useMemo(() => isMobile ? 60 : 40, [isMobile]);
+  
+  // Disable animations on mobile for better performance
+  const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
   return (
     <div className="bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
@@ -147,8 +160,8 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
                 hide={!visibility.totalValue}
                 fillOpacity={1} 
                 fill="url(#colorStpTotal)"
-                animationDuration={800}
-                animationEasing="ease-in-out"
+                animationDuration={animationDuration}
+                isAnimationActive={!isMobile}
               />
               <Line
                 type="monotone"
@@ -158,8 +171,8 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
                 strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 hide={!visibility.sourceFundValue}
-                animationDuration={800}
-                animationEasing="ease-in-out"
+                animationDuration={animationDuration}
+                isAnimationActive={!isMobile}
               />
               <Line
                 type="monotone"
@@ -169,8 +182,8 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
                 strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 hide={!visibility.destinationFundValue}
-                animationDuration={800}
-                animationEasing="ease-in-out"
+                animationDuration={animationDuration}
+                isAnimationActive={!isMobile}
               />
             </ComposedChart>
           </ResponsiveContainer>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ComposedChart,
   Line,
@@ -42,14 +43,23 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
+    
     const handleResize = () => {
-      const width = window.innerWidth;
-      setIsMobile(width < 640);
-      setIsTablet(width >= 640 && width < 1024);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const width = window.innerWidth;
+        setIsMobile(width < 640);
+        setIsTablet(width >= 640 && width < 1024);
+      }, 150);
     };
+    
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const handleLegendClick = (data: any) => {
@@ -100,8 +110,11 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     return null;
   };
 
-  const chartHeight = isMobile ? 280 : isTablet ? 300 : 320;
-  const legendHeight = isMobile ? 70 : 40;
+  const chartHeight = useMemo(() => isMobile ? 280 : isTablet ? 300 : 320, [isMobile, isTablet]);
+  const legendHeight = useMemo(() => isMobile ? 70 : 40, [isMobile]);
+  
+  // Disable animations on mobile for better performance
+  const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
   return (
     <div className="bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
@@ -177,8 +190,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 hide={!visibility.totalValue}
                 fillOpacity={1} 
                 fill="url(#colorTotal)"
-                animationDuration={800}
-                animationEasing="ease-in-out"
+                    animationDuration={animationDuration}
+                    isAnimationActive={!isMobile}
               />
               <Line
                 type="monotone"
@@ -188,8 +201,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 hide={!visibility.investedAmount}
-                animationDuration={800}
-                animationEasing="ease-in-out"
+                    animationDuration={animationDuration}
+                    isAnimationActive={!isMobile}
               />
               {showBreakdown && (
                 <>
@@ -201,8 +214,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                     strokeWidth={isMobile ? 1.5 : 2}
                     dot={false}
                     hide={!visibility.sipValue}
-                    animationDuration={800}
-                    animationEasing="ease-in-out"
+                    animationDuration={animationDuration}
+                    isAnimationActive={!isMobile}
                   />
                   <Line
                     type="monotone"
@@ -212,8 +225,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                     strokeWidth={isMobile ? 1.5 : 2}
                     dot={false}
                     hide={!visibility.lumpsumValue}
-                    animationDuration={800}
-                    animationEasing="ease-in-out"
+                    animationDuration={animationDuration}
+                    isAnimationActive={!isMobile}
                   />
                 </>
               )}
@@ -227,8 +240,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                     strokeDasharray="5 5"
                     dot={false}
                     hide={!visibility.inflationAdjustedTotalValue}
-                    animationDuration={800}
-                    animationEasing="ease-in-out"
+                    animationDuration={animationDuration}
+                    isAnimationActive={!isMobile}
                   />
               )}
             </ComposedChart>

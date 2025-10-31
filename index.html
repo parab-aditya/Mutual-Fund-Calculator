@@ -10,17 +10,33 @@
       html {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       }
+      
+      /* Performance optimizations */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* GPU acceleration for smooth animations */
+      .custom-slider,
+      .custom-slider::-webkit-slider-thumb,
+      .custom-slider::-moz-range-thumb {
+        will-change: transform;
+        transform: translateZ(0);
+      }
+      
       .custom-slider {
         -webkit-appearance: none;
         appearance: none;
         width: 100%;
         height: 8px;
         border-radius: 4px;
-        background-color: #e5e7eb; /* Fallback track color */
+        background-color: #e5e7eb;
         outline: none;
-        transition: opacity .2s;
         cursor: pointer;
+        /* Remove transition for better mobile performance */
+        touch-action: none;
       }
+      
       .custom-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
@@ -30,12 +46,14 @@
         border-radius: 50%;
         border: none;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        margin-top: -8px; /* Vertically center thumb on the track */
-        transition: transform .2s ease-in-out;
+        margin-top: -8px;
+        transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
       }
+      
       .custom-slider:active::-webkit-slider-thumb {
-        transform: scale(1.1);
+        transform: scale(1.1) translateZ(0);
       }
+      
       .custom-slider::-moz-range-thumb {
         width: 24px;
         height: 24px;
@@ -43,6 +61,22 @@
         border-radius: 50%;
         border: none;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .custom-slider:active::-moz-range-thumb {
+        transform: scale(1.1) translateZ(0);
+      }
+      
+      /* CSS containment for better rendering performance */
+      .recharts-wrapper {
+        contain: layout style paint;
+      }
+      
+      /* Smooth scrolling with momentum */
+      body {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
       }
     </style>
   <script type="importmap">
