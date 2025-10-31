@@ -26,6 +26,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
   const sliderRef = useRef<HTMLInputElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const gestureStateRef = useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
+  const initialValueRef = useRef<number>(value);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/,/g, '');
@@ -66,13 +67,17 @@ const SliderInput: React.FC<SliderInputProps> = ({
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     gestureStateRef.current = 'undetermined';
+    initialValueRef.current = value;
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLInputElement>) => {
     if (!touchStartRef.current) return;
 
     // If we've already determined this is a scroll, we stop processing.
-    if (gestureStateRef.current === 'scrolling') return;
+    if (gestureStateRef.current === 'scrolling') {
+      e.preventDefault(); // Prevent slider from responding
+      return;
+    }
 
     const touch = e.touches[0];
 
@@ -80,11 +85,18 @@ const SliderInput: React.FC<SliderInputProps> = ({
     if (gestureStateRef.current === 'undetermined') {
       const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
       const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-      const threshold = 5;
+      // Increased threshold for more deliberate horizontal movement required
+      const threshold = 8;
 
       if (deltaX > threshold || deltaY > threshold) {
-        if (deltaY > deltaX) {
+        // Require significantly more horizontal movement to activate slider
+        if (deltaY > deltaX * 0.7) {
           gestureStateRef.current = 'scrolling';
+          // Restore original value if it changed during gesture determination
+          if (value !== initialValueRef.current) {
+            onChange(initialValueRef.current);
+          }
+          e.preventDefault();
           return;
         } else {
           gestureStateRef.current = 'sliding';
@@ -100,6 +112,10 @@ const SliderInput: React.FC<SliderInputProps> = ({
   };
 
   const handleTouchEnd = () => {
+    // If this was determined to be a scroll gesture, restore the original value
+    if (gestureStateRef.current === 'scrolling' && value !== initialValueRef.current) {
+      onChange(initialValueRef.current);
+    }
     touchStartRef.current = null;
     gestureStateRef.current = 'undetermined';
   };
