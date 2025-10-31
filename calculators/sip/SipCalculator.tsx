@@ -144,7 +144,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                             value={lumpsumAmount}
                             onChange={setLumpsumAmount}
                             min={0}
-                            max={10000000}
+                            max={20000000}
                             step={100000}
                             unit="₹"
                           />
