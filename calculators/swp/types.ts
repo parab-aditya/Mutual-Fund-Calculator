@@ -19,3 +19,11 @@ export interface SwpGrowthData {
   totalWithdrawal: number;
   initialInvestment: number;
 }
+
+export interface SwpMonthlyData {
+  month: number;
+  beginningBalance: number;
+  monthlyReturns: number;
+  monthlyWithdrawal: number;
+  endingBalance: number;
+}
