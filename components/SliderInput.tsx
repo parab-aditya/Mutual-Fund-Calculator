@@ -92,17 +92,15 @@ const SliderInput: React.FC<SliderInputProps> = ({
         // Require significantly more horizontal movement to activate slider
         if (deltaY > deltaX * 0.7) {
           gestureStateRef.current = 'scrolling';
-          // Restore original value if it changed during gesture determination
-          if (value !== initialValueRef.current) {
-            onChange(initialValueRef.current);
-          }
           e.preventDefault();
           return;
         } else {
           gestureStateRef.current = 'sliding';
         }
       } else {
-        return; // Not enough movement to decide yet.
+        // Not enough movement to decide yet - prevent any changes
+        e.preventDefault();
+        return;
       }
     }
     
@@ -112,20 +110,18 @@ const SliderInput: React.FC<SliderInputProps> = ({
   };
 
   const handleTouchEnd = () => {
-    // If this was determined to be a scroll gesture, restore the original value
-    if (gestureStateRef.current === 'scrolling' && value !== initialValueRef.current) {
-      onChange(initialValueRef.current);
-    }
     touchStartRef.current = null;
     gestureStateRef.current = 'undetermined';
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // If the gesture is identified as scrolling, we must ignore the native
-    // `onChange` event to prevent the value from changing.
-    if (gestureStateRef.current === 'scrolling') {
+    // Block native onChange during touch gestures entirely to prevent flicker
+    // Touch gestures are handled by handleTouchMove
+    if (touchStartRef.current !== null) {
+      e.preventDefault();
       return;
     }
+    // Only allow mouse/keyboard interactions when not in a touch gesture
     onChange(Number(e.target.value));
   };
 
