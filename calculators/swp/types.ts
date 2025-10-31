@@ -1,6 +1,7 @@
 export interface SwpInputs {
     totalInvestment: number;
     withdrawalPerMonth: number;
+    withdrawalStepUpPercentage: number;
     expectedReturnRate: number;
     timePeriod: number;
 }

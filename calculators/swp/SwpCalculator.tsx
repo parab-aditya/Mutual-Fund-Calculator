@@ -12,6 +12,8 @@ interface SwpCalculatorProps {
 const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActive }) => {
     const [totalInvestment, setTotalInvestment] = useState<number>(1000000);
     const [withdrawalPerMonth, setWithdrawalPerMonth] = useState<number>(8000);
+    const [withdrawalStepUpPercentage, setWithdrawalStepUpPercentage] = useState<number>(7);
+    const [isStepUpEnabled, setIsStepUpEnabled] = useState<boolean>(false);
     const [expectedReturnRate, setExpectedReturnRate] = useState<number>(8);
     const [timePeriod, setTimePeriod] = useState<number>(20);
     const [syncWithSip, setSyncWithSip] = useState(false);
@@ -25,6 +27,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
     const { results, growthData } = useSwpCalculator({
         totalInvestment,
         withdrawalPerMonth,
+        withdrawalStepUpPercentage: isStepUpEnabled ? withdrawalStepUpPercentage : 0,
         expectedReturnRate,
         timePeriod,
     });
@@ -74,15 +77,42 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                             />
                         </div>
                     </div>
-                     <SliderInput
-                        label="Withdrawal per Month"
-                        value={withdrawalPerMonth}
-                        onChange={setWithdrawalPerMonth}
-                        min={1000}
-                        max={1000000}
-                        step={1000}
-                        unit="₹"
-                    />
+                     <div>
+                        <SliderInput
+                            label="Withdrawal per Month"
+                            value={withdrawalPerMonth}
+                            onChange={setWithdrawalPerMonth}
+                            min={1000}
+                            max={1000000}
+                            step={1000}
+                            unit="₹"
+                        />
+                         <div className="flex items-center justify-end pt-4">
+                            <label htmlFor="enableSwpStepUp" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                                Annual Step-up
+                            </label>
+                            <input
+                                type="checkbox"
+                                id="enableSwpStepUp"
+                                checked={isStepUpEnabled}
+                                onChange={(e) => setIsStepUpEnabled(e.target.checked)}
+                                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                    {isStepUpEnabled && (
+                        <div className="pl-4 border-l-2 border-slate-200/75">
+                             <SliderInput
+                                label="Withdrawal Step-up (p.a.)"
+                                value={withdrawalStepUpPercentage}
+                                onChange={setWithdrawalStepUpPercentage}
+                                min={1}
+                                max={20}
+                                step={1}
+                                unit="%"
+                            />
+                        </div>
+                    )}
                     <SliderInput
                         label="Expected Return Rate (p.a.)"
                         value={expectedReturnRate}

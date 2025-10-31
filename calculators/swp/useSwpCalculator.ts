@@ -12,6 +12,7 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
     const {
         totalInvestment,
         withdrawalPerMonth,
+        withdrawalStepUpPercentage,
         expectedReturnRate,
         timePeriod
     } = inputs;
@@ -30,12 +31,14 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
         const annualRate = expectedReturnRate / 100;
         const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
         const totalMonths = timePeriod * 12;
+        const stepUpRate = withdrawalStepUpPercentage / 100;
 
         const yearlyData: SwpGrowthData[] = [];
 
         let currentBalance = totalInvestment;
         let totalWithdrawnFromCorpus = 0;
         let monthsWithdrawn = 0;
+        let currentWithdrawalAmount = withdrawalPerMonth;
 
         for (let month = 1; month <= totalMonths; month++) {
             // Investment grows for the month
@@ -43,16 +46,16 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
 
             // Process withdrawal
             if (currentBalance > 0) {
-                const withdrawalAmount = Math.min(currentBalance, withdrawalPerMonth);
+                const withdrawalAmount = Math.min(currentBalance, currentWithdrawalAmount);
                 totalWithdrawnFromCorpus += withdrawalAmount;
                  if (withdrawalAmount > 0) {
                     monthsWithdrawn++;
                  }
             }
              // The withdrawal is attempted every month, reducing the balance.
-            currentBalance -= withdrawalPerMonth;
+            currentBalance -= currentWithdrawalAmount;
 
-            // Record data at the end of each year
+            // Record data and apply step-up at the end of each year
             if (month % 12 === 0) {
                 yearlyData.push({
                     year: month / 12,
@@ -60,6 +63,10 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
                     totalWithdrawal: Math.round(totalWithdrawnFromCorpus),
                     initialInvestment: totalInvestment,
                 });
+                
+                if (stepUpRate > 0) {
+                  currentWithdrawalAmount *= (1 + stepUpRate);
+                }
             }
         }
 
@@ -72,7 +79,7 @@ export const useSwpCalculator = (inputs: SwpInputs) => {
 
         return { results: finalResults, growthData: yearlyData };
 
-    }, [totalInvestment, withdrawalPerMonth, expectedReturnRate, timePeriod]);
+    }, [totalInvestment, withdrawalPerMonth, withdrawalStepUpPercentage, expectedReturnRate, timePeriod]);
 
     return { results, growthData };
 };
