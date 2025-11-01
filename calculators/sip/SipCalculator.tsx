@@ -24,7 +24,8 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
-        let resizeTimeout: NodeJS.Timeout;
+        // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
+        let resizeTimeout: ReturnType<typeof setTimeout>;
         
         const handleResize = () => {
             clearTimeout(resizeTimeout);

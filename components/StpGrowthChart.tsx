@@ -29,7 +29,8 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
   const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout;
+    // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     
     const handleResize = () => {
       clearTimeout(resizeTimeout);

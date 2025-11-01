@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { formatIndianCurrency, numberToIndianWords, formatIndianNumber } from '../utils/formatters';
 
 interface SliderInputProps {
@@ -23,11 +23,24 @@ const SliderInput: React.FC<SliderInputProps> = ({
 }) => {
   const isCurrency = unit === '₹';
 
+  // --- START: Performance Optimization for Smooth Sliding ---
+  const [localValue, setLocalValue] = useState(value);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Sync with parent state only when not actively dragging.
+  // This allows the slider UI to be driven by a responsive local state during
+  // a drag, while still reflecting the authoritative parent state at all other times.
+  useEffect(() => {
+    if (!isDragging) {
+      setLocalValue(value);
+    }
+  }, [value, isDragging]);
+  // --- END: Performance Optimization ---
+
   // Refs for robust touch handling
   const sliderRef = useRef<HTMLInputElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const gestureStateRef = useRef<'undetermined' | 'scrolling' | 'sliding'>('undetermined');
-  const initialValueRef = useRef<number>(value);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/,/g, '');
@@ -54,43 +67,38 @@ const SliderInput: React.FC<SliderInputProps> = ({
     const percent = Math.max(0, Math.min(1, (touchX - rect.left) / rect.width));
     const rawValue = min + percent * (max - min);
     
-    // Snap to the nearest step for discrete sliders
     const steppedValue = Math.round(rawValue / step) * step;
     const finalValue = Math.max(min, Math.min(max, steppedValue));
 
-    // Only call onChange if the value has actually changed
+    // Update local state immediately for smooth UI
+    setLocalValue(finalValue);
+    
+    // Propagate change to parent for calculations, only if it's a new value
     if (finalValue !== value) {
       onChange(finalValue);
     }
   }, [min, max, step, value, onChange]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
+    setIsDragging(true); // Start drag state
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     gestureStateRef.current = 'undetermined';
-    initialValueRef.current = value;
-  }, [value]);
+  }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     if (!touchStartRef.current) return;
-
-    // If we've already determined this is a scroll, we stop processing.
     if (gestureStateRef.current === 'scrolling') {
-      e.preventDefault(); // Prevent slider from responding
+      e.preventDefault();
       return;
     }
-
     const touch = e.touches[0];
-
-    // On the first significant movement, determine the gesture's intent.
     if (gestureStateRef.current === 'undetermined') {
       const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
       const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
-      // Increased threshold for more deliberate horizontal movement required
       const threshold = 8;
 
       if (deltaX > threshold || deltaY > threshold) {
-        // Require significantly more horizontal movement to activate slider
         if (deltaY > deltaX * 0.7) {
           gestureStateRef.current = 'scrolling';
           e.preventDefault();
@@ -99,34 +107,36 @@ const SliderInput: React.FC<SliderInputProps> = ({
           gestureStateRef.current = 'sliding';
         }
       } else {
-        // Not enough movement to decide yet - prevent any changes
         e.preventDefault();
         return;
       }
     }
     
-    // If we've reached here, the gesture is a slide.
-    e.preventDefault(); // Prevent the browser from scrolling the page.
+    e.preventDefault();
     updateValueFromTouch(touch.clientX);
   }, [updateValueFromTouch]);
 
   const handleTouchEnd = useCallback(() => {
+    setIsDragging(false); // End drag state
     touchStartRef.current = null;
     gestureStateRef.current = 'undetermined';
   }, []);
 
   const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    // Block native onChange during touch gestures entirely to prevent flicker
-    // Touch gestures are handled by handleTouchMove
     if (touchStartRef.current !== null) {
       e.preventDefault();
       return;
     }
-    // Only allow mouse/keyboard interactions when not in a touch gesture
-    onChange(Number(e.target.value));
+    const newValue = Number(e.target.value);
+    setLocalValue(newValue); // Update local state
+    onChange(newValue); // And parent state
   }, [onChange]);
+  
+  // Add mouse handlers to control isDragging state for desktop
+  const handleMouseDown = useCallback(() => setIsDragging(true), []);
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
 
-  const percentage = max > min ? ((value - min) / (max - min)) * 100 : 0;
+  const percentage = max > min ? ((localValue - min) / (max - min)) * 100 : 0;
   const sliderStyle: React.CSSProperties = {
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
   };
@@ -155,8 +165,10 @@ const SliderInput: React.FC<SliderInputProps> = ({
           min={min}
           max={max}
           step={step}
-          value={value}
+          value={localValue} // Use localValue for rendering for immediate feedback
           onChange={handleSliderChange}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}

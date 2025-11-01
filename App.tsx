@@ -32,7 +32,8 @@ const App: React.FC = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout;
+    // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     
     const handleResize = () => {
       clearTimeout(resizeTimeout);
@@ -55,7 +56,8 @@ const App: React.FC = () => {
       updateGlider();
     });
 
-    let resizeTimeout: NodeJS.Timeout;
+    // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(updateGlider, 150);
