@@ -81,12 +81,17 @@ const SliderInput: React.FC<SliderInputProps> = ({
     const percent = Math.max(0, Math.min(1, (touchX - rect.left) / rect.width));
     const rawValue = min + percent * (max - min);
 
-    let steppedValue = Math.round(rawValue / step) * step;
+    // Priority: Check snap on raw value first
+    const snappedValue = snapToMarker(rawValue);
 
-    // Apply snapping
-    steppedValue = snapToMarker(steppedValue);
+    let finalValue = snappedValue;
 
-    const finalValue = Math.max(min, Math.min(max, steppedValue));
+    // If not snapped (value returned as is), apply stepping
+    if (snappedValue === rawValue) {
+      finalValue = Math.round(rawValue / step) * step;
+    }
+
+    finalValue = Math.max(min, Math.min(max, finalValue));
 
     // Update local state immediately for smooth UI
     setLocalValue(finalValue);
@@ -145,14 +150,23 @@ const SliderInput: React.FC<SliderInputProps> = ({
       e.preventDefault();
       return;
     }
-    let newValue = Number(e.target.value);
+    let rawValue = Number(e.target.value);
 
-    // Apply snapping
-    newValue = snapToMarker(newValue);
+    // Priority: Check snap on raw value first
+    const snappedValue = snapToMarker(rawValue);
 
-    setLocalValue(newValue); // Update local state
-    onChange(newValue); // And parent state
-  }, [onChange, snapToMarker]);
+    let finalValue = snappedValue;
+
+    // If not snapped, apply stepping
+    if (snappedValue === rawValue) {
+      finalValue = Math.round(rawValue / step) * step;
+    }
+
+    finalValue = Math.max(min, Math.min(max, finalValue));
+
+    setLocalValue(finalValue); // Update local state
+    onChange(finalValue); // And parent state
+  }, [onChange, snapToMarker, step, min, max]);
 
   // Add mouse handlers to control isDragging state for desktop
   const handleMouseDown = useCallback(() => setIsDragging(true), []);
@@ -163,7 +177,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
   };
 
-  const markerPercentage = markerValue !== undefined && max > min
+  const markerPercentage = markerValue !== undefined && markerValue >= min && markerValue <= max
     ? ((markerValue - min) / (max - min)) * 100
     : null;
 
@@ -190,7 +204,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
           type="range"
           min={min}
           max={max}
-          step={step}
+          step="any"
           value={localValue} // Use localValue for rendering for immediate feedback
           onChange={handleSliderChange}
           onMouseDown={handleMouseDown}
