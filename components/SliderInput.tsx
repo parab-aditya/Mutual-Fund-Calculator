@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { formatIndianCurrency, numberToIndianWords, formatIndianNumber } from '../utils/formatters';
 
@@ -10,6 +9,8 @@ interface SliderInputProps {
   max: number;
   step: number;
   unit: string;
+  markerValue?: number;
+  markerLabel?: string;
 }
 
 const SliderInput: React.FC<SliderInputProps> = ({
@@ -20,13 +21,15 @@ const SliderInput: React.FC<SliderInputProps> = ({
   max,
   step,
   unit,
+  markerValue,
+  markerLabel,
 }) => {
   const isCurrency = unit === '₹';
 
   // --- START: Performance Optimization for Smooth Sliding ---
   const [localValue, setLocalValue] = useState(value);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Sync with parent state only when not actively dragging.
   // This allows the slider UI to be driven by a responsive local state during
   // a drag, while still reflecting the authoritative parent state at all other times.
@@ -60,24 +63,39 @@ const SliderInput: React.FC<SliderInputProps> = ({
     }
   }, [value, min, onChange]);
 
+  const snapToMarker = useCallback((val: number) => {
+    if (markerValue !== undefined) {
+      const range = max - min;
+      const threshold = range * 0.03; // 3% snap threshold
+      if (Math.abs(val - markerValue) <= threshold) {
+        return markerValue;
+      }
+    }
+    return val;
+  }, [markerValue, max, min]);
+
   const updateValueFromTouch = useCallback((touchX: number) => {
     if (!sliderRef.current) return;
 
     const rect = sliderRef.current.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (touchX - rect.left) / rect.width));
     const rawValue = min + percent * (max - min);
-    
-    const steppedValue = Math.round(rawValue / step) * step;
+
+    let steppedValue = Math.round(rawValue / step) * step;
+
+    // Apply snapping
+    steppedValue = snapToMarker(steppedValue);
+
     const finalValue = Math.max(min, Math.min(max, steppedValue));
 
     // Update local state immediately for smooth UI
     setLocalValue(finalValue);
-    
+
     // Propagate change to parent for calculations, only if it's a new value
     if (finalValue !== value) {
       onChange(finalValue);
     }
-  }, [min, max, step, value, onChange]);
+  }, [min, max, step, value, onChange, snapToMarker]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLInputElement>) => {
     setIsDragging(true); // Start drag state
@@ -111,7 +129,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
         return;
       }
     }
-    
+
     e.preventDefault();
     updateValueFromTouch(touch.clientX);
   }, [updateValueFromTouch]);
@@ -127,11 +145,15 @@ const SliderInput: React.FC<SliderInputProps> = ({
       e.preventDefault();
       return;
     }
-    const newValue = Number(e.target.value);
+    let newValue = Number(e.target.value);
+
+    // Apply snapping
+    newValue = snapToMarker(newValue);
+
     setLocalValue(newValue); // Update local state
     onChange(newValue); // And parent state
-  }, [onChange]);
-  
+  }, [onChange, snapToMarker]);
+
   // Add mouse handlers to control isDragging state for desktop
   const handleMouseDown = useCallback(() => setIsDragging(true), []);
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
@@ -140,6 +162,10 @@ const SliderInput: React.FC<SliderInputProps> = ({
   const sliderStyle: React.CSSProperties = {
     background: `linear-gradient(to right, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`,
   };
+
+  const markerPercentage = markerValue !== undefined && max > min
+    ? ((markerValue - min) / (max - min)) * 100
+    : null;
 
   return (
     <div className="space-y-4">
@@ -158,7 +184,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
           />
         </div>
       </div>
-      <div>
+      <div className="relative">
         <input
           ref={sliderRef}
           type="range"
@@ -173,8 +199,21 @@ const SliderInput: React.FC<SliderInputProps> = ({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={sliderStyle}
-          className="w-full custom-slider"
+          className="w-full custom-slider relative z-10"
         />
+        {markerPercentage !== null && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-6 -ml-2 z-0 group cursor-help flex items-center justify-center"
+            style={{ left: `${markerPercentage}%` }}
+          >
+            <div className="w-1 h-3 bg-slate-400 rounded-full" />
+            {markerLabel && (
+              <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-600 whitespace-nowrap bg-white px-2 py-1 rounded shadow-md border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                {markerLabel}
+              </div>
+            )}
+          </div>
+        )}
         {unit === '₹' ? (
           <p className="text-xs text-slate-500 text-right pt-2 min-h-4">
             {value > 0 ? numberToIndianWords(value) : <>&nbsp;</>}
