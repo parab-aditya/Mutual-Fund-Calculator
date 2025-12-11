@@ -9,8 +9,8 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts';
-import { SipGrowthData } from './types';
-import { formatIndianCurrency, formatAxisTick } from '../../utils/formatters';
+import { SipGrowthData } from '../calculators/sip/types';
+import { formatIndianCurrency, formatAxisTick } from '../utils/formatters';
 
 interface FireCrossoverChartProps {
     data: SipGrowthData[];

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import SliderInput from '../../components/SliderInput';
 import ResultsCard from '../../components/ResultsCard';
 import GrowthChart from '../../components/GrowthChart';
-import FireCrossoverChart from './FireCrossoverChart';
+import FireCrossoverChart from '../../components/FireCrossoverChart';
 import { useSipCalculator } from './useSipCalculator';
 
 // Helper component for collapsible sections
