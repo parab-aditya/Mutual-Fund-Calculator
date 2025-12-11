@@ -218,7 +218,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
         {markerPercentage !== null && (
           <div
             className="absolute top-1/2 -translate-y-1/2 w-4 h-6 -ml-2 z-0 group cursor-help flex items-center justify-center"
-            style={{ left: `${markerPercentage}%` }}
+            style={{ left: `calc(${markerPercentage}% - ${(markerPercentage / 100) * 16 - 8}px)` }}
           >
             <div className="w-1 h-3 bg-slate-400 rounded-full" />
             {markerLabel && (
