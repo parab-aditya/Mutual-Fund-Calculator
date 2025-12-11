@@ -29,9 +29,19 @@ interface GrowthChartProps {
   lumpsumAmount: number;
   monthlyInvestment: number;
   isActive: boolean;
+  hideContainer?: boolean;
+  hideTitle?: boolean;
 }
 
-const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumAmount, monthlyInvestment, isActive }) => {
+const GrowthChart: React.FC<GrowthChartProps> = ({
+  data,
+  inflationRate,
+  lumpsumAmount,
+  monthlyInvestment,
+  isActive,
+  hideContainer = false,
+  hideTitle = false
+}) => {
   const [visibility, setVisibility] = useState({
     investedAmount: true,
     totalValue: true,
@@ -45,7 +55,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
   useEffect(() => {
     // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
     let resizeTimeout: ReturnType<typeof setTimeout>;
-    
+
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -54,7 +64,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
         setIsTablet(width >= 640 && width < 1024);
       }, 150);
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize, { passive: true });
     return () => {
@@ -67,7 +77,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
     const { dataKey } = data;
     setVisibility(prev => ({ ...prev, [dataKey]: !prev[dataKey as keyof typeof visibility] }));
   };
-  
+
   const showBreakdown = monthlyInvestment > 0 && lumpsumAmount > 0;
   const showChart = isActive && data && data.length > 0;
 
@@ -100,7 +110,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
             <span className="text-slate-800">{formatIndianCurrency(data.totalValue)}</span>
           </p>
           {inflationRate > 0 && (
-             <p className="flex justify-between">
+            <p className="flex justify-between">
               <span className="text-slate-500 mr-4">Value (Today's terms):</span>
               <span className="font-semibold text-slate-600">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
             </p>
@@ -112,21 +122,25 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
   };
 
   const chartHeight = useMemo(() => isMobile ? 280 : isTablet ? 300 : 320, [isMobile, isTablet]);
-  const legendHeight = useMemo(() => isMobile ? 70 : 40, [isMobile]);
-  
+  const legendHeight = useMemo(() => isMobile ? 36 : 24, [isMobile]);
+
   // Disable animations on mobile for better performance
   const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
+  const containerClasses = hideContainer
+    ? "transition-all duration-300"
+    : "bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300";
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
-      <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>
+    <div className={containerClasses}>
+      {!hideTitle && <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>}
       <div style={{ width: '100%', height: chartHeight + legendHeight }}>
         {showChart ? (
           <ResponsiveContainer>
             <ComposedChart
               data={data}
               margin={{
-                top: legendHeight,
+                top: 5,
                 right: isMobile ? 10 : 20,
                 left: isMobile ? 0 : 10,
                 bottom: isMobile ? 20 : 15,
@@ -134,14 +148,14 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
             >
               <defs>
                 <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#334155" stopOpacity={0.4}/>
-                  <stop offset="95%" stopColor="#334155" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#334155" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#334155" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
-              <XAxis 
-                dataKey="year" 
-                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }} 
+              <XAxis
+                dataKey="year"
+                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
                 axisLine={{ stroke: '#cbd5e1' }}
                 tickLine={{ stroke: '#cbd5e1' }}
                 interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
@@ -155,15 +169,15 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 width={isMobile ? 55 : 70}
                 domain={['dataMin', 'auto']}
               />
-              <Tooltip 
-                content={<CustomTooltip />} 
+              <Tooltip
+                content={<CustomTooltip />}
                 cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
                 animationDuration={200}
               />
-              <Legend 
-                verticalAlign="top" 
+              <Legend
+                verticalAlign="top"
                 height={legendHeight}
-                iconType="circle" 
+                iconType="circle"
                 onClick={handleLegendClick}
                 wrapperStyle={{
                   paddingBottom: isMobile ? '12px' : '8px',
@@ -172,8 +186,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 }}
                 iconSize={isMobile ? 8 : 10}
                 formatter={(value: string) => (
-                  <span style={{ 
-                    fontSize: isMobile ? '11px' : '13px', 
+                  <span style={{
+                    fontSize: isMobile ? '11px' : '13px',
                     color: '#475569',
                     fontWeight: 500,
                   }}>
@@ -189,10 +203,10 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 strokeWidth={isMobile ? 2 : 3}
                 dot={false}
                 hide={!visibility.totalValue}
-                fillOpacity={1} 
+                fillOpacity={1}
                 fill="url(#colorTotal)"
-                    animationDuration={animationDuration}
-                    isAnimationActive={!isMobile}
+                animationDuration={animationDuration}
+                isAnimationActive={!isMobile}
               />
               <Line
                 type="monotone"
@@ -202,8 +216,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 strokeWidth={isMobile ? 1.5 : 2}
                 dot={false}
                 hide={!visibility.investedAmount}
-                    animationDuration={animationDuration}
-                    isAnimationActive={!isMobile}
+                animationDuration={animationDuration}
+                isAnimationActive={!isMobile}
               />
               {showBreakdown && (
                 <>
@@ -232,18 +246,18 @@ const GrowthChart: React.FC<GrowthChartProps> = ({ data, inflationRate, lumpsumA
                 </>
               )}
               {inflationRate > 0 && (
-                  <Line
-                    type="monotone"
-                    dataKey="inflationAdjustedTotalValue"
-                    name="Inflation Adjusted Value"
-                    stroke="#475569"
-                    strokeWidth={isMobile ? 1.5 : 2}
-                    strokeDasharray="5 5"
-                    dot={false}
-                    hide={!visibility.inflationAdjustedTotalValue}
-                    animationDuration={animationDuration}
-                    isAnimationActive={!isMobile}
-                  />
+                <Line
+                  type="monotone"
+                  dataKey="inflationAdjustedTotalValue"
+                  name="Inflation Adjusted Value"
+                  stroke="#475569"
+                  strokeWidth={isMobile ? 1.5 : 2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                  hide={!visibility.inflationAdjustedTotalValue}
+                  animationDuration={animationDuration}
+                  isAnimationActive={!isMobile}
+                />
               )}
             </ComposedChart>
           </ResponsiveContainer>

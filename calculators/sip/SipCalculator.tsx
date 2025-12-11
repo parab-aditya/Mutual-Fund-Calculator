@@ -3,7 +3,52 @@ import React, { useState, useEffect, useCallback } from 'react';
 import SliderInput from '../../components/SliderInput';
 import ResultsCard from '../../components/ResultsCard';
 import GrowthChart from '../../components/GrowthChart';
+import FireCrossoverChart from './FireCrossoverChart';
 import { useSipCalculator } from './useSipCalculator';
+
+// Helper component for collapsible sections
+interface CollapsibleSectionProps {
+  title: string;
+  isOpen: boolean;
+  toggle: () => void;
+  isMobile: boolean;
+  children: React.ReactNode;
+}
+
+const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, isOpen, toggle, isMobile, children }) => {
+  return (
+    <div className="bg-white/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
+      <button
+        onClick={toggle}
+        className={`w-full flex justify-between items-center p-4 sm:p-5 text-left ${!isMobile ? 'cursor-default pointer-events-none' : ''}`}
+        aria-expanded={isOpen}
+      >
+        <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`h-6 w-6 text-slate-500 transition-transform duration-300 md:hidden ${isOpen ? 'rotate-180' : ''}`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      </button>
+
+      <div
+        className={`grid transition-all duration-500 ease-in-out ${isMobile
+          ? (isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')
+          : 'grid-rows-[1fr] opacity-100'
+          }`}
+      >
+        <div className="overflow-hidden">
+          <div className="p-4 sm:p-6 pt-0">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface SipCalculatorProps {
   onResultsChange?: (value: number) => void;
@@ -11,217 +56,265 @@ interface SipCalculatorProps {
 }
 
 const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive }) => {
-    const [monthlyInvestment, setMonthlyInvestment] = useState<number>(25000);
-    const [stepUpPercentage, setStepUpPercentage] = useState<number>(0);
-    const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
-    const [returnRate, setReturnRate] = useState<number>(12);
-    const [lumpsumReturnRate, setLumpsumReturnRate] = useState<number>(returnRate);
-    const [syncLumpsumRate, setSyncLumpsumRate] = useState<boolean>(true);
-    const [timePeriod, setTimePeriod] = useState<number>(10);
-    const [inflationRate, setInflationRate] = useState<number>(0);
-    
-    const [isOptionalAdjustmentsOpen, setIsOptionalAdjustmentsOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [monthlyInvestment, setMonthlyInvestment] = useState<number>(25000);
+  const [stepUpPercentage, setStepUpPercentage] = useState<number>(0);
+  const [lumpsumAmount, setLumpsumAmount] = useState<number>(0);
+  const [returnRate, setReturnRate] = useState<number>(12);
+  const [lumpsumReturnRate, setLumpsumReturnRate] = useState<number>(returnRate);
+  const [syncLumpsumRate, setSyncLumpsumRate] = useState<boolean>(true);
+  const [timePeriod, setTimePeriod] = useState<number>(10);
+  const [inflationRate, setInflationRate] = useState<number>(0);
 
-    useEffect(() => {
-        // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
-        let resizeTimeout: ReturnType<typeof setTimeout>;
-        
-        const handleResize = () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const mobile = window.innerWidth < 768;
-                setIsMobile(mobile);
-                if (!mobile) {
-                    setIsOptionalAdjustmentsOpen(true);
-                }
-            }, 150);
-        };
-        
-        handleResize();
-        window.addEventListener('resize', handleResize, { passive: true });
-        return () => {
-            clearTimeout(resizeTimeout);
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
+  const [isOptionalAdjustmentsOpen, setIsOptionalAdjustmentsOpen] = useState(false);
 
-    useEffect(() => {
-        if (syncLumpsumRate) {
-            setLumpsumReturnRate(returnRate);
+  // New state for collapsible sections (default open)
+  const [isReturnsOpen, setIsReturnsOpen] = useState(true);
+  const [isGrowthChartOpen, setIsGrowthChartOpen] = useState(true);
+  const [isFireChartOpen, setIsFireChartOpen] = useState(true);
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const mobile = window.innerWidth < 768;
+        setIsMobile(mobile);
+        if (!mobile) {
+          setIsOptionalAdjustmentsOpen(true);
+          // These should technically be open on desktop, though we initialized them as true.
+          // Re-enforcing them is safe.
+          setIsReturnsOpen(true);
+          setIsGrowthChartOpen(true);
+          setIsFireChartOpen(true);
         }
-    }, [returnRate, syncLumpsumRate]);
+      }, 150);
+    };
 
-    const { totalResults, growthData } = useSipCalculator({
-        monthlyInvestment,
-        stepUpPercentage,
-        lumpsumAmount,
-        returnRate,
-        lumpsumReturnRate,
-        timePeriod,
-        inflationRate,
-    });
-    
-     useEffect(() => {
-        if (onResultsChange) {
-            onResultsChange(totalResults.totalValue);
-        }
-    }, [totalResults.totalValue, onResultsChange]);
+    handleResize(); // Init on mount
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
-    const handleLumpsumRateChange = useCallback((value: number) => {
-        setSyncLumpsumRate(false);
-        setLumpsumReturnRate(value);
-    }, []);
+  useEffect(() => {
+    if (syncLumpsumRate) {
+      setLumpsumReturnRate(returnRate);
+    }
+  }, [returnRate, syncLumpsumRate]);
 
-    const handleSyncToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const isChecked = e.target.checked;
-        setSyncLumpsumRate(isChecked);
-        if (isChecked) {
-            setLumpsumReturnRate(returnRate);
-        }
-    }, [returnRate]);
+  const { totalResults, growthData } = useSipCalculator({
+    monthlyInvestment,
+    stepUpPercentage,
+    lumpsumAmount,
+    returnRate,
+    lumpsumReturnRate,
+    timePeriod,
+    inflationRate,
+  });
+
+  useEffect(() => {
+    if (onResultsChange) {
+      onResultsChange(totalResults.totalValue);
+    }
+  }, [totalResults.totalValue, onResultsChange]);
+
+  const handleLumpsumRateChange = useCallback((value: number) => {
+    setSyncLumpsumRate(false);
+    setLumpsumReturnRate(value);
+  }, []);
+
+  const handleSyncToggle = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setSyncLumpsumRate(isChecked);
+    if (isChecked) {
+      setLumpsumReturnRate(returnRate);
+    }
+  }, [returnRate]);
 
 
-    return (
-        <div className="px-2 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-              <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
-                <div className="space-y-6">
-                  <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-3 sm:p-4 space-y-6">
-                    <h3 className="text-lg font-semibold text-slate-800 -mb-2">
-                      Core Calculation
-                    </h3>
+  return (
+    <div className="px-2 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+          <div className="space-y-6">
+            <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-3 sm:p-4 space-y-6">
+              <h3 className="text-lg font-semibold text-slate-800 -mb-2">
+                Core Calculation
+              </h3>
+              <SliderInput
+                label="Monthly Investment (SIP)"
+                value={monthlyInvestment}
+                onChange={setMonthlyInvestment}
+                min={0}
+                max={500000}
+                step={1000}
+                unit="₹"
+              />
+              <SliderInput
+                label="Expected Return Rate (p.a.)"
+                value={returnRate}
+                onChange={setReturnRate}
+                min={1}
+                max={30}
+                step={0.1}
+                unit="%"
+              />
+              <SliderInput
+                label="Time Period"
+                value={timePeriod}
+                onChange={setTimePeriod}
+                min={1}
+                max={40}
+                step={1}
+                unit="Yr"
+              />
+            </div>
+
+            <div>
+              <button
+                onClick={() => { if (isMobile) setIsOptionalAdjustmentsOpen(!isOptionalAdjustmentsOpen); }}
+                className="w-full flex justify-between items-center text-left lg:pointer-events-none"
+                aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
+                aria-controls="optional-adjustments-content"
+              >
+                <h3 className="text-lg font-semibold text-slate-700">
+                  Optional Adjustments
+                </h3>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              <div
+                id="optional-adjustments-content"
+                className={`grid transition-all duration-500 ease-in-out ${isMobile ? (isOptionalAdjustmentsOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0') : 'grid-rows-[1fr] opacity-100 mt-2'}`}
+              >
+                <div className="overflow-hidden">
+                  <div className="space-y-6 pt-4 pb-2">
                     <SliderInput
-                      label="Monthly Investment (SIP)"
-                      value={monthlyInvestment}
-                      onChange={setMonthlyInvestment}
+                      label="SIP Annual Step-up"
+                      value={stepUpPercentage}
+                      onChange={setStepUpPercentage}
                       min={0}
-                      max={500000}
-                      step={1000}
-                      unit="₹"
-                    />
-                    <SliderInput
-                      label="Expected Return Rate (p.a.)"
-                      value={returnRate}
-                      onChange={setReturnRate}
-                      min={1}
-                      max={30}
-                      step={0.1}
+                      max={50}
+                      step={1}
                       unit="%"
                     />
                     <SliderInput
-                      label="Time Period"
-                      value={timePeriod}
-                      onChange={setTimePeriod}
-                      min={1}
-                      max={40}
-                      step={1}
-                      unit="Yr"
+                      label="Lumpsum Investment"
+                      value={lumpsumAmount}
+                      onChange={setLumpsumAmount}
+                      min={0}
+                      max={20000000}
+                      step={100000}
+                      unit="₹"
                     />
-                  </div>
-                  
-                  <div>
-                    <button
-                      onClick={() => { if (isMobile) setIsOptionalAdjustmentsOpen(!isOptionalAdjustmentsOpen); }}
-                      className="w-full flex justify-between items-center text-left lg:pointer-events-none"
-                      aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
-                      aria-controls="optional-adjustments-content"
-                    >
-                      <h3 className="text-lg font-semibold text-slate-700">
-                        Optional Adjustments
-                      </h3>
-                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-
-                    <div
-                      id="optional-adjustments-content"
-                      className={`grid transition-all duration-500 ease-in-out ${isMobile ? (isOptionalAdjustmentsOpen ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0') : 'grid-rows-[1fr] opacity-100 mt-2'}`}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="space-y-6 pt-4 pb-2">
-                          <SliderInput
-                            label="SIP Annual Step-up"
-                            value={stepUpPercentage}
-                            onChange={setStepUpPercentage}
-                            min={0}
-                            max={50}
-                            step={1}
-                            unit="%"
-                          />
-                          <SliderInput
-                            label="Lumpsum Investment"
-                            value={lumpsumAmount}
-                            onChange={setLumpsumAmount}
-                            min={0}
-                            max={20000000}
-                            step={100000}
-                            unit="₹"
-                          />
-                           {lumpsumAmount > 0 && (
-                            <div className="space-y-1 pl-4 border-l-2 border-slate-200/75">
-                              <SliderInput
-                                label="Lumpsum Return Rate (p.a.)"
-                                value={lumpsumReturnRate}
-                                onChange={handleLumpsumRateChange}
-                                min={1}
-                                max={30}
-                                step={0.1}
-                                unit="%"
-                              />
-                              <div className="flex items-center justify-end pt-1">
-                                <label htmlFor="syncRate" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
-                                  Same as SIP
-                                </label>
-                                <input
-                                  type="checkbox"
-                                  id="syncRate"
-                                  checked={syncLumpsumRate}
-                                  onChange={handleSyncToggle}
-                                  className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                                />
-                              </div>
-                            </div>
-                          )}
-                          <SliderInput
-                            label="Inflation Rate (p.a.)"
-                            value={inflationRate}
-                            onChange={setInflationRate}
-                            min={0}
-                            max={20}
-                            step={0.1}
-                            unit="%"
+                    {lumpsumAmount > 0 && (
+                      <div className="space-y-1 pl-4 border-l-2 border-slate-200/75">
+                        <SliderInput
+                          label="Lumpsum Return Rate (p.a.)"
+                          value={lumpsumReturnRate}
+                          onChange={handleLumpsumRateChange}
+                          min={1}
+                          max={30}
+                          step={0.1}
+                          unit="%"
+                        />
+                        <div className="flex items-center justify-end pt-1">
+                          <label htmlFor="syncRate" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                            Same as SIP
+                          </label>
+                          <input
+                            type="checkbox"
+                            id="syncRate"
+                            checked={syncLumpsumRate}
+                            onChange={handleSyncToggle}
+                            className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                           />
                         </div>
                       </div>
-                    </div>
+                    )}
+                    <SliderInput
+                      label="Inflation Rate (p.a.)"
+                      value={inflationRate}
+                      onChange={setInflationRate}
+                      min={0}
+                      max={20}
+                      step={0.1}
+                      unit="%"
+                    />
                   </div>
                 </div>
               </div>
-
-              <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
-                <ResultsCard
-                  investedAmount={totalResults.investedAmount}
-                  estimatedReturns={totalResults.estimatedReturns}
-                  totalValue={totalResults.totalValue}
-                  inflationAdjustedTotalValue={totalResults.inflationAdjustedTotalValue}
-                  sipResults={totalResults.sip}
-                  lumpsumResults={totalResults.lumpsum}
-                  inflationRate={inflationRate}
-                  isActive={isActive}
-                />
-                 <GrowthChart 
-                   data={growthData} 
-                   inflationRate={inflationRate} 
-                   lumpsumAmount={lumpsumAmount} 
-                   monthlyInvestment={monthlyInvestment}
-                   isActive={isActive}
-                  />
-              </div>
             </div>
+          </div>
         </div>
-    );
+
+        <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
+          <CollapsibleSection
+            title="Returns Breakdown"
+            isOpen={isReturnsOpen}
+            toggle={() => isMobile && setIsReturnsOpen(!isReturnsOpen)}
+            isMobile={isMobile}
+          >
+            <ResultsCard
+              investedAmount={totalResults.investedAmount}
+              estimatedReturns={totalResults.estimatedReturns}
+              totalValue={totalResults.totalValue}
+              inflationAdjustedTotalValue={totalResults.inflationAdjustedTotalValue}
+              sipResults={totalResults.sip}
+              lumpsumResults={totalResults.lumpsum}
+              inflationRate={inflationRate}
+              isActive={isActive}
+              hideContainer={true}
+            />
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            title="Investment Growth Over Time"
+            isOpen={isGrowthChartOpen}
+            toggle={() => isMobile && setIsGrowthChartOpen(!isGrowthChartOpen)}
+            isMobile={isMobile}
+          >
+            <GrowthChart
+              data={growthData}
+              inflationRate={inflationRate}
+              lumpsumAmount={lumpsumAmount}
+              monthlyInvestment={monthlyInvestment}
+              isActive={isActive}
+              hideContainer={true}
+              hideTitle={true}
+            />
+          </CollapsibleSection>
+        </div>
+      </div>
+
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 mt-8">
+        <div className="lg:col-span-5">
+          <CollapsibleSection
+            title="The FIRE crossover"
+            isOpen={isFireChartOpen}
+            toggle={() => isMobile && setIsFireChartOpen(!isFireChartOpen)}
+            isMobile={isMobile}
+          >
+            <FireCrossoverChart
+              data={growthData}
+              isActive={isActive}
+              returnRate={returnRate}
+              hideContainer={true}
+              hideTitle={true}
+            />
+          </CollapsibleSection>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default SipCalculator;

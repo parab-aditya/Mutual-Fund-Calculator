@@ -19,6 +19,7 @@ interface ResultsCardProps {
   lumpsumResults: ResultBreakdown;
   inflationRate: number;
   isActive: boolean;
+  hideContainer?: boolean;
 }
 
 const COLORS = [Palette.chart.invested, Palette.chart.returns];
@@ -46,6 +47,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
   lumpsumResults,
   inflationRate,
   isActive,
+  hideContainer = false,
 }) => {
   const chartData = useMemo(() => [
     { name: 'Invested Amount', value: investedAmount > 0 ? investedAmount : 1 },
@@ -54,7 +56,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
 
   const hasData = investedAmount > 0;
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const formattedTotalValue = formatIndianCurrency(totalValue);
   const totalValueClass = getDynamicValueClass(formattedTotalValue);
 
@@ -67,8 +69,12 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const containerClasses = hideContainer
+    ? "h-full flex flex-col justify-center"
+    : "bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center";
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
+    <div className={containerClasses}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <div>
@@ -86,17 +92,17 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
             </p>
             {inflationRate > 0 && (
               <div className="mt-3 pt-3 border-t border-slate-200/75">
-                   <p className="text-sm text-slate-500">Value in today's terms (adj. for inflation)</p>
-                   <p className="text-2xl font-bold text-slate-700">
-                       {formatIndianCurrency(inflationAdjustedTotalValue)}
-                   </p>
+                <p className="text-sm text-slate-500">Value in today's terms (adj. for inflation)</p>
+                <p className="text-2xl font-bold text-slate-700">
+                  {formatIndianCurrency(inflationAdjustedTotalValue)}
+                </p>
               </div>
             )}
           </div>
         </div>
 
         <div className="h-56 sm:h-64 w-full">
-           {isActive && hasData ? (
+          {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -123,50 +129,50 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
                 />
               </PieChart>
             </ResponsiveContainer>
-           ) : (
+          ) : (
             <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-                <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
+              <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
             </div>
-           )}
+          )}
         </div>
       </div>
 
       {sipResults.investedAmount > 0 && lumpsumResults.investedAmount > 0 && (
         <div className="mt-6 pt-4 border-t border-slate-200/75 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-slate-100/50 p-4 rounded-lg border border-slate-200/75">
-                <h3 className="font-semibold text-slate-700 mb-2 text-center sm:text-left">SIP Details</h3>
-                <div className="space-y-1 text-sm">
-                    <p className="flex justify-between sm:grid sm:grid-cols-2">
-                        <span className="text-slate-600">Invested:</span>
-                        <span className="font-medium text-slate-800 text-right sm:text-left">{formatIndianCurrency(sipResults.investedAmount)}</span>
-                    </p>
-                    <p className="flex justify-between sm:grid sm:grid-cols-2">
-                        <span className="text-slate-600">Returns:</span>
-                        <span className="font-medium text-emerald-700 text-right sm:text-left">{formatIndianCurrency(sipResults.estimatedReturns)}</span>
-                    </p>
-                    <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
-                        <span className="text-slate-600 font-semibold">Total:</span>
-                        <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(sipResults.totalValue)}</span>
-                    </p>
-                </div>
+          <div className="bg-slate-100/50 p-4 rounded-lg border border-slate-200/75">
+            <h3 className="font-semibold text-slate-700 mb-2 text-center sm:text-left">SIP Details</h3>
+            <div className="space-y-1 text-sm">
+              <p className="flex justify-between sm:grid sm:grid-cols-2">
+                <span className="text-slate-600">Invested:</span>
+                <span className="font-medium text-slate-800 text-right sm:text-left">{formatIndianCurrency(sipResults.investedAmount)}</span>
+              </p>
+              <p className="flex justify-between sm:grid sm:grid-cols-2">
+                <span className="text-slate-600">Returns:</span>
+                <span className="font-medium text-emerald-700 text-right sm:text-left">{formatIndianCurrency(sipResults.estimatedReturns)}</span>
+              </p>
+              <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
+                <span className="text-slate-600 font-semibold">Total:</span>
+                <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(sipResults.totalValue)}</span>
+              </p>
             </div>
-            <div className="bg-slate-100/50 p-4 rounded-lg border border-slate-200/75">
-                <h3 className="font-semibold text-slate-700 mb-2 text-center sm:text-left">Lumpsum Details</h3>
-                <div className="space-y-1 text-sm">
-                    <p className="flex justify-between sm:grid sm:grid-cols-2">
-                        <span className="text-slate-600">Invested:</span>
-                        <span className="font-medium text-slate-800 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.investedAmount)}</span>
-                    </p>
-                    <p className="flex justify-between sm:grid sm:grid-cols-2">
-                        <span className="text-slate-600">Returns:</span>
-                        <span className="font-medium text-emerald-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.estimatedReturns)}</span>
-                    </p>
-                     <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
-                        <span className="text-slate-600 font-semibold">Total:</span>
-                        <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.totalValue)}</span>
-                    </p>
-                </div>
+          </div>
+          <div className="bg-slate-100/50 p-4 rounded-lg border border-slate-200/75">
+            <h3 className="font-semibold text-slate-700 mb-2 text-center sm:text-left">Lumpsum Details</h3>
+            <div className="space-y-1 text-sm">
+              <p className="flex justify-between sm:grid sm:grid-cols-2">
+                <span className="text-slate-600">Invested:</span>
+                <span className="font-medium text-slate-800 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.investedAmount)}</span>
+              </p>
+              <p className="flex justify-between sm:grid sm:grid-cols-2">
+                <span className="text-slate-600">Returns:</span>
+                <span className="font-medium text-emerald-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.estimatedReturns)}</span>
+              </p>
+              <p className="flex justify-between sm:grid sm:grid-cols-2 mt-1 pt-1 border-t border-slate-200">
+                <span className="text-slate-600 font-semibold">Total:</span>
+                <span className="font-semibold text-emerald-700 text-right sm:text-left">{formatIndianCurrency(lumpsumResults.totalValue)}</span>
+              </p>
             </div>
+          </div>
         </div>
       )}
     </div>

@@ -3,32 +3,32 @@ import { SipInputs, SipTotalResults, SipGrowthData } from './types';
 import { CashFlow, firstOfMonthUTC, addMonthsUTC, xirr, deflateToBase } from '../../utils/financial';
 
 const EMPTY_RESULTS: SipTotalResults = {
-    investedAmount: 0,
-    estimatedReturns: 0,
-    totalValue: 0,
-    inflationAdjustedTotalValue: 0,
-    inflationAdjustedInvestedAmount: 0,
-    inflationAdjustedEstimatedReturns: 0,
-    nominalXIRR: Number.NaN,
-    realXIRR: Number.NaN,
-    nominalCAGR: Number.NaN,
-    realCAGR: Number.NaN,
-    sip: { investedAmount: 0, estimatedReturns: 0, totalValue: 0 },
-    lumpsum: { investedAmount: 0, estimatedReturns: 0, totalValue: 0 },
+  investedAmount: 0,
+  estimatedReturns: 0,
+  totalValue: 0,
+  inflationAdjustedTotalValue: 0,
+  inflationAdjustedInvestedAmount: 0,
+  inflationAdjustedEstimatedReturns: 0,
+  nominalXIRR: Number.NaN,
+  realXIRR: Number.NaN,
+  nominalCAGR: Number.NaN,
+  realCAGR: Number.NaN,
+  sip: { investedAmount: 0, estimatedReturns: 0, totalValue: 0 },
+  lumpsum: { investedAmount: 0, estimatedReturns: 0, totalValue: 0 },
 };
 
 export const useSipCalculator = (inputs: SipInputs) => {
-    const {
-        monthlyInvestment,
-        returnRate,
-        lumpsumReturnRate,
-        timePeriod,
-        lumpsumAmount,
-        inflationRate,
-        stepUpPercentage,
-    } = inputs;
+  const {
+    monthlyInvestment,
+    returnRate,
+    lumpsumReturnRate,
+    timePeriod,
+    lumpsumAmount,
+    inflationRate,
+    stepUpPercentage,
+  } = inputs;
 
-    const totalResults = useMemo<SipTotalResults>(() => {
+  const totalResults = useMemo<SipTotalResults>(() => {
     // Trivial/invalid guards
     if ((monthlyInvestment <= 0 && lumpsumAmount <= 0) || timePeriod <= 0) {
       return EMPTY_RESULTS;
@@ -60,7 +60,7 @@ export const useSipCalculator = (inputs: SipInputs) => {
       sipTotalValue = (sipTotalValue + currentMonthlySip) * (1 + monthlySipRate);
       sipInvestedAmount += currentMonthlySip;
       if (month % 12 === 0 && month < months) {
-        currentMonthlySip *=  (1 + stepUpRate);
+        currentMonthlySip *= (1 + stepUpRate);
       }
     }
     const sipEstimatedReturns = sipTotalValue - sipInvestedAmount;
@@ -176,7 +176,7 @@ export const useSipCalculator = (inputs: SipInputs) => {
     };
   }, [monthlyInvestment, returnRate, lumpsumReturnRate, timePeriod, lumpsumAmount, inflationRate, stepUpPercentage]);
 
-    const growthData = useMemo<SipGrowthData[]>(() => {
+  const growthData = useMemo<SipGrowthData[]>(() => {
     if ((monthlyInvestment <= 0 && lumpsumAmount <= 0) || timePeriod <= 0) return [];
 
     const data: SipGrowthData[] = [];
@@ -191,6 +191,9 @@ export const useSipCalculator = (inputs: SipInputs) => {
     let runningSipValue = 0;
     let runningSipInvested = 0;
     let currentMonthlySip = monthlyInvestment;
+
+    let prevTotalInvested = lumpsumAmount;
+    let prevTotalValue = lumpsumAmount;
 
     for (let year = 1; year <= timePeriod; year++) {
       for (let m = 1; m <= 12; m++) {
@@ -217,7 +220,12 @@ export const useSipCalculator = (inputs: SipInputs) => {
         sipValue: Math.round(runningSipValue),
         lumpsumValue: Math.round(lumpsumValue),
         inflationAdjustedTotalValue: Math.round(inflationAdjustedTotalValue),
+        annualSipAmount: Math.round(currentMonthlySip * 12),
+        annualReturns: Math.round((totalValue - prevTotalValue) - (totalInvested - prevTotalInvested)),
       });
+
+      prevTotalInvested = totalInvested;
+      prevTotalValue = totalValue;
 
       currentMonthlySip *= (1 + stepUpRate); // step-up for next year
     }

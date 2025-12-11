@@ -37,4 +37,6 @@ export interface SipGrowthData {
     sipValue: number;
     lumpsumValue: number;
     inflationAdjustedTotalValue: number;
+    annualSipAmount: number;
+    annualReturns: number;
 }
