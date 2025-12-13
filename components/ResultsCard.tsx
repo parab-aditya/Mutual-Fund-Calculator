@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
+import { formatIndianCurrency, getDynamicValueClass, numberToIndianWords } from '../utils/formatters';
 import { Palette } from '../design-system';
 
 interface ResultBreakdown {
@@ -89,6 +89,9 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
             <p className="text-sm text-slate-500">Projected Total Value</p>
             <p className={`${totalValueClass} font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700`}>
               {formattedTotalValue}
+            </p>
+            <p className="text-xs text-slate-500 text-left pt-2 min-h-4">
+              {totalValue > 0 ? numberToIndianWords(totalValue) : <>&nbsp;</>}
             </p>
             {inflationRate > 0 && (
               <div className="mt-3 pt-3 border-t border-slate-200/75">

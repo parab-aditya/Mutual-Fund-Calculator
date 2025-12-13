@@ -206,7 +206,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                       unit="%"
                     />
                     <SliderInput
-                      label="Lumpsum Investment"
+                      label="Lumpsum / Current Corpus"
                       value={lumpsumAmount}
                       onChange={setLumpsumAmount}
                       min={0}
