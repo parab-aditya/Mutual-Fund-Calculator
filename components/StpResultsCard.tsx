@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
 import { Palette } from '../design-system';
+import CollapsibleSection from './CollapsibleSection';
 
 interface StpResultsCardProps {
   investedAmount: number;
@@ -11,7 +12,7 @@ interface StpResultsCardProps {
   isActive: boolean;
 }
 
-const COLORS = [Palette.chart.invested, Palette.chart.returns]; 
+const COLORS = [Palette.chart.invested, Palette.chart.returns];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -34,13 +35,14 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
 }) => {
   const hasData = investedAmount > 0;
   const estimatedGains = totalValue - investedAmount;
-  
+
   const chartData = [
     { name: 'Initial Investment', value: investedAmount > 0 ? investedAmount : 1 },
     { name: 'Estimated Gains', value: estimatedGains > 0 ? estimatedGains : 0 },
   ];
 
   const [isMobile, setIsMobile] = useState(false);
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
 
   const formattedTotalValue = formatIndianCurrency(totalValue);
   const totalValueClass = getDynamicValueClass(formattedTotalValue);
@@ -53,16 +55,21 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
+    <CollapsibleSection
+      title="STP Results"
+      isOpen={isSectionOpen}
+      toggle={() => setIsSectionOpen(!isSectionOpen)}
+      isMobile={isMobile}
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <div>
             <p className="text-sm text-slate-500">Initial Investment</p>
             <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(investedAmount)}</p>
           </div>
-           <div>
+          <div>
             <p className="text-sm text-slate-500">Amount at Source Fund</p>
             <p className="text-2xl font-bold text-slate-700">{formatIndianCurrency(sourceFundValue)}</p>
           </div>
@@ -79,7 +86,7 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
         </div>
 
         <div className="h-56 sm:h-64 w-full">
-           {isActive && hasData ? (
+          {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -106,14 +113,14 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
                 />
               </PieChart>
             </ResponsiveContainer>
-           ) : (
+          ) : (
             <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-                <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
+              <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
             </div>
-           )}
+          )}
         </div>
       </div>
-    </div>
+    </CollapsibleSection>
   );
 };
 

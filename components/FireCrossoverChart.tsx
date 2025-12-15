@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { SipGrowthData } from '../calculators/sip/types';
 import { formatIndianCurrency, formatAxisTick } from '../utils/formatters';
+import CollapsibleSection from './CollapsibleSection';
 
 interface FireCrossoverChartProps {
     data: SipGrowthData[];
@@ -34,6 +35,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
     const [stopInvesting, setStopInvesting] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
+    const [isSectionOpen, setIsSectionOpen] = useState(true);
 
     useEffect(() => {
         let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -150,152 +152,164 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
     const legendHeight = useMemo(() => isMobile ? 36 : 24, [isMobile]);
     const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
-    const containerClasses = hideContainer
-        ? "transition-all duration-300"
-        : "bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300";
-
-    return (
-        <div className={containerClasses}>
-            {!hideTitle && <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center lg:text-left">The FIRE crossover</h2>}
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Left side text content */}
-                <div className="lg:col-span-2 flex flex-col justify-start space-y-6 px-4 sm:px-0 order-2 lg:order-1">
-                    {crossoverYear ? (
-                        <>
-                            <div className="space-y-2">
-                                <p className="text-slate-600 text-lg leading-relaxed">
-                                    By year <span className="font-bold text-slate-900 bg-emerald-100 px-2 py-0.5 rounded">{crossoverYear}</span>, your annual returns surpass your SIP amount. Here you can see the power of compounding.
-                                </p>
-                            </div>
-
-                            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                                <p className="text-slate-700 italic font-medium">
-                                    This is when your money starts working for you, instead of you working for it.
-                                </p>
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-200/60">
-                                <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
-                                    <span className="text-sm font-medium text-slate-700">What if I stop investing after year {crossoverYear}?</span>
-                                    <button
-                                        onClick={() => setStopInvesting(!stopInvesting)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${stopInvesting ? 'bg-indigo-600' : 'bg-slate-200'}`}
-                                    >
-                                        <span
-                                            className={`${stopInvesting ? 'translate-x-6' : 'translate-x-1'
-                                                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                        />
-                                    </button>
-                                </div>
-                                {stopInvesting && (
-                                    <p className="text-xs text-slate-500 mt-2 px-1">
-                                        Showing projection up to 40 years assuming SIP stops after year {crossoverYear}.
-                                    </p>
-                                )}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-center space-y-3 p-6 bg-slate-50 rounded-xl border border-slate-100">
-                            <p className="text-slate-500 font-medium">Keep investing to reach the crossover point!</p>
-                            <p className="text-sm text-slate-400">Increase your monthly investment or time period to see when your returns exceed your contributions.</p>
+    const chartContent = (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Left side text content */}
+            <div className="lg:col-span-2 flex flex-col justify-start space-y-6 px-4 sm:px-0 order-2 lg:order-1">
+                {crossoverYear ? (
+                    <>
+                        <div className="space-y-2">
+                            <p className="text-slate-600 text-lg leading-relaxed">
+                                By year <span className="font-bold text-slate-900 bg-emerald-100 px-2 py-0.5 rounded">{crossoverYear}</span>, your annual returns surpass your SIP amount. Here you can see the power of compounding.
+                            </p>
                         </div>
-                    )}
-                </div>
 
-                {/* Right side chart */}
-                <div className="lg:col-span-3 order-1 lg:order-2" style={{ width: '100%', height: chartHeight + legendHeight }}>
-                    {showChart ? (
-                        <ResponsiveContainer>
-                            <ComposedChart
-                                data={projectionData}
-                                margin={{
-                                    top: 5,
-                                    right: isMobile ? 10 : 20,
-                                    left: isMobile ? 0 : 10,
-                                    bottom: isMobile ? 20 : 15,
+                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                            <p className="text-slate-700 italic font-medium">
+                                This is when your money starts working for you, instead of you working for it.
+                            </p>
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <span className="text-sm font-medium text-slate-700">What if I stop investing after year {crossoverYear}?</span>
+                                <button
+                                    onClick={() => setStopInvesting(!stopInvesting)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${stopInvesting ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                                >
+                                    <span
+                                        className={`${stopInvesting ? 'translate-x-6' : 'translate-x-1'
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                    />
+                                </button>
+                            </div>
+                            {stopInvesting && (
+                                <p className="text-xs text-slate-500 mt-2 px-1">
+                                    Showing projection up to 40 years assuming SIP stops after year {crossoverYear}.
+                                </p>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center space-y-3 p-6 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-slate-500 font-medium">Keep investing to reach the crossover point!</p>
+                        <p className="text-sm text-slate-400">Increase your monthly investment or time period to see when your returns exceed your contributions.</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Right side chart */}
+            <div className="lg:col-span-3 order-1 lg:order-2" style={{ width: '100%', height: chartHeight + legendHeight }}>
+                {showChart ? (
+                    <ResponsiveContainer>
+                        <ComposedChart
+                            data={projectionData}
+                            margin={{
+                                top: 5,
+                                right: isMobile ? 10 : 20,
+                                left: isMobile ? 0 : 10,
+                                bottom: isMobile ? 20 : 15,
+                            }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
+                            <XAxis
+                                dataKey="year"
+                                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
+                                axisLine={{ stroke: '#cbd5e1' }}
+                                tickLine={{ stroke: '#cbd5e1' }}
+                                interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
+                                label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 12 }}
+                            />
+                            <YAxis
+                                scale="sqrt"
+                                tickFormatter={formatAxisTick}
+                                tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
+                                axisLine={{ stroke: '#cbd5e1' }}
+                                tickLine={{ stroke: '#cbd5e1' }}
+                                width={isMobile ? 55 : 70}
+                                domain={['dataMin', 'auto']}
+                            />
+                            <Tooltip
+                                content={<CustomTooltip />}
+                                cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
+                                animationDuration={200}
+                                wrapperStyle={{ outline: 'none', pointerEvents: 'auto' }}
+                            />
+                            <Legend
+                                verticalAlign="top"
+                                height={legendHeight}
+                                iconType="circle"
+                                onClick={handleLegendClick}
+                                wrapperStyle={{
+                                    paddingBottom: isMobile ? '12px' : '8px',
+                                    cursor: 'pointer',
+                                    userSelect: 'none',
                                 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" strokeOpacity={0.8} />
-                                <XAxis
-                                    dataKey="year"
-                                    tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
-                                    axisLine={{ stroke: '#cbd5e1' }}
-                                    tickLine={{ stroke: '#cbd5e1' }}
-                                    interval={isMobile ? 'preserveStartEnd' : 'preserveStart'}
-                                    label={isMobile ? undefined : { value: 'Years', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 12 }}
-                                />
-                                <YAxis
-                                    scale="sqrt"
-                                    tickFormatter={formatAxisTick}
-                                    tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
-                                    axisLine={{ stroke: '#cbd5e1' }}
-                                    tickLine={{ stroke: '#cbd5e1' }}
-                                    width={isMobile ? 55 : 70}
-                                    domain={['dataMin', 'auto']}
-                                />
-                                <Tooltip
-                                    content={<CustomTooltip />}
-                                    cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
-                                    animationDuration={200}
-                                    wrapperStyle={{ outline: 'none', pointerEvents: 'auto' }}
-                                />
-                                <Legend
-                                    verticalAlign="top"
-                                    height={legendHeight}
-                                    iconType="circle"
-                                    onClick={handleLegendClick}
-                                    wrapperStyle={{
-                                        paddingBottom: isMobile ? '12px' : '8px',
-                                        cursor: 'pointer',
-                                        userSelect: 'none',
-                                    }}
-                                    iconSize={isMobile ? 8 : 10}
-                                    formatter={(value: string) => (
-                                        <span style={{
-                                            fontSize: isMobile ? '11px' : '13px',
-                                            color: '#475569',
-                                            fontWeight: 500,
-                                        }}>
-                                            {value}
-                                        </span>
-                                    )}
-                                />
+                                iconSize={isMobile ? 8 : 10}
+                                formatter={(value: string) => (
+                                    <span style={{
+                                        fontSize: isMobile ? '11px' : '13px',
+                                        color: '#475569',
+                                        fontWeight: 500,
+                                    }}>
+                                        {value}
+                                    </span>
+                                )}
+                            />
 
-                                <Line
-                                    type="monotone"
-                                    dataKey="annualSipAmount"
-                                    name="Annual SIP Amount"
-                                    stroke="#3b82f6"
-                                    strokeWidth={isMobile ? 1.5 : 2}
-                                    dot={false}
-                                    hide={!visibility.annualSipAmount}
-                                    animationDuration={animationDuration}
-                                    isAnimationActive={!isMobile}
-                                />
+                            <Line
+                                type="monotone"
+                                dataKey="annualSipAmount"
+                                name="Annual SIP Amount"
+                                stroke="#3b82f6"
+                                strokeWidth={isMobile ? 1.5 : 2}
+                                dot={false}
+                                hide={!visibility.annualSipAmount}
+                                animationDuration={animationDuration}
+                                isAnimationActive={!isMobile}
+                            />
 
-                                <Line
-                                    type="monotone"
-                                    dataKey="annualReturns"
-                                    name="Annual Returns"
-                                    stroke="#10b981"
-                                    strokeWidth={isMobile ? 1.5 : 2}
-                                    dot={false}
-                                    hide={!visibility.annualReturns}
-                                    animationDuration={animationDuration}
-                                    isAnimationActive={!isMobile}
-                                />
+                            <Line
+                                type="monotone"
+                                dataKey="annualReturns"
+                                name="Annual Returns"
+                                stroke="#10b981"
+                                strokeWidth={isMobile ? 1.5 : 2}
+                                dot={false}
+                                hide={!visibility.annualReturns}
+                                animationDuration={animationDuration}
+                                isAnimationActive={!isMobile}
+                            />
 
-                            </ComposedChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
-                            <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
-                        </div>
-                    )}
-                </div>
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
+                        <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
+                    </div>
+                )}
             </div>
         </div>
+    );
+
+    if (hideContainer) {
+        return (
+            <div className="transition-all duration-300">
+                {!hideTitle && <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center lg:text-left">The FIRE crossover</h2>}
+                {chartContent}
+            </div>
+        );
+    }
+
+    return (
+        <CollapsibleSection
+            title="The FIRE crossover"
+            isOpen={isSectionOpen}
+            toggle={() => setIsSectionOpen(!isSectionOpen)}
+            isMobile={isMobile}
+        >
+            {chartContent}
+        </CollapsibleSection>
     );
 };
 

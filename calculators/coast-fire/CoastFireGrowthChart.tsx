@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { formatIndianCurrency, formatAxisTick } from '../../utils/formatters';
 import { CoastFireGrowthData } from './types';
+import CollapsibleSection from '../../components/CollapsibleSection';
 
 interface CoastFireGrowthChartProps {
     data: CoastFireGrowthData[];
@@ -33,6 +34,7 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
     });
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
+    const [isSectionOpen, setIsSectionOpen] = useState(true);
 
     useEffect(() => {
         let resizeTimeout: ReturnType<typeof setTimeout>;
@@ -109,8 +111,12 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
     const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
     return (
-        <div className="transition-all duration-300">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 text-center">Corpus Growth Over Time</h2>
+        <CollapsibleSection
+            title="Corpus Growth Over Time"
+            isOpen={isSectionOpen}
+            toggle={() => setIsSectionOpen(!isSectionOpen)}
+            isMobile={isMobile}
+        >
             <div style={{ width: '100%', height: chartHeight + legendHeight }}>
                 {showChart ? (
                     <ResponsiveContainer>
@@ -217,7 +223,7 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
                     </div>
                 )}
             </div>
-        </div>
+        </CollapsibleSection>
     );
 };
 

@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { formatIndianCurrency, getDynamicValueClass, numberToIndianWords } from '../utils/formatters';
 import { Palette } from '../design-system';
+import CollapsibleSection from './CollapsibleSection';
 
 interface ResultBreakdown {
   investedAmount: number;
@@ -56,6 +56,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
 
   const hasData = investedAmount > 0;
   const [isMobile, setIsMobile] = useState(false);
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
 
   const formattedTotalValue = formatIndianCurrency(totalValue);
   const totalValueClass = getDynamicValueClass(formattedTotalValue);
@@ -69,12 +70,8 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const containerClasses = hideContainer
-    ? "h-full flex flex-col justify-center"
-    : "bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center";
-
-  return (
-    <div className={containerClasses}>
+  const cardContent = (
+    <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-3">
           <div>
@@ -178,7 +175,26 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
+  );
+
+  if (hideContainer) {
+    return (
+      <div className="h-full flex flex-col justify-center">
+        {cardContent}
+      </div>
+    );
+  }
+
+  return (
+    <CollapsibleSection
+      title="Investment Results"
+      isOpen={isSectionOpen}
+      toggle={() => setIsSectionOpen(!isSectionOpen)}
+      isMobile={isMobile}
+    >
+      {cardContent}
+    </CollapsibleSection>
   );
 };
 

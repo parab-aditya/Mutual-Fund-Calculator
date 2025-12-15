@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { formatIndianCurrency, formatAxisTick } from '../utils/formatters';
 import { StpGrowthData } from '../calculators/stp/types';
+import CollapsibleSection from './CollapsibleSection';
 
 interface StpGrowthChartProps {
   data: StpGrowthData[];
@@ -27,6 +28,7 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
   });
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [isSectionOpen, setIsSectionOpen] = useState(true);
 
   useEffect(() => {
     // FIX: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> for browser compatibility.
@@ -107,8 +109,12 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
   const animationDuration = useMemo(() => isMobile ? 0 : 800, [isMobile]);
 
   return (
-    <div className="bg-white/60 backdrop-blur-xl py-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
-      <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Growth Over Time</h2>
+    <CollapsibleSection
+      title="Growth Over Time"
+      isOpen={isSectionOpen}
+      toggle={() => setIsSectionOpen(!isSectionOpen)}
+      isMobile={isMobile}
+    >
       <div style={{ width: '100%', height: chartHeight + legendHeight }}>
         {showChart ? (
           <ResponsiveContainer>
@@ -214,7 +220,7 @@ const StpGrowthChart: React.FC<StpGrowthChartProps> = ({ data, isActive }) => {
           </div>
         )}
       </div>
-    </div>
+    </CollapsibleSection>
   );
 };
 
