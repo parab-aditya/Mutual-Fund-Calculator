@@ -31,11 +31,13 @@ export function useResponsive() {
 
   useEffect(() => {
     // FIX: Use ReturnType<typeof setTimeout> for browser compatibility instead of NodeJS.Timeout.
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const handleResize = () => {
       // Debounce resize events
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       timeoutId = setTimeout(() => {
         const width = window.innerWidth;
         setDimensions({
@@ -48,7 +50,9 @@ export function useResponsive() {
 
     window.addEventListener('resize', handleResize, { passive: true });
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -65,13 +69,13 @@ export function useThrottle<T extends (...args: any[]) => any>(
 ): T {
   const lastRan = useRef(Date.now());
   // FIX: Use ReturnType<typeof setTimeout> which is browser-safe, instead of NodeJS.Timeout.
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // FIX: Refactored for clarity and to ensure type safety.
   const throttledCallback = useCallback(
     (...args: Parameters<T>) => {
       const now = Date.now();
-      
+
       if (now - lastRan.current >= delay) {
         callback(...args);
         lastRan.current = now;
