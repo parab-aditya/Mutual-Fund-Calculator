@@ -21,6 +21,7 @@ const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = memo(({ data }) =
             <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Opening Balance</th>
             <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Returns</th>
             <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Withdrawal</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Inflation Adj.</th>
             <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Closing Balance</th>
           </tr>
         </thead>
@@ -36,11 +37,12 @@ const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = memo(({ data }) =
                   <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right">{formatIndianCurrency(row.beginningBalance)}</td>
                   <td className="px-3 py-3 whitespace-nowrap text-sm text-emerald-600 text-right">{formatIndianCurrency(row.monthlyReturns)}</td>
                   <td className="px-3 py-3 whitespace-nowrap text-sm text-red-600 text-right">{formatIndianCurrency(row.monthlyWithdrawal)}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-500 text-right">{formatIndianCurrency(row.inflationAdjustedWithdrawal)}</td>
                   <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">{formatIndianCurrency(row.endingBalance)}</td>
                 </tr>
                 {isYearEnd && (
                   <tr className="bg-emerald-50/80">
-                    <td colSpan={5} className="px-3 py-2 text-center text-sm font-semibold text-emerald-800 tracking-wide">
+                    <td colSpan={6} className="px-3 py-2 text-center text-sm font-semibold text-emerald-800 tracking-wide">
                       Year {year} End
                     </td>
                   </tr>
@@ -69,8 +71,31 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
   const [isStepUpEnabled, setIsStepUpEnabled] = useState<boolean>(false);
   const [expectedReturnRate, setExpectedReturnRate] = useState<number>(8);
   const [timePeriod, setTimePeriod] = useState<number>(20);
+  const [inflationRate, setInflationRate] = useState<number>(0);
   const [syncWithSip, setSyncWithSip] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isOptionalAdjustmentsOpen, setIsOptionalAdjustmentsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  useEffect(() => {
+    let resizeTimeout: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const mobile = window.innerWidth < 1024; // lg breakpoint
+        setIsMobile(mobile);
+        if (!mobile) {
+          setIsOptionalAdjustmentsOpen(true);
+        }
+      }, 150);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   useEffect(() => {
     if (syncWithSip && sipProjectedValue && sipProjectedValue > 0) {
@@ -84,6 +109,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
     withdrawalStepUpPercentage: isStepUpEnabled ? withdrawalStepUpPercentage : 0,
     expectedReturnRate,
     timePeriod,
+    inflationRate,
   });
 
   const maxWithdrawal = React.useMemo(() => {
@@ -196,6 +222,40 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
               step={1}
               unit="Yr"
             />
+
+            <div>
+              <button
+                onClick={() => { if (isMobile) setIsOptionalAdjustmentsOpen(!isOptionalAdjustmentsOpen); }}
+                className="w-full flex justify-between items-center text-left lg:pointer-events-none"
+                aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
+                aria-controls="swp-optional-adjustments"
+              >
+                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest pt-2">
+                  Optional Adjustments
+                </h3>
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              <div
+                id="swp-optional-adjustments"
+                className={`grid transition-all duration-500 ease-in-out ${isMobile ? (isOptionalAdjustmentsOpen ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0') : 'grid-rows-[1fr] opacity-100 mt-4'}`}
+              >
+                <div className="overflow-hidden">
+                  <SliderInput
+                    label="Inflation Rate (p.a.)"
+                    value={inflationRate}
+                    onChange={setInflationRate}
+                    min={0}
+                    max={20}
+                    step={0.1}
+                    unit="%"
+                  />
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
@@ -204,6 +264,8 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
             totalWithdrawal={results.totalWithdrawal}
             finalValue={results.finalValue}
             numberOfWithdrawals={results.numberOfWithdrawals}
+            inflationAdjustedFinalValue={results.inflationAdjustedFinalValue}
+            inflationRate={inflationRate}
             isActive={isActive}
           />
           <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">

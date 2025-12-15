@@ -8,6 +8,8 @@ interface SwpResultsCardProps {
   totalWithdrawal: number;
   finalValue: number;
   numberOfWithdrawals: number;
+  inflationAdjustedFinalValue?: number;
+  inflationRate?: number;
   isActive: boolean;
 }
 
@@ -30,6 +32,8 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
   totalWithdrawal,
   finalValue,
   numberOfWithdrawals,
+  inflationAdjustedFinalValue,
+  inflationRate = 0,
   isActive,
 }) => {
   const chartData = [
@@ -39,7 +43,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
 
   const hasData = totalInvestment > 0;
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const formattedFinalValue = formatIndianCurrency(finalValue);
   const finalValueClass = getDynamicValueClass(formattedFinalValue);
 
@@ -64,20 +68,28 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
             <p className="text-sm text-slate-500">Total Withdrawal</p>
             <p className="text-2xl font-bold text-emerald-600">{formatIndianCurrency(totalWithdrawal)}</p>
           </div>
-           <div>
-              <p className="text-sm text-slate-500">Number of Withdrawals</p>
-              <p className="text-2xl font-bold text-slate-800">{numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
+          <div>
+            <p className="text-sm text-slate-500">Number of Withdrawals</p>
+            <p className="text-2xl font-bold text-slate-800">{numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
           </div>
           <div className="pt-2">
             <p className="text-sm text-slate-500">Final Balance</p>
             <p className={`${finalValueClass} font-extrabold ${finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
               {formattedFinalValue}
             </p>
+            {inflationRate > 0 && inflationAdjustedFinalValue !== undefined && (
+              <div className="mt-3 pt-3 border-t border-slate-200/75">
+                <p className="text-sm text-slate-500">Inflation Adjusted</p>
+                <p className="text-2xl font-bold text-slate-700">
+                  {formatIndianCurrency(inflationAdjustedFinalValue)}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="h-56 sm:h-64 w-full">
-           {isActive && hasData ? (
+          {isActive && hasData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -104,11 +116,11 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
                 />
               </PieChart>
             </ResponsiveContainer>
-           ) : (
+          ) : (
             <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-                <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
+              <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
             </div>
-           )}
+          )}
         </div>
       </div>
     </div>

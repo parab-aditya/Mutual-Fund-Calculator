@@ -95,7 +95,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
             </p>
             {inflationRate > 0 && (
               <div className="mt-3 pt-3 border-t border-slate-200/75">
-                <p className="text-sm text-slate-500">Value in today's terms (adj. for inflation)</p>
+                <p className="text-sm text-slate-500">Inflation Adjusted</p>
                 <p className="text-2xl font-bold text-slate-700">
                   {formatIndianCurrency(inflationAdjustedTotalValue)}
                 </p>
