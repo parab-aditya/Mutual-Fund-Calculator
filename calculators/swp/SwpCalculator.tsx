@@ -4,6 +4,7 @@ import SliderInput from '../../components/SliderInput';
 import { useSwpCalculator, calculateMaxWithdrawal } from './useSwpCalculator';
 import SwpResultsCard from '../../components/SwpResultsCard';
 import SwpGrowthChart from '../../components/SwpGrowthChart';
+import CollapsibleSection from '../../components/CollapsibleSection';
 import { SwpMonthlyData } from './types';
 import { formatIndianCurrency } from '../../utils/formatters';
 
@@ -75,6 +76,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
   const [syncWithSip, setSyncWithSip] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isOptionalAdjustmentsOpen, setIsOptionalAdjustmentsOpen] = useState(false);
+  const [isReturnsOpen, setIsReturnsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
 
   useEffect(() => {
@@ -86,6 +88,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
         setIsMobile(mobile);
         if (!mobile) {
           setIsOptionalAdjustmentsOpen(true);
+          setIsReturnsOpen(true);
         }
       }, 150);
     };
@@ -259,15 +262,23 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
           </div>
         </div>
         <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
-          <SwpResultsCard
-            totalInvestment={results.totalInvestment}
-            totalWithdrawal={results.totalWithdrawal}
-            finalValue={results.finalValue}
-            numberOfWithdrawals={results.numberOfWithdrawals}
-            inflationAdjustedFinalValue={results.inflationAdjustedFinalValue}
-            inflationRate={inflationRate}
-            isActive={isActive}
-          />
+          <CollapsibleSection
+            title="Returns Breakdown"
+            isOpen={isReturnsOpen}
+            toggle={() => isMobile && setIsReturnsOpen(!isReturnsOpen)}
+            isMobile={isMobile}
+          >
+            <SwpResultsCard
+              totalInvestment={results.totalInvestment}
+              totalWithdrawal={results.totalWithdrawal}
+              finalValue={results.finalValue}
+              numberOfWithdrawals={results.numberOfWithdrawals}
+              inflationAdjustedFinalValue={results.inflationAdjustedFinalValue}
+              inflationRate={inflationRate}
+              isActive={isActive}
+              hideContainer={true}
+            />
+          </CollapsibleSection>
           <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
             <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
             <SwpGrowthChart data={growthData} isActive={isActive} />

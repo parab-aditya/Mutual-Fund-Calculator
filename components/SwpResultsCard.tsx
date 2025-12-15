@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatIndianCurrency, getDynamicValueClass } from '../utils/formatters';
+import { formatIndianCurrency, getDynamicValueClass, numberToIndianWords } from '../utils/formatters';
 import { Palette } from '../design-system';
 
 interface SwpResultsCardProps {
@@ -11,6 +11,7 @@ interface SwpResultsCardProps {
   inflationAdjustedFinalValue?: number;
   inflationRate?: number;
   isActive: boolean;
+  hideContainer?: boolean;
 }
 
 const COLORS = [Palette.chart.invested, Palette.chart.returns];
@@ -35,6 +36,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
   inflationAdjustedFinalValue,
   inflationRate = 0,
   isActive,
+  hideContainer = false,
 }) => {
   const chartData = [
     { name: 'Initial Investment', value: totalInvestment > 0 ? totalInvestment : 1 }, // Min value for chart visibility
@@ -56,8 +58,12 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const containerClasses = hideContainer
+    ? "h-full flex flex-col justify-center"
+    : "bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center";
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-md h-full border border-slate-200/60 flex flex-col justify-center">
+    <div className={containerClasses}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <div>
@@ -76,6 +82,9 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
             <p className="text-sm text-slate-500">Final Balance</p>
             <p className={`${finalValueClass} font-extrabold ${finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
               {formattedFinalValue}
+            </p>
+            <p className="text-xs text-slate-500 text-left pt-2 min-h-4">
+              {finalValue > 0 ? numberToIndianWords(finalValue) : <>&nbsp;</>}
             </p>
             {inflationRate > 0 && inflationAdjustedFinalValue !== undefined && (
               <div className="mt-3 pt-3 border-t border-slate-200/75">
