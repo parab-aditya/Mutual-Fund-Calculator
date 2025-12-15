@@ -79,10 +79,13 @@ const Navigation: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <div className="flex flex-col sm:flex-row items-center sm:justify-center relative relative-container gap-4">
-                {/* Calculator Tabs */}
-                <div className="relative bg-slate-200/60 p-1 rounded-xl flex items-center space-x-1 shrink-0">
+        <div className="container mx-auto px-2 sm:px-6 lg:px-8 mb-8">
+            <div className="flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] relative gap-2 sm:gap-4">
+                {/* Desktop Left Spacer to balance the grid and center the tabs */}
+                <div className="hidden sm:block" aria-hidden="true" />
+
+                {/* Calculator Tabs - Left on mobile, Centered on Desktop */}
+                <div className="relative bg-slate-200/60 p-1 rounded-xl flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
                     <div
                         className="absolute h-[calc(100%-8px)] top-1 bg-white rounded-lg shadow-md transition-all duration-300 ease-in-out"
                         style={{
@@ -94,7 +97,7 @@ const Navigation: React.FC = () => {
                     <button
                         ref={sipTabRef}
                         onClick={() => handleTabClick('sip')}
-                        className={`relative z-10 px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 ${activeTab === 'sip' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'sip' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         {isMobile ? 'SIP' : 'SIP Calculator'}
@@ -102,7 +105,7 @@ const Navigation: React.FC = () => {
                     <button
                         ref={swpTabRef}
                         onClick={() => handleTabClick('swp')}
-                        className={`relative z-10 px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 ${activeTab === 'swp' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'swp' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         {isMobile ? 'SWP' : 'SWP Calculator'}
@@ -110,26 +113,24 @@ const Navigation: React.FC = () => {
                     <button
                         ref={stpTabRef}
                         onClick={() => handleTabClick('stp')}
-                        className={`relative z-10 px-4 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 ${activeTab === 'stp' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'stp' ? 'text-slate-800' : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
                         {isMobile ? 'STP' : 'STP Calculator'}
                     </button>
                 </div>
 
-                {/* Coast Fire Button - Right aligned on desktop, stacked on mobile but with gap */}
-                <div className="flex-grow hidden sm:block"></div> {/* Spacer for desktop */}
-
+                {/* Coast Fire Button - Right aligned on both */}
                 <button
                     onClick={() => navigate('/sip-calculator/coast-fire')}
-                    className={`shrink-0 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 shadow-sm self-end sm:self-auto
+                    className={`shrink-0 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-sm sm:justify-self-end
             ${location.pathname.includes('coast-fire')
                             ? 'bg-rose-100 text-rose-700 ring-2 ring-rose-200 shadow-inner'
                             : 'bg-white text-slate-600 hover:text-slate-900 hover:shadow-md border border-slate-200/60'
                         }`}
                 >
-                    <span>Coast Fire</span>
-                    <span className="text-lg">🔥</span>
+                    <span className="whitespace-nowrap">Coast Fire</span>
+                    <span className="text-base sm:text-lg">🔥</span>
                 </button>
             </div>
         </div>
