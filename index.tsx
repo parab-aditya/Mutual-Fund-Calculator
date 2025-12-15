@@ -17,3 +17,12 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Clean up any existing service workers from previous PWA configurations
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
