@@ -75,7 +75,7 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
 
   return (
     <div className={containerClasses}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-3">
           <div>
             <p className="text-sm text-slate-500">Total Invested Amount</p>

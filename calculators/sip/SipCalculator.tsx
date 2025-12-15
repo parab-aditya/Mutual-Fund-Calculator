@@ -20,7 +20,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, isOpen, 
     <div className="bg-white/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
       <button
         onClick={toggle}
-        className={`w-full flex justify-between items-center p-4 sm:p-5 text-left ${!isMobile ? 'cursor-default pointer-events-none' : ''}`}
+        className={`w-full flex justify-between items-center px-4 pt-4 pb-1 sm:px-5 sm:pt-5 sm:pb-1 text-left ${!isMobile ? 'cursor-default pointer-events-none' : ''}`}
         aria-expanded={isOpen}
       >
         <h2 className="text-xl font-bold text-slate-800">{title}</h2>

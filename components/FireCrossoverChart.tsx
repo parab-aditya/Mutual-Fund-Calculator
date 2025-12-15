@@ -141,7 +141,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 {/* Left side text content */}
-                <div className="lg:col-span-2 flex flex-col justify-center space-y-6 px-4 sm:px-0 order-2 lg:order-1">
+                <div className="lg:col-span-2 flex flex-col justify-start space-y-6 px-4 sm:px-0 order-2 lg:order-1">
                     {crossoverYear ? (
                         <>
                             <div className="space-y-2">
