@@ -82,10 +82,29 @@ const GrowthChart: React.FC<GrowthChartProps> = ({
   const showChart = isActive && data && data.length > 0;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    const [hidden, setHidden] = useState(false);
+
+    useEffect(() => {
+      if (hidden) setHidden(false);
+    }, [label]);
+
+    if (active && payload && payload.length && !hidden) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2">
+        <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setHidden(true);
+            }}
+            className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-200/50 transition-colors focus:outline-none"
+            title="Close tooltip"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
           <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
           <p className="flex justify-between">
             <span className="text-slate-500 mr-4">Invested:</span>
@@ -173,6 +192,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({
                 content={<CustomTooltip />}
                 cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '5 5' }}
                 animationDuration={200}
+                wrapperStyle={{ outline: 'none', pointerEvents: 'auto' }}
               />
               <Legend
                 verticalAlign="top"
