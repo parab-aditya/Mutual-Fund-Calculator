@@ -24,8 +24,11 @@ export function useDebounce<T>(value: T, delay: number): T {
  */
 export function useResponsive() {
   const [dimensions, setDimensions] = useState({
-    isMobile: window.innerWidth < 640,
-    isTablet: window.innerWidth >= 640 && window.innerWidth < 1024,
+    isMobile: window.innerWidth < 640, // sm
+    isTablet: window.innerWidth >= 640 && window.innerWidth < 1024, // md -> lg
+    isSm: window.innerWidth < 640,
+    isMd: window.innerWidth < 768,
+    isLg: window.innerWidth < 1024,
     width: window.innerWidth,
   });
 
@@ -43,6 +46,9 @@ export function useResponsive() {
         setDimensions({
           isMobile: width < 640,
           isTablet: width >= 640 && width < 1024,
+          isSm: width < 640,
+          isMd: width < 768,
+          isLg: width < 1024,
           width,
         });
       }, 150); // 150ms debounce
