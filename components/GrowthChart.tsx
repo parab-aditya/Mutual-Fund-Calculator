@@ -93,47 +93,47 @@ const GrowthChart: React.FC<GrowthChartProps> = ({
     if (active && payload && payload.length && !hidden) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
+        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg p-4 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setHidden(true);
             }}
-            className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-200/50 transition-colors focus:outline-none"
+            className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-600/50 transition-colors focus:outline-none"
             title="Close tooltip"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 dark:text-slate-500">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
+          <p className="font-bold mb-2 text-slate-800 dark:text-slate-100">{`Year ${label}`}</p>
           <p className="flex justify-between">
-            <span className="text-slate-500 mr-4">Invested:</span>
-            <span className="font-semibold text-blue-600">{formatIndianCurrency(data.investedAmount)}</span>
+            <span className="text-slate-500 dark:text-slate-400 mr-4">Invested:</span>
+            <span className="font-semibold text-blue-600 dark:text-blue-400">{formatIndianCurrency(data.investedAmount)}</span>
           </p>
           {showBreakdown && (
             <>
-              <div className="border-t border-slate-200/75 my-1"></div>
+              <div className="border-t border-slate-200/75 dark:border-slate-700/75 my-1"></div>
               <p className="flex justify-between">
-                <span className="text-slate-500 mr-4">SIP Value:</span>
-                <span className="font-semibold text-emerald-600">{formatIndianCurrency(data.sipValue)}</span>
+                <span className="text-slate-500 dark:text-slate-400 mr-4">SIP Value:</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatIndianCurrency(data.sipValue)}</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-slate-500 mr-4">Lumpsum Value:</span>
-                <span className="font-semibold text-violet-500">{formatIndianCurrency(data.lumpsumValue)}</span>
+                <span className="text-slate-500 dark:text-slate-400 mr-4">Lumpsum Value:</span>
+                <span className="font-semibold text-violet-500 dark:text-violet-400">{formatIndianCurrency(data.lumpsumValue)}</span>
               </p>
             </>
           )}
-          <div className="border-t border-slate-200/75 my-1"></div>
+          <div className="border-t border-slate-200/75 dark:border-slate-700/75 my-1"></div>
           <p className="flex justify-between mt-1 font-bold">
-            <span className="text-slate-600 mr-4">Total Value:</span>
-            <span className="text-slate-800">{formatIndianCurrency(data.totalValue)}</span>
+            <span className="text-slate-600 dark:text-slate-300 mr-4">Total Value:</span>
+            <span className="text-slate-800 dark:text-slate-100">{formatIndianCurrency(data.totalValue)}</span>
           </p>
           {inflationRate > 0 && (
             <p className="flex justify-between">
-              <span className="text-slate-500 mr-4">Value (Today's terms):</span>
-              <span className="font-semibold text-slate-600">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
+              <span className="text-slate-500 dark:text-slate-400 mr-4">Value (Today's terms):</span>
+              <span className="font-semibold text-slate-600 dark:text-slate-300">{formatIndianCurrency(data.inflationAdjustedTotalValue)}</span>
             </p>
           )}
         </div>
@@ -278,8 +278,8 @@ const GrowthChart: React.FC<GrowthChartProps> = ({
           </ComposedChart>
         </ResponsiveContainer>
       ) : (
-        <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
-          <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
+        <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-800/50 rounded-lg transition-all duration-300">
+          <p className="text-slate-500 dark:text-slate-400 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
         </div>
       )}
     </div>
@@ -288,7 +288,7 @@ const GrowthChart: React.FC<GrowthChartProps> = ({
   if (hideContainer) {
     return (
       <div className="transition-all duration-300">
-        {!hideTitle && <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>}
+        {!hideTitle && <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 px-4 sm:px-0 text-center">Investment Growth Over Time</h2>}
         {chartContent}
       </div>
     );

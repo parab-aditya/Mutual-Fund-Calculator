@@ -40,35 +40,35 @@ const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = memo(({ data }) =
 
   return (
     <div className="w-full overflow-x-auto">
-      <table className="min-w-full divide-y divide-slate-200">
-        <thead className="bg-slate-100/70 sticky top-0 z-10">
+      <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+        <thead className="bg-slate-100/70 dark:bg-slate-800/70 sticky top-0 z-10">
           <tr>
-            <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Month</th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Opening Balance</th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Returns</th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Withdrawal</th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Inflation Adj.</th>
-            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Closing Balance</th>
+            <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Month</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Opening Balance</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Returns</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Withdrawal</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Inflation Adj.</th>
+            <th scope="col" className="px-3 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Closing Balance</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-slate-200/70">
+        <tbody className="bg-white dark:bg-slate-900/40 divide-y divide-slate-200/70 dark:divide-slate-700/70">
           {data.map((row) => {
             const isYearEnd = row.month > 0 && row.month % 12 === 0;
             const year = Math.ceil(row.month / 12);
 
             return (
               <React.Fragment key={row.month}>
-                <tr className="hover:bg-slate-50/50 transition-colors duration-150">
-                  <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-slate-700">{row.month}</td>
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right">{formatIndianCurrency(row.beginningBalance)}</td>
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-emerald-600 text-right">{formatIndianCurrency(row.monthlyReturns)}</td>
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-red-600 text-right">{formatIndianCurrency(row.monthlyWithdrawal)}</td>
-                  <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-500 text-right">{formatIndianCurrency(row.inflationAdjustedWithdrawal)}</td>
-                  <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">{formatIndianCurrency(row.endingBalance)}</td>
+                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors duration-150">
+                  <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-slate-700 dark:text-slate-300">{row.month}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 text-right">{formatIndianCurrency(row.beginningBalance)}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-emerald-600 dark:text-emerald-400 text-right">{formatIndianCurrency(row.monthlyReturns)}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-red-600 dark:text-red-400 text-right">{formatIndianCurrency(row.monthlyWithdrawal)}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-500 dark:text-slate-500 text-right">{formatIndianCurrency(row.inflationAdjustedWithdrawal)}</td>
+                  <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-slate-800 dark:text-slate-200 text-right">{formatIndianCurrency(row.endingBalance)}</td>
                 </tr>
                 {isYearEnd && (
-                  <tr className="bg-emerald-50/80">
-                    <td colSpan={6} className="px-3 py-2 text-center text-sm font-semibold text-emerald-800 tracking-wide">
+                  <tr className="bg-emerald-50/80 dark:bg-emerald-900/20">
+                    <td colSpan={6} className="px-3 py-2 text-center text-sm font-semibold text-emerald-800 dark:text-emerald-300 tracking-wide">
                       Year {year} End
                     </td>
                   </tr>
@@ -156,9 +156,9 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
   return (
     <div className="px-2 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+        <div className="lg:col-span-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-slate-800 -mb-1">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 -mb-1">
               SWP Configuration
             </h3>
             <div>
@@ -172,7 +172,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                 unit="₹"
               />
               <div className="flex items-center justify-end pt-4">
-                <label htmlFor="syncSwpInvestment" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                <label htmlFor="syncSwpInvestment" className="mr-2 text-xs font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
                   Use SIP Projected Value
                 </label>
                 <input
@@ -198,7 +198,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                 markerLabel="Max Withdrawal"
               />
               <div className="flex items-center justify-end pt-4">
-                <label htmlFor="enableSwpStepUp" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                <label htmlFor="enableSwpStepUp" className="mr-2 text-xs font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
                   Annual Step-up
                 </label>
                 <input
@@ -211,7 +211,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
               </div>
             </div>
             {isStepUpEnabled && (
-              <div className="pl-4 border-l-2 border-slate-200/75">
+              <div className="pl-4 border-l-2 border-slate-200/75 dark:border-slate-700/75">
                 <SliderInput
                   label="Withdrawal Step-up (p.a.)"
                   value={withdrawalStepUpPercentage}
@@ -249,7 +249,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                 aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
                 aria-controls="swp-optional-adjustments"
               >
-                <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest pt-2">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-widest pt-2">
                   Optional Adjustments
                 </h3>
                 <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
@@ -296,8 +296,8 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
               hideContainer={true}
             />
           </CollapsibleSection>
-          <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
+          <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 px-4 sm:px-0 text-center">Withdrawal & Balance Over Time</h2>
             <SwpGrowthChart data={growthData} isActive={isActive} />
           </div>
         </div>
@@ -305,14 +305,14 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
 
       {monthlyData && monthlyData.length > 0 && (
         <div className="mt-6 lg:mt-8">
-          <div className="bg-white/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60">
+          <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
             <button
               onClick={() => setIsDetailsOpen(!isDetailsOpen)}
               className="w-full flex justify-between items-center p-4 sm:p-5 text-left"
               aria-expanded={isDetailsOpen}
               aria-controls="detailed-swp-results"
             >
-              <h2 className="text-xl font-bold text-slate-800">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 Detailed Results
               </h2>
               <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 text-slate-500 transition-transform duration-300 ${isDetailsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
@@ -325,7 +325,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
             >
               <div className="overflow-hidden">
                 <div className="p-4 sm:p-6 pt-0">
-                  <div className="max-h-[85vh] lg:max-h-[70vh] overflow-y-auto rounded-lg border border-slate-200/75">
+                  <div className="max-h-[85vh] lg:max-h-[70vh] overflow-y-auto rounded-lg border border-slate-200/75 dark:border-slate-700/75">
                     <DetailedSwpTable data={monthlyData} />
                   </div>
                 </div>

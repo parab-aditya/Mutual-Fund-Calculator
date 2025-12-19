@@ -5,6 +5,7 @@ import SwpCalculator from './calculators/swp/SwpCalculator';
 import StpCalculator from './calculators/stp/StpCalculator';
 import CoastFireCalculator from './calculators/coast-fire/CoastFireCalculator';
 import Navigation from './components/Navigation';
+import DarkModeToggle from './components/DarkModeToggle';
 
 // Home page with separate calculators based on URL param
 const HomePage: React.FC = () => {
@@ -42,11 +43,14 @@ const App: React.FC = () => {
   // We don't need detailed resize logic here anymore for the old glider
 
   return (
-    <div className="min-h-screen text-slate-800 antialiased">
+    <div className="min-h-screen text-slate-800 dark:text-slate-200 antialiased transition-colors duration-300 bg-slate-50 dark:bg-slate-950">
+      {/* Dark Mode Toggle */}
+      <DarkModeToggle />
+
       <header>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 text-center">
           <Link to="/sip-calculator">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-700 hover:to-slate-500 transition-all duration-300">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 hover:from-slate-700 hover:to-slate-500 dark:hover:from-slate-200 dark:hover:to-slate-400 transition-all duration-300">
               Mutual Fund Calculator
             </h1>
           </Link>
@@ -63,14 +67,14 @@ const App: React.FC = () => {
         <Route path="*" element={<Navigate to="/sip-calculator" replace />} />
       </Routes>
 
-      <footer className="text-center py-4 text-sm text-slate-500 space-y-2 mt-auto">
+      <footer className="text-center py-4 text-sm text-slate-500 dark:text-slate-400 space-y-2 mt-auto">
         <p>
           Made by{' '}
           <a
             href="https://www.linkedin.com/in/its-aditya-parab/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-emerald-600 hover:underline"
+            className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
           >
             Aditya Parab
           </a>

@@ -72,7 +72,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
         if (active && payload && payload.length && !hidden) {
             const d = payload[0].payload;
             return (
-                <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
+                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg p-4 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -86,7 +86,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
-                    <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
+                    <p className="font-bold mb-2 text-slate-800 dark:text-slate-100">{`Year ${label}`}</p>
                     <p className="flex justify-between">
                         <span className="text-slate-500 mr-4">Portfolio Size:</span>
                         <span className="font-semibold text-violet-600">{formatIndianCurrency(d.totalValue)}</span>
@@ -159,23 +159,23 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
                 {crossoverYear ? (
                     <>
                         <div className="space-y-2">
-                            <p className="text-slate-600 text-lg leading-relaxed">
-                                By year <span className="font-bold text-slate-900 bg-emerald-100 px-2 py-0.5 rounded">{crossoverYear}</span>, your annual returns surpass your SIP amount. Here you can see the power of compounding.
+                            <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
+                                By year <span className="font-bold text-slate-900 dark:text-slate-100 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded">{crossoverYear}</span>, your annual returns surpass your SIP amount. Here you can see the power of compounding.
                             </p>
                         </div>
 
-                        <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                            <p className="text-slate-700 italic font-medium">
+                        <div className="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                            <p className="text-slate-700 dark:text-slate-300 italic font-medium">
                                 This is when your money starts working for you, instead of you working for it.
                             </p>
                         </div>
 
-                        <div className="pt-4 border-t border-slate-200/60">
-                            <div className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
-                                <span className="text-sm font-medium text-slate-700">What if I stop investing after year {crossoverYear}?</span>
+                        <div className="pt-4 border-t border-slate-200/60 dark:border-slate-700/60">
+                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">What if I stop investing after year {crossoverYear}?</span>
                                 <button
                                     onClick={() => setStopInvesting(!stopInvesting)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${stopInvesting ? 'bg-indigo-600' : 'bg-slate-200'}`}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${stopInvesting ? 'bg-indigo-600' : 'bg-slate-600'}`}
                                 >
                                     <span
                                         className={`${stopInvesting ? 'translate-x-6' : 'translate-x-1'
@@ -184,16 +184,16 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
                                 </button>
                             </div>
                             {stopInvesting && (
-                                <p className="text-xs text-slate-500 mt-2 px-1">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 px-1">
                                     Showing projection up to 40 years assuming SIP stops after year {crossoverYear}.
                                 </p>
                             )}
                         </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-3 p-6 bg-slate-50 rounded-xl border border-slate-100">
-                        <p className="text-slate-500 font-medium">Keep investing to reach the crossover point!</p>
-                        <p className="text-sm text-slate-400">Increase your monthly investment or time period to see when your returns exceed your contributions.</p>
+                    <div className="flex flex-col items-center justify-center h-full text-center space-y-3 p-6 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">Keep investing to reach the crossover point!</p>
+                        <p className="text-sm text-slate-400 dark:text-slate-500">Increase your monthly investment or time period to see when your returns exceed your contributions.</p>
                     </div>
                 )}
             </div>
@@ -284,8 +284,8 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
                         </ComposedChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
-                        <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
+                    <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-800/50 rounded-lg transition-all duration-300">
+                        <p className="text-slate-500 dark:text-slate-400 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
                     </div>
                 )}
             </div>
@@ -295,7 +295,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
     if (hideContainer) {
         return (
             <div className="transition-all duration-300">
-                {!hideTitle && <h2 className="text-xl font-bold text-slate-800 mb-6 px-4 sm:px-0 text-center lg:text-left">The FIRE crossover</h2>}
+                {!hideTitle && <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 px-4 sm:px-0 text-center lg:text-left">The FIRE crossover</h2>}
                 {chartContent}
             </div>
         );

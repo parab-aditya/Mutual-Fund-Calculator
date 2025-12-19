@@ -104,10 +104,10 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
   return (
     <div className="px-2 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-        <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+        <div className="lg:col-span-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
           <div className="space-y-6">
-            <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-3 sm:p-4 space-y-6">
-              <h3 className="text-lg font-semibold text-slate-800 -mb-2">
+            <div className="bg-slate-100/30 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-700/60 rounded-xl p-3 sm:p-4 space-y-6">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 -mb-2">
                 Core Calculation
               </h3>
               <SliderInput
@@ -146,7 +146,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                 aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
                 aria-controls="optional-adjustments-content"
               >
-                <h3 className="text-lg font-semibold text-slate-700">
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200">
                   Optional Adjustments
                 </h3>
                 <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
@@ -179,7 +179,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                       unit="₹"
                     />
                     {lumpsumAmount > 0 && (
-                      <div className="space-y-1 pl-4 border-l-2 border-slate-200/75">
+                      <div className="space-y-1 pl-4 border-l-2 border-slate-200/75 dark:border-slate-700/75">
                         <SliderInput
                           label="Lumpsum Return Rate (p.a.)"
                           value={lumpsumReturnRate}
@@ -190,7 +190,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
                           unit="%"
                         />
                         <div className="flex items-center justify-end pt-1">
-                          <label htmlFor="syncRate" className="mr-2 text-xs font-medium text-slate-600 cursor-pointer">
+                          <label htmlFor="syncRate" className="mr-2 text-xs font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
                             Same as SIP
                           </label>
                           <input

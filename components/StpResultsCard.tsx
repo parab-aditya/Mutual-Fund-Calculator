@@ -17,9 +17,9 @@ const COLORS = [Palette.chart.invested, Palette.chart.returns];
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/70 backdrop-blur-lg p-3 border border-slate-200/60 rounded-lg shadow-lg">
-        <p className="font-semibold">{`${payload[0].name}`}</p>
-        <p className="text-sm text-slate-600">{formatIndianCurrency(payload[0].value)}</p>
+      <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg p-3 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg">
+        <p className="font-semibold text-slate-800 dark:text-slate-100">{`${payload[0].name}`}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{formatIndianCurrency(payload[0].value)}</p>
       </div>
     );
   }
@@ -66,20 +66,20 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <div>
-            <p className="text-sm text-slate-500">Initial Investment</p>
-            <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(investedAmount)}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Initial Investment</p>
+            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatIndianCurrency(investedAmount)}</p>
           </div>
           <div>
-            <p className="text-sm text-slate-500">Amount at Source Fund</p>
-            <p className="text-2xl font-bold text-slate-700">{formatIndianCurrency(sourceFundValue)}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Amount at Source Fund</p>
+            <p className="text-2xl font-bold text-slate-700 dark:text-slate-200">{formatIndianCurrency(sourceFundValue)}</p>
           </div>
           <div>
-            <p className="text-sm text-slate-500">Amount at Destination Fund</p>
-            <p className="text-2xl font-bold text-emerald-600">{formatIndianCurrency(destinationFundValue)}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Amount at Destination Fund</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatIndianCurrency(destinationFundValue)}</p>
           </div>
           <div className="pt-2">
-            <p className="text-sm text-slate-500">Total Investment Value</p>
-            <p className={`${totalValueClass} font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700`}>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Investment Value</p>
+            <p className={`${totalValueClass} font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300`}>
               {formattedTotalValue}
             </p>
           </div>
@@ -114,8 +114,8 @@ const StpResultsCard: React.FC<StpResultsCardProps> = ({
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-              <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
+            <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-800/50 rounded-lg">
+              <p className="text-slate-500 dark:text-slate-400 text-center">Enter inputs to see the projection.</p>
             </div>
           )}
         </div>

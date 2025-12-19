@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { PostHogProvider } from 'posthog-js/react';
+import { ThemeProvider } from './utils/ThemeContext';
 import App from './App';
 
 const rootElement = document.getElementById('root');
@@ -21,9 +22,11 @@ root.render(
         debug: import.meta.env.MODE === 'development',
       }}
     >
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
     </PostHogProvider>
   </React.StrictMode>
 );

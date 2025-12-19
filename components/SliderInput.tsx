@@ -184,9 +184,9 @@ const SliderInput: React.FC<SliderInputProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <label className="text-sm font-medium text-slate-600">{label}</label>
-        <div className="flex items-center rounded-lg bg-emerald-50 border border-emerald-200/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
-          <span className="pl-3 text-emerald-800 font-medium">{unit}</span>
+        <label className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</label>
+        <div className="flex items-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200/60 dark:border-emerald-700/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
+          <span className="pl-3 text-emerald-800 dark:text-emerald-400 font-medium">{unit}</span>
           <input
             type="text"
             inputMode={step < 1 ? 'decimal' : 'numeric'}
@@ -194,7 +194,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
             value={isCurrency ? formatIndianNumber(value) : (step < 1 ? value.toFixed(1) : String(value))}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            className="w-28 sm:w-32 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none"
+            className="w-28 sm:w-32 p-2 text-right font-semibold text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none"
           />
         </div>
       </div>
@@ -205,7 +205,7 @@ const SliderInput: React.FC<SliderInputProps> = ({
           min={min}
           max={max}
           step="any"
-          value={localValue} // Use localValue for rendering for immediate feedback
+          value={localValue}
           onChange={handleSliderChange}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
@@ -220,16 +220,16 @@ const SliderInput: React.FC<SliderInputProps> = ({
             className="absolute top-1/2 -translate-y-1/2 w-4 h-6 -ml-2 z-0 group cursor-help flex items-center justify-center"
             style={{ left: `calc(${markerPercentage}% - ${(markerPercentage / 100) * 16 - 8}px)` }}
           >
-            <div className="w-1 h-3 bg-slate-400 rounded-full" />
+            <div className="w-1 h-3 bg-slate-400 dark:bg-slate-500 rounded-full" />
             {markerLabel && (
-              <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-600 whitespace-nowrap bg-white px-2 py-1 rounded shadow-md border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap bg-white dark:bg-slate-800 px-2 py-1 rounded shadow-md border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 {markerLabel}
               </div>
             )}
           </div>
         )}
         {unit === '₹' ? (
-          <p className="text-xs text-slate-500 text-right pt-2 min-h-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-right pt-2 min-h-4">
             {value > 0 ? numberToIndianWords(value) : <>&nbsp;</>}
           </p>
         ) : null}

@@ -80,14 +80,14 @@ const Navigation: React.FC = () => {
 
     return (
         <div className="container mx-auto px-2 sm:px-6 lg:px-8 mb-8">
-            <div className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/40 rounded-2xl p-2 flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] relative gap-2 sm:gap-4">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/40 dark:shadow-slate-900/40 rounded-2xl p-2 flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] relative gap-2 sm:gap-4">
                 {/* Desktop Left Spacer to balance the grid and center the tabs */}
                 <div className="hidden sm:block" aria-hidden="true" />
 
                 {/* Calculator Tabs - Left on mobile, Centered on Desktop */}
-                <div className="relative bg-slate-100/80 p-1 rounded-xl flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar border border-slate-200/30">
+                <div className="relative bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar border border-slate-200/30 dark:border-slate-700/30">
                     <div
-                        className="absolute h-[calc(100%-8px)] top-1 bg-white rounded-lg shadow-sm border border-slate-100 transition-all duration-300 ease-in-out"
+                        className="absolute h-[calc(100%-8px)] top-1 bg-white dark:bg-slate-700 rounded-lg shadow-sm border border-slate-100 dark:border-slate-600 transition-all duration-300 ease-in-out"
                         style={{
                             left: gliderStyle.left,
                             width: gliderStyle.width,
@@ -97,7 +97,7 @@ const Navigation: React.FC = () => {
                     <button
                         ref={sipTabRef}
                         onClick={() => handleTabClick('sip')}
-                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'sip' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'sip' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                     >
                         {isMobile ? 'SIP' : 'SIP Calculator'}
@@ -105,7 +105,7 @@ const Navigation: React.FC = () => {
                     <button
                         ref={swpTabRef}
                         onClick={() => handleTabClick('swp')}
-                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'swp' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'swp' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                     >
                         {isMobile ? 'SWP' : 'SWP Calculator'}
@@ -113,7 +113,7 @@ const Navigation: React.FC = () => {
                     <button
                         ref={stpTabRef}
                         onClick={() => handleTabClick('stp')}
-                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'stp' ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-700'
+                        className={`relative z-10 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors duration-300 whitespace-nowrap ${activeTab === 'stp' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                     >
                         {isMobile ? 'STP' : 'STP Calculator'}
@@ -121,17 +121,17 @@ const Navigation: React.FC = () => {
                 </div>
 
                 {/* Coast Fire Button - Right aligned on both */}
-                <button
+                {/* <button
                     onClick={() => navigate('/sip-calculator/coast-fire')}
                     className={`shrink-0 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-sm sm:justify-self-end
             ${location.pathname.includes('coast-fire')
-                            ? 'bg-gradient-to-r from-rose-100 to-orange-100 text-rose-800 ring-2 ring-rose-200/50 shadow-inner'
-                            : 'bg-gradient-to-r from-rose-50 to-orange-50 text-rose-700 hover:text-rose-900 border border-rose-100 hover:border-rose-200 hover:shadow-md'
+                            ? 'bg-gradient-to-r from-rose-100 to-orange-100 dark:from-rose-900/50 dark:to-orange-900/50 text-rose-800 dark:text-rose-200 ring-2 ring-rose-200/50 dark:ring-rose-700/50 shadow-inner'
+                            : 'bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-900/30 dark:to-orange-900/30 text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-rose-100 border border-rose-100 dark:border-rose-800 hover:border-rose-200 dark:hover:border-rose-700 hover:shadow-md'
                         }`}
                 >
                     <span className="whitespace-nowrap">Coast Fire</span>
                     <span className="text-base sm:text-lg">🔥</span>
-                </button>
+                </button> */}
             </div>
         </div>
     );

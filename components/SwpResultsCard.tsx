@@ -21,9 +21,9 @@ const COLORS = [Palette.chart.invested, Palette.chart.returns];
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/70 backdrop-blur-lg p-3 border border-slate-200/60 rounded-lg shadow-lg">
-        <p className="font-semibold">{`${payload[0].name}`}</p>
-        <p className="text-sm text-slate-600">{formatIndianCurrency(payload[0].value)}</p>
+      <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg p-3 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg">
+        <p className="font-semibold text-slate-800 dark:text-slate-100">{`${payload[0].name}`}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{formatIndianCurrency(payload[0].value)}</p>
       </div>
     );
   }
@@ -69,29 +69,29 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
       <div className="space-y-3">
         <div>
-          <p className="text-sm text-slate-500">Total Investment</p>
-          <p className="text-2xl font-bold text-slate-800">{formatIndianCurrency(totalInvestment)}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Total Investment</p>
+          <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{formatIndianCurrency(totalInvestment)}</p>
         </div>
         <div>
-          <p className="text-sm text-slate-500">Total Withdrawal</p>
-          <p className="text-2xl font-bold text-emerald-600">{formatIndianCurrency(totalWithdrawal)}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Total Withdrawal</p>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{formatIndianCurrency(totalWithdrawal)}</p>
         </div>
         <div>
-          <p className="text-sm text-slate-500">Number of Withdrawals</p>
-          <p className="text-2xl font-bold text-slate-800">{numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Number of Withdrawals</p>
+          <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{numberOfWithdrawals} <span className="text-lg font-medium">months</span></p>
         </div>
         <div className="pt-2">
-          <p className="text-sm text-slate-500">Final Balance</p>
-          <p className={`${finalValueClass} font-extrabold ${finalValue < 0 ? 'text-red-600' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700'}`}>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Final Balance</p>
+          <p className={`${finalValueClass} font-extrabold ${finalValue < 0 ? 'text-red-600 dark:text-red-400' : 'text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300'}`}>
             {formattedFinalValue}
           </p>
-          <p className="text-xs text-slate-500 text-left pt-2 min-h-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-left pt-2 min-h-4">
             {finalValue > 0 ? numberToIndianWords(finalValue) : <>&nbsp;</>}
           </p>
           {inflationRate > 0 && inflationAdjustedFinalValue !== undefined && (
-            <div className="mt-3 pt-3 border-t border-slate-200/75">
+            <div className="mt-3 pt-3 border-t border-slate-200/75 dark:border-slate-700/75">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <p className="text-sm text-slate-500">Inflation Adjusted for {futureYear}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Inflation Adjusted for {futureYear}</p>
                 <div className="group relative">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +103,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-slate-400 cursor-help hover:text-slate-600 transition-colors"
+                    className="text-slate-400 dark:text-slate-500 cursor-help hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 16v-4" />
@@ -115,7 +115,7 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
                   </div>
                 </div>
               </div>
-              <p className="text-2xl font-bold text-slate-700">
+              <p className="text-2xl font-bold text-slate-700 dark:text-slate-200">
                 {formatIndianCurrency(inflationAdjustedFinalValue)}
               </p>
             </div>
@@ -152,8 +152,8 @@ const SwpResultsCard: React.FC<SwpResultsCardProps> = ({
             </PieChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg">
-            <p className="text-slate-500 text-center">Enter inputs to see the projection.</p>
+          <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-800/50 rounded-lg">
+            <p className="text-slate-500 dark:text-slate-400 text-center">Enter inputs to see the projection.</p>
           </div>
         )}
       </div>

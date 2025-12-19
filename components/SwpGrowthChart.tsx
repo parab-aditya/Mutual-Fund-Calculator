@@ -66,29 +66,29 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
     if (active && payload && payload.length && !hidden) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
+        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg p-4 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setHidden(true);
             }}
-            className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-200/50 transition-colors focus:outline-none"
+            className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors focus:outline-none"
             title="Close tooltip"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 dark:text-slate-500">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <p className="font-bold mb-2 text-slate-800">{`End of Year ${label}`}</p>
+          <p className="font-bold mb-2 text-slate-800 dark:text-slate-100">{`End of Year ${label}`}</p>
           <p className="flex justify-between">
-            <span className="text-slate-500 mr-4">Total Withdrawn:</span>
-            <span className="font-semibold text-emerald-600">{formatIndianCurrency(data.totalWithdrawal)}</span>
+            <span className="text-slate-500 dark:text-slate-400 mr-4">Total Withdrawn:</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatIndianCurrency(data.totalWithdrawal)}</span>
           </p>
-          <div className="border-t border-slate-200/75 my-1"></div>
+          <div className="border-t border-slate-200/75 dark:border-slate-700/75 my-1"></div>
           <p className="flex justify-between mt-1 font-bold">
-            <span className="text-slate-600 mr-4">Remaining Balance:</span>
-            <span className={`font-semibold ${data.balance < 0 ? 'text-red-600' : 'text-slate-800'}`}>{formatIndianCurrency(data.balance)}</span>
+            <span className="text-slate-600 dark:text-slate-300 mr-4">Remaining Balance:</span>
+            <span className={`font-semibold ${data.balance < 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-100'}`}>{formatIndianCurrency(data.balance)}</span>
           </p>
         </div>
       );
@@ -204,8 +204,8 @@ const SwpGrowthChart: React.FC<SwpGrowthChartProps> = ({ data, isActive }) => {
           </ComposedChart>
         </ResponsiveContainer>
       ) : (
-        <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
-          <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter SWP details.</p>
+        <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-800/50 rounded-lg transition-all duration-300">
+          <p className="text-slate-500 dark:text-slate-400 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter SWP details.</p>
         </div>
       )}
     </div>

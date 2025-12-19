@@ -10,16 +10,16 @@ interface CollapsibleSectionProps {
 
 const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, isOpen, toggle, isMobile, children }) => {
     return (
-        <div className="bg-white/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60 transition-all duration-300">
+        <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60 transition-all duration-300">
             <button
                 onClick={toggle}
                 className={`w-full flex justify-between items-center px-4 pt-4 pb-1 sm:px-5 sm:pt-5 sm:pb-1 text-left ${!isMobile ? 'cursor-default pointer-events-none' : ''}`}
                 aria-expanded={isOpen}
             >
-                <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h2>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 text-slate-500 transition-transform duration-300 md:hidden ${isOpen ? 'rotate-180' : ''}`}
+                    className={`h-6 w-6 text-slate-500 dark:text-slate-400 transition-transform duration-300 md:hidden ${isOpen ? 'rotate-180' : ''}`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                 >
