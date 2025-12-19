@@ -97,20 +97,20 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
         <div className="px-2 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
                 {/* Left Side - Input Form */}
-                <div className="lg:col-span-2 bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+                <div className="lg:col-span-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
                     <div className="space-y-6">
                         {/* Main Input Section */}
-                        <div className="bg-slate-100/30 border border-slate-200/60 rounded-xl p-3 sm:p-4">
-                            <h3 className="text-lg font-semibold text-slate-800 mb-4">
+                        <div className="bg-slate-100/30 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-700/60 rounded-xl p-3 sm:p-4">
+                            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">
                                 Investment Goal
                             </h3>
 
                             {/* Sentence-style inputs */}
-                            <div className="text-base sm:text-lg text-slate-700 leading-relaxed space-y-4">
+                            <div className="text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed space-y-4">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <span>I can invest</span>
-                                    <div className="inline-flex items-center rounded-lg bg-emerald-50 border border-emerald-200/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
-                                        <span className="pl-3 text-emerald-800 font-medium">₹</span>
+                                    <div className="inline-flex items-center rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-700/60 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/40 transition-all duration-200 shadow-sm">
+                                        <span className="pl-3 text-emerald-800 dark:text-emerald-300 font-medium">₹</span>
                                         <input
                                             type="text"
                                             inputMode="numeric"
@@ -118,7 +118,7 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
                                             value={inputValue}
                                             onChange={handleInputChange}
                                             onBlur={handleInputBlur}
-                                            className="w-24 sm:w-28 p-2 text-right font-semibold text-slate-800 bg-transparent focus:outline-none"
+                                            className="w-24 sm:w-28 p-2 text-right font-semibold text-slate-800 dark:text-slate-100 bg-transparent focus:outline-none"
                                             placeholder="25,000"
                                         />
                                     </div>
@@ -130,7 +130,7 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
                                     <select
                                         value={goalCorpus}
                                         onChange={handleGoalChange}
-                                        className="inline-flex items-center px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200/60 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/40 font-semibold text-slate-800 cursor-pointer transition-all duration-200 shadow-sm"
+                                        className="inline-flex items-center px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-700/60 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/40 font-semibold text-slate-800 dark:text-slate-100 cursor-pointer transition-all duration-200 shadow-sm"
                                     >
                                         {GOAL_CORPUS_OPTIONS.map((option) => (
                                             <option key={option.value} value={option.value}>
@@ -150,7 +150,7 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
                                 aria-expanded={!isMobile || isOptionalAdjustmentsOpen}
                                 aria-controls="optional-adjustments-content"
                             >
-                                <h3 className="text-lg font-semibold text-slate-700">
+                                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200">
                                     Optional Adjustments
                                 </h3>
                                 <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-slate-500 transition-transform duration-300 lg:hidden ${isOptionalAdjustmentsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
@@ -192,25 +192,25 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
                 {/* Right Side - Results */}
                 <div className="lg:col-span-3 flex flex-col gap-6 lg:gap-8">
                     {/* Years to Goal Display */}
-                    <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+                    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
                         <div className="text-center">
                             {results.goalReached && results.yearsToGoal > 0 ? (
                                 <>
-                                    <p className="text-lg sm:text-xl text-slate-700 mb-2">
+                                    <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 mb-2">
                                         It will take you
                                     </p>
                                     <p className="text-3xl sm:text-4xl font-bold text-emerald-600 mb-2">
                                         {formatYearsDisplay()}
                                     </p>
-                                    <p className="text-lg sm:text-xl text-slate-700">
-                                        to reach your goal of <span className="font-semibold text-slate-800">{formatIndianCurrency(goalCorpus)}</span>
+                                    <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300">
+                                        to reach your goal of <span className="font-semibold text-slate-800 dark:text-slate-100">{formatIndianCurrency(goalCorpus)}</span>
                                     </p>
-                                    <p className="text-sm text-slate-500 mt-4">
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
                                         Total Investment: <span className="font-medium">{formatIndianCurrency(results.totalInvested)}</span>
                                     </p>
                                 </>
                             ) : (
-                                <p className="text-lg text-slate-500">
+                                <p className="text-lg text-slate-500 dark:text-slate-400">
                                     Enter your investment details to see how long it will take to reach your goal.
                                 </p>
                             )}
@@ -218,7 +218,7 @@ const CoastFireCalculator: React.FC<CoastFireCalculatorProps> = ({ isActive }) =
                     </div>
 
                     {/* Growth Chart */}
-                    <div className="bg-white/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60">
+                    <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
                         <CoastFireGrowthChart
                             data={growthData}
                             goalCorpus={goalCorpus}

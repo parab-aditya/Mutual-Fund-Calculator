@@ -73,7 +73,7 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
         if (active && payload && payload.length && !hidden) {
             const dataPoint = payload[0].payload;
             return (
-                <div className="bg-white/70 backdrop-blur-lg p-4 border border-slate-200/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
+                <div className="bg-white/70 dark:bg-slate-800/90 backdrop-blur-lg p-4 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg text-sm space-y-2 relative pr-8">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
@@ -87,18 +87,18 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
-                    <p className="font-bold mb-2 text-slate-800">{`Year ${label}`}</p>
+                    <p className="font-bold mb-2 text-slate-800 dark:text-slate-100">{`Year ${label}`}</p>
                     <p className="flex justify-between">
-                        <span className="text-slate-500 mr-4">Invested:</span>
-                        <span className="font-semibold text-blue-600">{formatIndianCurrency(dataPoint.investedAmount)}</span>
+                        <span className="text-slate-500 dark:text-slate-400 mr-4">Invested:</span>
+                        <span className="font-semibold text-blue-600 dark:text-blue-400">{formatIndianCurrency(dataPoint.investedAmount)}</span>
                     </p>
                     <div className="border-t border-slate-200/75 my-1"></div>
                     <p className="flex justify-between mt-1 font-bold">
-                        <span className="text-slate-600 mr-4">Total Value:</span>
-                        <span className="text-slate-800">{formatIndianCurrency(dataPoint.totalValue)}</span>
+                        <span className="text-slate-600 dark:text-slate-400 mr-4">Total Value:</span>
+                        <span className="text-slate-800 dark:text-slate-100">{formatIndianCurrency(dataPoint.totalValue)}</span>
                     </p>
                     {dataPoint.totalValue >= goalCorpus && (
-                        <p className="text-emerald-600 font-medium text-center mt-2">🎯 Goal Reached!</p>
+                        <p className="text-emerald-600 dark:text-emerald-400 font-medium text-center mt-2">🎯 Goal Reached!</p>
                     )}
                 </div>
             );
@@ -218,8 +218,8 @@ const CoastFireGrowthChart: React.FC<CoastFireGrowthChartProps> = ({
                         </ComposedChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="flex items-center justify-center h-full w-full bg-slate-100/50 rounded-lg transition-all duration-300">
-                        <p className="text-slate-500 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
+                    <div className="flex items-center justify-center h-full w-full bg-slate-100/50 dark:bg-slate-900/50 rounded-lg transition-all duration-300">
+                        <p className="text-slate-500 dark:text-slate-400 text-center px-4 text-sm sm:text-base">Your growth chart will appear here once you enter investment details.</p>
                     </div>
                 )}
             </div>
