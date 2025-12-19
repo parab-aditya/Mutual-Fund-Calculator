@@ -9,17 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "posthog-js": "^1.306.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.10.1",
-    "recharts": "^3.2.1"
+    "@theme-toggles/react": "^4.1.0",
+    "posthog-js": "^1.309.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-router-dom": "^7.11.0",
+    "recharts": "^3.6.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "baseline-browser-mapping": "^2.9.7",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/node": "^25.0.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "baseline-browser-mapping": "^2.9.11",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
   }
 }
