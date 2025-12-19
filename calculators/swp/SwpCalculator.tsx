@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import SliderInput from '../../components/SliderInput';
 import { useSwpCalculator, calculateMaxWithdrawal } from './useSwpCalculator';
@@ -7,6 +6,32 @@ import SwpGrowthChart from '../../components/SwpGrowthChart';
 import CollapsibleSection from '../../components/CollapsibleSection';
 import { SwpMonthlyData } from './types';
 import { formatIndianCurrency } from '../../utils/formatters';
+import { useResponsive } from '../../utils/hooks';
+import {
+  DEFAULT_TOTAL_INVESTMENT,
+  DEFAULT_WITHDRAWAL_PER_MONTH,
+  DEFAULT_WITHDRAWAL_STEP_UP_PERCENTAGE,
+  DEFAULT_EXPECTED_RETURN_RATE,
+  DEFAULT_TIME_PERIOD,
+  DEFAULT_INFLATION_RATE,
+  MIN_TOTAL_INVESTMENT,
+  MAX_TOTAL_INVESTMENT,
+  STEP_TOTAL_INVESTMENT,
+  MIN_WITHDRAWAL,
+  MAX_WITHDRAWAL,
+  STEP_WITHDRAWAL,
+  MIN_STEP_UP,
+  MAX_STEP_UP,
+  STEP_STEP_UP,
+  MIN_RETURN_RATE,
+  MAX_RETURN_RATE,
+  STEP_RETURN_RATE,
+  MIN_TIME_PERIOD,
+  MAX_TIME_PERIOD,
+  STEP_TIME_PERIOD,
+  MAX_INFLATION_RATE,
+  STEP_INFLATION_RATE,
+} from './constants';
 
 const DetailedSwpTable: React.FC<{ data: SwpMonthlyData[] }> = memo(({ data }) => {
   if (!data || data.length === 0) {
@@ -66,39 +91,30 @@ interface SwpCalculatorProps {
 }
 
 const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActive }) => {
-  const [totalInvestment, setTotalInvestment] = useState<number>(1000000);
-  const [withdrawalPerMonth, setWithdrawalPerMonth] = useState<number>(8000);
-  const [withdrawalStepUpPercentage, setWithdrawalStepUpPercentage] = useState<number>(7);
+  const [totalInvestment, setTotalInvestment] = useState<number>(DEFAULT_TOTAL_INVESTMENT);
+  const [withdrawalPerMonth, setWithdrawalPerMonth] = useState<number>(DEFAULT_WITHDRAWAL_PER_MONTH);
+  const [withdrawalStepUpPercentage, setWithdrawalStepUpPercentage] = useState<number>(DEFAULT_WITHDRAWAL_STEP_UP_PERCENTAGE);
   const [isStepUpEnabled, setIsStepUpEnabled] = useState<boolean>(false);
-  const [expectedReturnRate, setExpectedReturnRate] = useState<number>(8);
-  const [timePeriod, setTimePeriod] = useState<number>(20);
-  const [inflationRate, setInflationRate] = useState<number>(0);
+  const [expectedReturnRate, setExpectedReturnRate] = useState<number>(DEFAULT_EXPECTED_RETURN_RATE);
+  const [timePeriod, setTimePeriod] = useState<number>(DEFAULT_TIME_PERIOD);
+  const [inflationRate, setInflationRate] = useState<number>(DEFAULT_INFLATION_RATE);
   const [syncWithSip, setSyncWithSip] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isOptionalAdjustmentsOpen, setIsOptionalAdjustmentsOpen] = useState(false);
   const [isReturnsOpen, setIsReturnsOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
+
+  // Use shared responsive hook.
+  // SWP uses lg breakpoint (< 1024) for mobile behavior.
+  const { isLg } = useResponsive();
+  const isMobile = isLg;
 
   useEffect(() => {
-    let resizeTimeout: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        const mobile = window.innerWidth < 1024; // lg breakpoint
-        setIsMobile(mobile);
-        if (!mobile) {
-          setIsOptionalAdjustmentsOpen(true);
-          setIsReturnsOpen(true);
-        }
-      }, 150);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => {
-      clearTimeout(resizeTimeout);
-      window.removeEventListener('resize', handleResize);
+    // If not mobile (meaning >= 1024px), force sections open
+    if (!isMobile) {
+      setIsOptionalAdjustmentsOpen(true);
+      setIsReturnsOpen(true);
     }
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     if (syncWithSip && sipProjectedValue && sipProjectedValue > 0) {
@@ -150,9 +166,9 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                 label="Total Investment"
                 value={totalInvestment}
                 onChange={handleTotalInvestmentChange}
-                min={100000}
-                max={50000000}
-                step={100000}
+                min={MIN_TOTAL_INVESTMENT}
+                max={MAX_TOTAL_INVESTMENT}
+                step={STEP_TOTAL_INVESTMENT}
                 unit="₹"
               />
               <div className="flex items-center justify-end pt-4">
@@ -174,9 +190,9 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                 label="Withdrawal per Month"
                 value={withdrawalPerMonth}
                 onChange={setWithdrawalPerMonth}
-                min={1000}
-                max={1000000}
-                step={1000}
+                min={MIN_WITHDRAWAL}
+                max={MAX_WITHDRAWAL}
+                step={STEP_WITHDRAWAL}
                 unit="₹"
                 markerValue={maxWithdrawal}
                 markerLabel="Max Withdrawal"
@@ -200,9 +216,9 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                   label="Withdrawal Step-up (p.a.)"
                   value={withdrawalStepUpPercentage}
                   onChange={setWithdrawalStepUpPercentage}
-                  min={1}
-                  max={20}
-                  step={1}
+                  min={MIN_STEP_UP}
+                  max={MAX_STEP_UP}
+                  step={STEP_STEP_UP}
                   unit="%"
                 />
               </div>
@@ -211,18 +227,18 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
               label="Expected Return Rate (p.a.)"
               value={expectedReturnRate}
               onChange={setExpectedReturnRate}
-              min={1}
-              max={30}
-              step={0.1}
+              min={MIN_RETURN_RATE}
+              max={MAX_RETURN_RATE}
+              step={STEP_RETURN_RATE}
               unit="%"
             />
             <SliderInput
               label="Time Period"
               value={timePeriod}
               onChange={setTimePeriod}
-              min={1}
-              max={40}
-              step={1}
+              min={MIN_TIME_PERIOD}
+              max={MAX_TIME_PERIOD}
+              step={STEP_TIME_PERIOD}
               unit="Yr"
             />
 
@@ -251,8 +267,8 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
                     value={inflationRate}
                     onChange={setInflationRate}
                     min={0}
-                    max={20}
-                    step={0.1}
+                    max={MAX_INFLATION_RATE}
+                    step={STEP_INFLATION_RATE}
                     unit="%"
                   />
                 </div>
