@@ -59,11 +59,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const toggleTheme = useCallback(() => {
-        setIsDark(prev => {
-            const newValue = !prev;
-            localStorage.setItem(STORAGE_KEY, newValue ? 'dark' : 'light');
-            return newValue;
-        });
+        const switchTheme = () => {
+            setIsDark(prev => {
+                const newValue = !prev;
+                localStorage.setItem(STORAGE_KEY, newValue ? 'dark' : 'light');
+                return newValue;
+            });
+        };
+
+        // Check if View Transitions API is supported
+        if (!document.startViewTransition) {
+            switchTheme();
+            return;
+        }
+
+        // Use View Transitions API for smooth animation
+        document.startViewTransition(switchTheme);
     }, []);
 
     return (
