@@ -295,7 +295,7 @@ const FireCrossoverChart: React.FC<FireCrossoverChartProps> = ({
     if (hideContainer) {
         return (
             <div className="transition-all duration-300">
-                {!hideTitle && <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 px-4 sm:px-0 text-center lg:text-left">The FIRE crossover</h2>}
+                {!hideTitle && <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6 px-4 sm:px-0 text-center lg:text-left">The Golden Crossover</h2>}
                 {chartContent}
             </div>
         );
