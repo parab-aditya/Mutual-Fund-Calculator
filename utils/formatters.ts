@@ -1,5 +1,4 @@
 
-
 export const formatIndianCurrency = (value: number): string => {
   if (isNaN(value) || !isFinite(value)) {
     return '₹ 0';
@@ -23,7 +22,7 @@ export const formatIndianNumber = (value: number): string => {
 
 export const formatAxisTick = (tickValue: number): string => {
   if (isNaN(tickValue)) return '0';
-  
+
   const crore = 10000000;
   const lakh = 100000;
   const thousand = 1000;
@@ -87,28 +86,46 @@ export const numberToIndianWords = (value: number): string => {
   if (num >= 1000000000) return '100 Crore or more'; // Handle edge case
 
   let result = '';
-  
+
   const crore = Math.floor(num / 10000000);
   num %= 10000000;
   if (crore > 0) {
     result += numToWords(crore) + ' Crore ';
   }
-  
+
   const lakh = Math.floor(num / 100000);
   num %= 100000;
   if (lakh > 0) {
     result += numToWords(lakh) + ' Lakh ';
   }
-  
+
   const thousand = Math.floor(num / 1000);
   num %= 1000;
   if (thousand > 0) {
     result += numToWords(thousand) + ' Thousand ';
   }
-  
+
   if (num > 0) {
     result += numToWords(num);
   }
-  
+
   return result.trim();
+};
+
+export const formatToWords = (value: number): string => {
+  if (value === 0) return '0';
+
+  if (value >= 10000000) {
+    const cr = value / 10000000;
+    return `${+cr.toFixed(2)} crore`;
+  }
+  if (value >= 100000) {
+    const lk = value / 100000;
+    return `${+lk.toFixed(2)} Lakhs`;
+  }
+  if (value >= 1000) {
+    const th = value / 1000;
+    return `${+th.toFixed(2)} thousand`;
+  }
+  return value.toString();
 };

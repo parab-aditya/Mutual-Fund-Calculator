@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { formatIndianCurrency, getDynamicValueClass, numberToIndianWords } from '../utils/formatters';
+import { formatIndianCurrency, getDynamicValueClass, numberToIndianWords, formatToWords } from '../utils/formatters';
 import { Palette } from '../design-system';
 import CollapsibleSection from './CollapsibleSection';
 
@@ -17,6 +17,7 @@ interface ResultsCardProps {
   inflationAdjustedTotalValue: number;
   sipResults: ResultBreakdown;
   lumpsumResults: ResultBreakdown;
+  timePeriod: number;
   inflationRate: number;
   isActive: boolean;
   hideContainer?: boolean;
@@ -45,10 +46,14 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
   inflationAdjustedTotalValue,
   sipResults,
   lumpsumResults,
+  timePeriod,
   inflationRate,
   isActive,
   hideContainer = false,
 }) => {
+  const currentYear = new Date().getFullYear();
+  const futureYear = currentYear + timePeriod;
+
   const chartData = useMemo(() => [
     { name: 'Invested Amount', value: investedAmount > 0 ? investedAmount : 1 },
     { name: 'Estimated Returns', value: estimatedReturns > 0 ? estimatedReturns : 0 },
@@ -92,7 +97,31 @@ const ResultsCard: React.FC<ResultsCardProps> = ({
             </p>
             {inflationRate > 0 && (
               <div className="mt-3 pt-3 border-t border-slate-200/75">
-                <p className="text-sm text-slate-500">Inflation Adjusted</p>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="text-sm text-slate-500">Inflation Adjusted for {futureYear}</p>
+                  <div className="group relative">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-slate-400 cursor-help hover:text-slate-600 transition-colors"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
+                    </svg>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                      In <span className="font-bold">{futureYear}</span>, your portfolio may be worth <span className="font-bold">{formatToWords(totalValue)}</span>. Adjusted for inflation, that’s equivalent to <span className="font-bold">{formatToWords(inflationAdjustedTotalValue)}</span> today.
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-800"></div>
+                    </div>
+                  </div>
+                </div>
                 <p className="text-2xl font-bold text-slate-700">
                   {formatIndianCurrency(inflationAdjustedTotalValue)}
                 </p>

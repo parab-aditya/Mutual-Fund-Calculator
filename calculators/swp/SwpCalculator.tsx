@@ -289,6 +289,7 @@ const SwpCalculator: React.FC<SwpCalculatorProps> = ({ sipProjectedValue, isActi
               totalWithdrawal={results.totalWithdrawal}
               finalValue={results.finalValue}
               numberOfWithdrawals={results.numberOfWithdrawals}
+              timePeriod={timePeriod}
               inflationAdjustedFinalValue={results.inflationAdjustedFinalValue}
               inflationRate={inflationRate}
               isActive={isActive}

@@ -233,6 +233,7 @@ const SipCalculator: React.FC<SipCalculatorProps> = ({ onResultsChange, isActive
               inflationAdjustedTotalValue={totalResults.inflationAdjustedTotalValue}
               sipResults={totalResults.sip}
               lumpsumResults={totalResults.lumpsum}
+              timePeriod={timePeriod}
               inflationRate={inflationRate}
               isActive={isActive}
               hideContainer={true}
