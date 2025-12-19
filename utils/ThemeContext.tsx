@@ -31,6 +31,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         } else {
             root.classList.remove('dark');
         }
+
+        // Update theme-color meta tag for mobile browsers and PWA
+        // Using Slate 950 (#020617) for dark mode and Slate 50 (#f8fafc) for light mode
+        let themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (!themeMeta) {
+            themeMeta = document.createElement('meta');
+            themeMeta.setAttribute('name', 'theme-color');
+            document.head.appendChild(themeMeta);
+        }
+        themeMeta.setAttribute('content', isDark ? '#020617' : '#f8fafc');
     }, [isDark]);
 
     // Listen for system theme changes (only if no stored preference)
