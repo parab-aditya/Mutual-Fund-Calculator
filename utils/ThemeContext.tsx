@@ -9,6 +9,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'theme-preference';
 
+/**
+ * Determines if it's currently night time based on user's local time.
+ * Night is defined as 6 PM (18:00) to 6 AM (06:00)
+ */
+const isNightTime = (): boolean => {
+    const hour = new Date().getHours();
+    // Night time: from 6 PM (18) to 6 AM (6)
+    return hour >= 18 || hour < 6;
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isDark, setIsDark] = useState<boolean>(() => {
         // Check localStorage first
@@ -17,8 +27,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (stored !== null) {
                 return stored === 'dark';
             }
-            // Fall back to system preference
-            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Fall back to time-based detection: dark mode at night, light mode during day
+            return isNightTime();
         }
         return false;
     });
