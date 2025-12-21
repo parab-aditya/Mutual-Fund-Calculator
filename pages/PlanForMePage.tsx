@@ -86,7 +86,7 @@ const PlanForMePage: React.FC = () => {
                         <div className="space-y-3 sm:space-y-3.5">
                             {/* Age Input */}
                             <div className="bg-slate-50/50 dark:bg-slate-900/30 rounded-xl p-3 sm:p-3.5 border border-slate-200/40 dark:border-slate-700/40">
-                                <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <label className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
                                         My age is
                                     </label>
@@ -104,7 +104,7 @@ const PlanForMePage: React.FC = () => {
 
                             {/* Monthly Expenditure Input */}
                             <div className="bg-slate-50/50 dark:bg-slate-900/30 rounded-xl p-3 sm:p-3.5 border border-slate-200/40 dark:border-slate-700/40">
-                                <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <label className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
                                         My monthly expenditure is
                                     </label>
@@ -120,11 +120,16 @@ const PlanForMePage: React.FC = () => {
                                         />
                                     </div>
                                 </div>
+                                {formData.monthlyExpenditure && parseInt(formData.monthlyExpenditure) > 0 && (
+                                    <div className="mt-2 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 italic">
+                                        {numberToIndianWords(parseInt(formData.monthlyExpenditure))} Rupees
+                                    </div>
+                                )}
                             </div>
 
                             {/* Monthly Investment Input */}
                             <div className="bg-slate-50/50 dark:bg-slate-900/30 rounded-xl p-3 sm:p-3.5 border border-slate-200/40 dark:border-slate-700/40">
-                                <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
                                     <label className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
                                         I can invest
                                     </label>
@@ -145,6 +150,11 @@ const PlanForMePage: React.FC = () => {
                                         </span>
                                     </div>
                                 </div>
+                                {formData.monthlyInvestment && parseInt(formData.monthlyInvestment) > 0 && (
+                                    <div className="mt-2 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 italic">
+                                        {numberToIndianWords(parseInt(formData.monthlyInvestment))} Rupees per month
+                                    </div>
+                                )}
                             </div>
 
                             {/* Health & Lifestyle Question */}
@@ -156,15 +166,14 @@ const PlanForMePage: React.FC = () => {
                                     {[
                                         { value: 'needs_improvement', label: 'Needs improvement' },
                                         { value: 'generally_healthy', label: 'Generally healthy' },
-                                        { value: 'very_healthy', label: 'Very healthy & disciplined' }
+                                        { value: 'very_healthy', label: 'Very healthy' }
                                     ].map((option) => (
                                         <label
                                             key={option.value}
-                                            className={`flex items-center justify-center gap-2 p-2.5 sm:p-3 rounded-lg cursor-pointer transition-all duration-200 border-2 ${
-                                                formData.healthLifestyle === option.value
-                                                    ? 'bg-white dark:bg-slate-800 border-emerald-500 dark:border-emerald-400 shadow-sm'
-                                                    : 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600'
-                                            }`}
+                                            className={`flex items-center justify-center gap-2 p-2.5 sm:p-3 rounded-lg cursor-pointer transition-all duration-200 border-2 ${formData.healthLifestyle === option.value
+                                                ? 'bg-white dark:bg-slate-800 border-emerald-500 dark:border-emerald-400 shadow-sm'
+                                                : 'bg-slate-50/50 dark:bg-slate-900/30 border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600'
+                                                }`}
                                         >
                                             <input
                                                 type="radio"
@@ -174,11 +183,10 @@ const PlanForMePage: React.FC = () => {
                                                 onChange={(e) => handleHealthLifestyleChange(e.target.value)}
                                                 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-500 border-slate-300 dark:border-slate-600 focus:ring-emerald-500 focus:ring-2 cursor-pointer"
                                             />
-                                            <span className={`text-[11px] sm:text-sm font-medium text-center ${
-                                                formData.healthLifestyle === option.value
-                                                    ? 'text-slate-800 dark:text-slate-100'
-                                                    : 'text-slate-600 dark:text-slate-400'
-                                            }`}>
+                                            <span className={`text-[11px] sm:text-sm font-medium text-center ${formData.healthLifestyle === option.value
+                                                ? 'text-slate-800 dark:text-slate-100'
+                                                : 'text-slate-600 dark:text-slate-400'
+                                                }`}>
                                                 {option.label}
                                             </span>
                                         </label>
@@ -191,11 +199,10 @@ const PlanForMePage: React.FC = () => {
                         <button
                             type="button"
                             disabled={!isFormValid()}
-                            className={`mt-4 sm:mt-5 w-full py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold shadow-md transition-all duration-300 ${
-                                isFormValid()
-                                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
-                                    : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
-                            }`}
+                            className={`mt-4 sm:mt-5 w-full py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold shadow-md transition-all duration-300 ${isFormValid()
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
+                                : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                                }`}
                         >
                             Plan For Me
                         </button>
