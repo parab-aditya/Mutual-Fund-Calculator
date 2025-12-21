@@ -18,6 +18,7 @@ const Navigation: React.FC = () => {
     const sipTabRef = useRef<HTMLButtonElement>(null);
     const swpTabRef = useRef<HTMLButtonElement>(null);
     const stpTabRef = useRef<HTMLButtonElement>(null);
+    const planForMeRef = useRef<HTMLButtonElement>(null);
 
     const [gliderStyle, setGliderStyle] = useState({ left: 0, width: 0, opacity: 0 });
 
@@ -78,6 +79,10 @@ const Navigation: React.FC = () => {
         }
     };
 
+    const handlePlanForMeClick = () => {
+        navigate('/plan-for-me');
+    };
+
     return (
         <div className="container mx-auto px-2 sm:px-6 lg:px-8 mb-8">
             <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 shadow-xl shadow-slate-200/40 dark:shadow-slate-900/40 rounded-2xl p-2 flex items-center justify-between sm:grid sm:grid-cols-[1fr_auto_1fr] relative gap-2 sm:gap-4">
@@ -120,18 +125,18 @@ const Navigation: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Coast Fire Button - Right aligned on both */}
-                {/* <button
-                    onClick={() => navigate('/sip-calculator/coast-fire')}
+                {/* Plan For Me Button - Right aligned */}
+                <button
+                    onClick={handlePlanForMeClick}
                     className={`shrink-0 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-sm sm:justify-self-end
-            ${location.pathname.includes('coast-fire')
-                            ? 'bg-gradient-to-r from-rose-100 to-orange-100 dark:from-rose-900/50 dark:to-orange-900/50 text-rose-800 dark:text-rose-200 ring-2 ring-rose-200/50 dark:ring-rose-700/50 shadow-inner'
-                            : 'bg-gradient-to-r from-rose-50 to-orange-50 dark:from-rose-900/30 dark:to-orange-900/30 text-rose-700 dark:text-rose-300 hover:text-rose-900 dark:hover:text-rose-100 border border-rose-100 dark:border-rose-800 hover:border-rose-200 dark:hover:border-rose-700 hover:shadow-md'
+            ${location.pathname === '/plan-for-me'
+                            ? 'bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 text-emerald-800 dark:text-emerald-200 ring-2 ring-emerald-200/50 dark:ring-emerald-700/50 shadow-inner'
+                            : 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-100 border border-emerald-100 dark:border-emerald-800 hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-md'
                         }`}
                 >
-                    <span className="whitespace-nowrap">Coast Fire</span>
-                    <span className="text-base sm:text-lg">🔥</span>
-                </button> */}
+                    <span className="whitespace-nowrap">Plan For Me</span>
+                    <span className="text-base sm:text-lg">📋</span>
+                </button>
             </div>
         </div>
     );

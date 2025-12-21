@@ -6,6 +6,7 @@ import StpCalculator from './calculators/stp/StpCalculator';
 import CoastFireCalculator from './calculators/coast-fire/CoastFireCalculator';
 import Navigation from './components/Navigation';
 import DarkModeToggle from './components/DarkModeToggle';
+import PlanForMePage from './pages/PlanForMePage';
 
 // Home page with separate calculators based on URL param
 const HomePage: React.FC = () => {
@@ -64,6 +65,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/sip-calculator" replace />} />
         <Route path="/sip-calculator" element={<HomePage />} />
         <Route path="/sip-calculator/coast-fire" element={<CoastFirePage />} />
+        <Route path="/plan-for-me" element={<PlanForMePage />} />
         <Route path="*" element={<Navigate to="/sip-calculator" replace />} />
       </Routes>
 
