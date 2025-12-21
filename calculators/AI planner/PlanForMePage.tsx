@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { numberToIndianWords } from '../utils/formatters';
+import { numberToIndianWords } from '../../utils/formatters';
 
 interface FormData {
     age: string;

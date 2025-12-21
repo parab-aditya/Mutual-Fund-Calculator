@@ -6,7 +6,7 @@ import StpCalculator from './calculators/stp/StpCalculator';
 import CoastFireCalculator from './calculators/coast-fire/CoastFireCalculator';
 import Navigation from './components/Navigation';
 import DarkModeToggle from './components/DarkModeToggle';
-import PlanForMePage from './pages/PlanForMePage';
+import PlanForMePage from './calculators/AI planner/PlanForMePage';
 
 // Home page with separate calculators based on URL param
 const HomePage: React.FC = () => {
