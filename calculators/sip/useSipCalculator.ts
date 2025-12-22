@@ -2,6 +2,44 @@ import { useMemo } from 'react';
 import { SipInputs, SipTotalResults, SipGrowthData } from './types';
 import { CashFlow, firstOfMonthUTC, addMonthsUTC, xirr, deflateToBase } from '../../utils/financial';
 
+/**
+ * Standalone function to calculate SIP corpus after a given number of years.
+ * This can be imported and used by other modules without needing a React component.
+ */
+export const calculateSipCorpus = (
+  monthlyInvestment: number,
+  annualReturnRate: number, // as percentage, e.g., 12 for 12%
+  years: number,
+  stepUpPercentage: number = 0
+): { totalValue: number; investedAmount: number } => {
+  if (monthlyInvestment <= 0 || years <= 0) {
+    return { totalValue: 0, investedAmount: 0 };
+  }
+
+  const annualRate = annualReturnRate / 100;
+  if (annualRate <= -1) {
+    return { totalValue: 0, investedAmount: 0 };
+  }
+
+  const stepUpRate = stepUpPercentage / 100;
+  const months = years * 12;
+  const monthlyRate = Math.pow(1 + annualRate, 1 / 12) - 1;
+
+  let totalValue = 0;
+  let investedAmount = 0;
+  let currentMonthlySip = monthlyInvestment;
+
+  for (let month = 1; month <= months; month++) {
+    totalValue = (totalValue + currentMonthlySip) * (1 + monthlyRate);
+    investedAmount += currentMonthlySip;
+    if (month % 12 === 0 && month < months) {
+      currentMonthlySip *= (1 + stepUpRate);
+    }
+  }
+
+  return { totalValue, investedAmount };
+};
+
 const EMPTY_RESULTS: SipTotalResults = {
   investedAmount: 0,
   estimatedReturns: 0,
@@ -47,22 +85,15 @@ export const useSipCalculator = (inputs: SipInputs) => {
       return EMPTY_RESULTS;
     }
 
+
     const months = timePeriod * 12;
     const monthlySipRate = Math.pow(1 + annualSipRate, 1 / 12) - 1;
     const monthlyLumpsumRate = Math.pow(1 + annualLumpsumRate, 1 / 12) - 1;
 
-    // ----- SIP (monthly compounding; invest at start of month, then grow) -----
-    let sipTotalValue = 0;
-    let sipInvestedAmount = 0;
-    let currentMonthlySip = monthlyInvestment;
-
-    for (let month = 1; month <= months; month++) {
-      sipTotalValue = (sipTotalValue + currentMonthlySip) * (1 + monthlySipRate);
-      sipInvestedAmount += currentMonthlySip;
-      if (month % 12 === 0 && month < months) {
-        currentMonthlySip *= (1 + stepUpRate);
-      }
-    }
+    // ----- SIP (reuse standalone function for core calculation) -----
+    const sipResult = calculateSipCorpus(monthlyInvestment, returnRate, timePeriod, stepUpPercentage);
+    const sipTotalValue = sipResult.totalValue;
+    const sipInvestedAmount = sipResult.investedAmount;
     const sipEstimatedReturns = sipTotalValue - sipInvestedAmount;
 
     // ----- Lumpsum (monthly compounding for consistency) -----
@@ -92,12 +123,13 @@ export const useSipCalculator = (inputs: SipInputs) => {
     }
 
     // SIP contributions at start of each month
-    currentMonthlySip = monthlyInvestment;
+    let currentMonthlySipForFlow = monthlyInvestment;
+    const stepUpRateForFlow = stepUpPercentage / 100;
     for (let m = 1; m <= months; m++) {
       const dt = addMonthsUTC(startDate, m - 1);
-      flowsNominal.push({ amount: -currentMonthlySip, date: dt });
+      flowsNominal.push({ amount: -currentMonthlySipForFlow, date: dt });
       if (m % 12 === 0 && m < months) {
-        currentMonthlySip *= (1 + stepUpRate);
+        currentMonthlySipForFlow *= (1 + stepUpRateForFlow);
       }
     }
 

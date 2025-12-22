@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { numberToIndianWords } from '../../utils/formatters';
+import { useRetirementPlanner } from './useRetirementPlanner';
+import { RetirementInputs } from './types';
 
 interface FormData {
     age: string;
@@ -15,6 +17,20 @@ const PlanForMePage: React.FC = () => {
         monthlyInvestment: '',
         healthLifestyle: 'generally_healthy', // Pre-select middle option
     });
+
+    const [retirementInputs, setRetirementInputs] = useState<RetirementInputs | null>(null);
+    const retirementResult = useRetirementPlanner(retirementInputs);
+
+    const handlePlanForMe = () => {
+        if (!isFormValid()) return;
+
+        setRetirementInputs({
+            currentAge: parseInt(formData.age),
+            monthlyExpense: parseInt(formData.monthlyExpenditure),
+            monthlyInvestment: parseInt(formData.monthlyInvestment),
+            healthStatus: formData.healthLifestyle,
+        });
+    };
 
     const handleInputChange = (field: keyof FormData, value: string) => {
         // Allow only numbers
@@ -199,6 +215,7 @@ const PlanForMePage: React.FC = () => {
                         <button
                             type="button"
                             disabled={!isFormValid()}
+                            onClick={handlePlanForMe}
                             className={`mt-4 sm:mt-5 w-full py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-semibold shadow-md transition-all duration-300 ${isFormValid()
                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
                                 : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
@@ -207,6 +224,108 @@ const PlanForMePage: React.FC = () => {
                             Plan For Me
                         </button>
                     </div>
+
+                    {/* Results Section */}
+                    {retirementResult && (
+                        <div className="mt-6 space-y-4">
+                            {/* Summary Card */}
+                            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-4 sm:p-6">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
+                                    📊 Retirement Analysis Summary
+                                </h2>
+                                <div className="grid grid-cols-2 gap-3 mb-4">
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Current Age</div>
+                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{retirementResult.currentAge}</div>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Max Age (Based on Health)</div>
+                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{retirementResult.maxAge}</div>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Can Retire Early?</div>
+                                        <div className={`text-lg font-bold ${retirementResult.canRetire ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                            {retirementResult.canRetire ? 'Yes ✅' : 'No ❌'}
+                                        </div>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Earliest Retirement Age</div>
+                                        <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                                            {retirementResult.earliestRetirementAge ?? 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={`p-3 rounded-lg ${retirementResult.canRetire ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
+                                    <p className={`text-sm ${retirementResult.canRetire ? 'text-emerald-800 dark:text-emerald-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                                        {retirementResult.message}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Year-by-Year Breakdown Table */}
+                            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-4 sm:p-6">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
+                                    📈 Year-by-Year Breakdown
+                                </h2>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-xs sm:text-sm">
+                                        <thead>
+                                            <tr className="bg-slate-100 dark:bg-slate-900/50">
+                                                <th className="px-2 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Age</th>
+                                                <th className="px-2 py-2 text-left font-semibold text-slate-700 dark:text-slate-300">Years</th>
+                                                <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">SIP Corpus</th>
+                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Rate</th>
+                                                <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Inflated Expense</th>
+                                                <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Target W/D</th>
+                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Ret. Years</th>
+                                                <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Final Corpus</th>
+                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Final %</th>
+                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Sustainable?</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {retirementResult.yearlyBreakdown.map((row, index) => (
+                                                <tr
+                                                    key={row.year}
+                                                    className={`border-b border-slate-200 dark:border-slate-700 ${row.year === retirementResult.earliestRetirementAge
+                                                            ? 'bg-emerald-50 dark:bg-emerald-900/30'
+                                                            : index % 2 === 0
+                                                                ? 'bg-white dark:bg-slate-800'
+                                                                : 'bg-slate-50 dark:bg-slate-850'
+                                                        }`}
+                                                >
+                                                    <td className="px-2 py-2 font-medium text-slate-800 dark:text-slate-200">
+                                                        {row.year}
+                                                        {row.year === retirementResult.earliestRetirementAge && ' 🎯'}
+                                                    </td>
+                                                    <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{row.yearsFromNow}</td>
+                                                    <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.sipCorpus.toLocaleString('en-IN')}</td>
+                                                    <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">{row.sipReturnRate}%</td>
+                                                    <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.inflationAdjustedExpense.toLocaleString('en-IN')}</td>
+                                                    <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.targetWithdrawal.toLocaleString('en-IN')}</td>
+                                                    <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">{row.yearsInRetirement}</td>
+                                                    <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.swpFinalCorpus.toLocaleString('en-IN')}</td>
+                                                    <td className={`px-2 py-2 text-center font-medium ${row.swpFinalCorpusPercentage >= 10 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                        {row.swpFinalCorpusPercentage.toFixed(1)}%
+                                                    </td>
+                                                    <td className="px-2 py-2 text-center">
+                                                        {row.swpSustainable
+                                                            ? <span className="text-emerald-600 dark:text-emerald-400 font-bold">✅</span>
+                                                            : <span className="text-red-500 dark:text-red-400">❌</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                    <p><strong>Note:</strong> Sustainability requires final corpus to be ≥10% of initial corpus at retirement.</p>
+                                    <p><strong>Target W/D:</strong> Monthly withdrawal = Inflation-adjusted expense + 25% lifestyle buffer</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>
