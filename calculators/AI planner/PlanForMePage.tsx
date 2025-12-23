@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { numberToIndianWords } from '../../utils/formatters';
-import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
-import { FinancialIndependenceInputs } from './types';
+import { useFinancialIndependencePlanner, runOptimization } from './useFinancialIndependencePlanner';
+import { FinancialIndependenceInputs, OptimizationResult } from './types';
 
 interface FormData {
     age: string;
@@ -20,6 +20,41 @@ const PlanForMePage: React.FC = () => {
 
     const [fiInputs, setFiInputs] = useState<FinancialIndependenceInputs | null>(null);
     const fiResult = useFinancialIndependencePlanner(fiInputs);
+
+    // Optimization state
+    const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+    const [isOptimizing, setIsOptimizing] = useState(false);
+    const [showOptimization, setShowOptimization] = useState(false);
+
+    // Run optimization when FI result is available and user clicks optimize
+    const handleOptimize = async () => {
+        if (!fiInputs || !fiResult) return;
+
+        setIsOptimizing(true);
+        setShowOptimization(true);
+        try {
+            const result = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
+            setOptimizationResult(result);
+        } catch (error) {
+            console.error('Optimization failed:', error);
+            setOptimizationResult({
+                baselineFiAge: fiResult.earliestFinancialIndependenceAge,
+                solutions: [],
+                recommendedSolution: null,
+                recommendation: null,
+                skipOptimization: false,
+                error: 'Failed to run optimization. Please try again.'
+            });
+        } finally {
+            setIsOptimizing(false);
+        }
+    };
+
+    // Reset optimization when inputs change
+    useEffect(() => {
+        setOptimizationResult(null);
+        setShowOptimization(false);
+    }, [fiInputs]);
 
     const handlePlanForMe = () => {
         if (!isFormValid()) return;
@@ -260,9 +295,171 @@ const PlanForMePage: React.FC = () => {
                                         {fiResult.message}
                                     </p>
                                 </div>
+
+                                {/* Optimize Button */}
+                                {fiResult.earliestFinancialIndependenceAge && fiResult.earliestFinancialIndependenceAge > 40 && !showOptimization && (
+                                    <button
+                                        onClick={handleOptimize}
+                                        className="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700 text-white hover:from-purple-600 hover:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-800 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                                    >
+                                        🎯 Optimize My Plan - Lower FI Age
+                                    </button>
+                                )}
                             </div>
 
-                            {/* Year-by-Year Breakdown Table */}
+                            {/* Optimization Results Section */}
+                            {showOptimization && (
+                                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-purple-200/60 dark:border-purple-700/60 p-4 sm:p-6">
+                                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2">
+                                        🎯 Optimization Results
+                                        {isOptimizing && (
+                                            <span className="inline-block w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></span>
+                                        )}
+                                    </h2>
+
+                                    {isOptimizing ? (
+                                        <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                                            <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="text-sm text-slate-600 dark:text-slate-400">Analyzing optimization options with AI...</p>
+                                        </div>
+                                    ) : optimizationResult ? (
+                                        <>
+                                            {/* Skip reason */}
+                                            {optimizationResult.skipOptimization && (
+                                                <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                                                    <p className="text-sm text-emerald-800 dark:text-emerald-200">
+                                                        🎉 {optimizationResult.skipReason}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Error message */}
+                                            {optimizationResult.error && (
+                                                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                                    <p className="text-sm text-red-800 dark:text-red-200">
+                                                        ⚠️ {optimizationResult.error}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Recommended Solution */}
+                                            {optimizationResult.recommendedSolution && (
+                                                <div className="mb-4">
+                                                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700">
+                                                        <h3 className="text-sm font-bold text-purple-800 dark:text-purple-200 mb-3 flex items-center gap-2">
+                                                            ✨ Recommended Plan
+                                                        </h3>
+                                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                                                            <div className="bg-white/70 dark:bg-slate-800/50 rounded-lg p-3">
+                                                                <div className="text-xs text-slate-500 dark:text-slate-400">New FI Age</div>
+                                                                <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                                                                    {optimizationResult.recommendedSolution.fiAge}
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-white/70 dark:bg-slate-800/50 rounded-lg p-3">
+                                                                <div className="text-xs text-slate-500 dark:text-slate-400">Years Saved</div>
+                                                                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                                                                    {optimizationResult.recommendedSolution.improvementYears}
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-white/70 dark:bg-slate-800/50 rounded-lg p-3">
+                                                                <div className="text-xs text-slate-500 dark:text-slate-400">Annual Step-up</div>
+                                                                <div className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                                                                    {optimizationResult.recommendedSolution.stepUpPercent}%
+                                                                </div>
+                                                            </div>
+                                                            <div className="bg-white/70 dark:bg-slate-800/50 rounded-lg p-3">
+                                                                <div className="text-xs text-slate-500 dark:text-slate-400">New Monthly SIP</div>
+                                                                <div className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                                                                    ₹{optimizationResult.recommendedSolution.newMonthlySip.toLocaleString('en-IN')}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* AI Explanation */}
+                                                        {optimizationResult.recommendation && (
+                                                            <div className="mt-3 p-3 bg-white/50 dark:bg-slate-900/30 rounded-lg">
+                                                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">💡 Why this plan?</p>
+                                                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                                                    {optimizationResult.recommendation.explanation}
+                                                                </p>
+                                                                {optimizationResult.recommendation.alternatives.length > 0 && (
+                                                                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                                                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">🔄 Alternatives:</p>
+                                                                        <ul className="text-xs text-slate-500 dark:text-slate-400 list-disc list-inside">
+                                                                            {optimizationResult.recommendation.alternatives.map((alt, i) => (
+                                                                                <li key={i}>{alt}</li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* All Solutions Table */}
+                                            {optimizationResult.solutions.length > 1 && (
+                                                <div className="mt-4">
+                                                    <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">📊 All Optimization Options</h3>
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full text-xs sm:text-sm">
+                                                            <thead>
+                                                                <tr className="bg-slate-100 dark:bg-slate-900/50">
+                                                                    <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">FI Age</th>
+                                                                    <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Step-up</th>
+                                                                    <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">SIP Increase</th>
+                                                                    <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">New SIP</th>
+                                                                    <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Years Saved</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {optimizationResult.solutions.map((solution, index) => {
+                                                                    const isRecommended = optimizationResult.recommendedSolution &&
+                                                                        solution.fiAge === optimizationResult.recommendedSolution.fiAge &&
+                                                                        solution.stepUpPercent === optimizationResult.recommendedSolution.stepUpPercent &&
+                                                                        solution.sipIncreasePercent === optimizationResult.recommendedSolution.sipIncreasePercent;
+                                                                    return (
+                                                                        <tr
+                                                                            key={index}
+                                                                            className={`border-b border-slate-200 dark:border-slate-700 ${isRecommended
+                                                                                    ? 'bg-purple-50 dark:bg-purple-900/30'
+                                                                                    : index % 2 === 0
+                                                                                        ? 'bg-white dark:bg-slate-800'
+                                                                                        : 'bg-slate-50 dark:bg-slate-850'
+                                                                                }`}
+                                                                        >
+                                                                            <td className="px-2 py-2 text-center font-medium text-slate-800 dark:text-slate-200">
+                                                                                {solution.fiAge}
+                                                                                {isRecommended && ' ⭐'}
+                                                                                {solution.fiAge <= 40 && ' 🎯'}
+                                                                            </td>
+                                                                            <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">
+                                                                                {solution.stepUpPercent}%
+                                                                            </td>
+                                                                            <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">
+                                                                                {solution.sipIncreasePercent}%
+                                                                            </td>
+                                                                            <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">
+                                                                                ₹{solution.newMonthlySip.toLocaleString('en-IN')}
+                                                                            </td>
+                                                                            <td className="px-2 py-2 text-center font-medium text-emerald-600 dark:text-emerald-400">
+                                                                                {solution.improvementYears > 0 ? `+${solution.improvementYears}` : '-'}
+                                                                            </td>
+                                                                        </tr>
+                                                                    );
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : null}
+                                </div>
+                            )}
+
                             <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-4 sm:p-6">
                                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
                                     📈 Year-by-Year Breakdown
