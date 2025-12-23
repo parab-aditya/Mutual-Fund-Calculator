@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { numberToIndianWords } from '../../utils/formatters';
-import { useRetirementPlanner } from './useRetirementPlanner';
-import { RetirementInputs } from './types';
+import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
+import { FinancialIndependenceInputs } from './types';
 
 interface FormData {
     age: string;
@@ -18,13 +18,13 @@ const PlanForMePage: React.FC = () => {
         healthLifestyle: 'generally_healthy', // Pre-select middle option
     });
 
-    const [retirementInputs, setRetirementInputs] = useState<RetirementInputs | null>(null);
-    const retirementResult = useRetirementPlanner(retirementInputs);
+    const [fiInputs, setFiInputs] = useState<FinancialIndependenceInputs | null>(null);
+    const fiResult = useFinancialIndependencePlanner(fiInputs);
 
     const handlePlanForMe = () => {
         if (!isFormValid()) return;
 
-        setRetirementInputs({
+        setFiInputs({
             currentAge: parseInt(formData.age),
             monthlyExpense: parseInt(formData.monthlyExpenditure),
             monthlyInvestment: parseInt(formData.monthlyInvestment),
@@ -95,7 +95,7 @@ const PlanForMePage: React.FC = () => {
                     <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-700/60 p-4 sm:p-6">
                         {/* Heading */}
                         <h1 className="text-base sm:text-lg font-bold text-center text-slate-800 dark:text-slate-100 mb-4 sm:mb-5 leading-tight">
-                            Investment Plan Form
+                            Financial Independence Plan Form
                         </h1>
 
                         {/* Form Fields */}
@@ -226,38 +226,38 @@ const PlanForMePage: React.FC = () => {
                     </div>
 
                     {/* Results Section */}
-                    {retirementResult && (
+                    {fiResult && (
                         <div className="mt-6 space-y-4">
                             {/* Summary Card */}
                             <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-700/60 p-4 sm:p-6">
                                 <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
-                                    📊 Retirement Analysis Summary
+                                    📊 Financial Independence Analysis Summary
                                 </h2>
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
                                         <div className="text-xs text-slate-500 dark:text-slate-400">Current Age</div>
-                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{retirementResult.currentAge}</div>
+                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{fiResult.currentAge}</div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
                                         <div className="text-xs text-slate-500 dark:text-slate-400">Max Age (Based on Health)</div>
-                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{retirementResult.maxAge}</div>
+                                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{fiResult.maxAge}</div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
-                                        <div className="text-xs text-slate-500 dark:text-slate-400">Can Retire Early?</div>
-                                        <div className={`text-lg font-bold ${retirementResult.canRetire ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                                            {retirementResult.canRetire ? 'Yes ✅' : 'No ❌'}
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Can be Financially Free?</div>
+                                        <div className={`text-lg font-bold ${fiResult.canBeFinanciallyIndependent ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                            {fiResult.canBeFinanciallyIndependent ? 'Yes ✅' : 'No ❌'}
                                         </div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
-                                        <div className="text-xs text-slate-500 dark:text-slate-400">Earliest Retirement Age</div>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400">Earliest FI Age</div>
                                         <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                            {retirementResult.earliestRetirementAge ?? 'N/A'}
+                                            {fiResult.earliestFinancialIndependenceAge ?? 'N/A'}
                                         </div>
                                     </div>
                                 </div>
-                                <div className={`p-3 rounded-lg ${retirementResult.canRetire ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
-                                    <p className={`text-sm ${retirementResult.canRetire ? 'text-emerald-800 dark:text-emerald-200' : 'text-amber-800 dark:text-amber-200'}`}>
-                                        {retirementResult.message}
+                                <div className={`p-3 rounded-lg ${fiResult.canBeFinanciallyIndependent ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
+                                    <p className={`text-sm ${fiResult.canBeFinanciallyIndependent ? 'text-emerald-800 dark:text-emerald-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                                        {fiResult.message}
                                     </p>
                                 </div>
                             </div>
@@ -277,33 +277,33 @@ const PlanForMePage: React.FC = () => {
                                                 <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Rate</th>
                                                 <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Inflated Expense</th>
                                                 <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Target W/D</th>
-                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Ret. Years</th>
+                                                <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">FI Years</th>
                                                 <th className="px-2 py-2 text-right font-semibold text-slate-700 dark:text-slate-300">Final Corpus</th>
                                                 <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Final %</th>
                                                 <th className="px-2 py-2 text-center font-semibold text-slate-700 dark:text-slate-300">Sustainable?</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {retirementResult.yearlyBreakdown.map((row, index) => (
+                                            {fiResult.yearlyBreakdown.map((row, index) => (
                                                 <tr
                                                     key={row.year}
-                                                    className={`border-b border-slate-200 dark:border-slate-700 ${row.year === retirementResult.earliestRetirementAge
-                                                            ? 'bg-emerald-50 dark:bg-emerald-900/30'
-                                                            : index % 2 === 0
-                                                                ? 'bg-white dark:bg-slate-800'
-                                                                : 'bg-slate-50 dark:bg-slate-850'
+                                                    className={`border-b border-slate-200 dark:border-slate-700 ${row.year === fiResult.earliestFinancialIndependenceAge
+                                                        ? 'bg-emerald-50 dark:bg-emerald-900/30'
+                                                        : index % 2 === 0
+                                                            ? 'bg-white dark:bg-slate-800'
+                                                            : 'bg-slate-50 dark:bg-slate-850'
                                                         }`}
                                                 >
                                                     <td className="px-2 py-2 font-medium text-slate-800 dark:text-slate-200">
                                                         {row.year}
-                                                        {row.year === retirementResult.earliestRetirementAge && ' 🎯'}
+                                                        {row.year === fiResult.earliestFinancialIndependenceAge && ' 🎯'}
                                                     </td>
                                                     <td className="px-2 py-2 text-slate-600 dark:text-slate-400">{row.yearsFromNow}</td>
                                                     <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.sipCorpus.toLocaleString('en-IN')}</td>
                                                     <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">{row.sipReturnRate}%</td>
                                                     <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.inflationAdjustedExpense.toLocaleString('en-IN')}</td>
                                                     <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.targetWithdrawal.toLocaleString('en-IN')}</td>
-                                                    <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">{row.yearsInRetirement}</td>
+                                                    <td className="px-2 py-2 text-center text-slate-600 dark:text-slate-400">{row.yearsInFinancialIndependence}</td>
                                                     <td className="px-2 py-2 text-right text-slate-800 dark:text-slate-200">₹{row.swpFinalCorpus.toLocaleString('en-IN')}</td>
                                                     <td className={`px-2 py-2 text-center font-medium ${row.swpFinalCorpusPercentage >= 10 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                                         {row.swpFinalCorpusPercentage.toFixed(1)}%
@@ -320,7 +320,7 @@ const PlanForMePage: React.FC = () => {
                                     </table>
                                 </div>
                                 <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                                    <p><strong>Note:</strong> Sustainability requires final corpus to be ≥10% of initial corpus at retirement.</p>
+                                    <p><strong>Note:</strong> Sustainability requires final corpus to be ≥10% of initial corpus at the start of financial independence.</p>
                                     <p><strong>Target W/D:</strong> Monthly withdrawal = Inflation-adjusted expense + 25% lifestyle buffer</p>
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { RetirementInputs, YearlyBreakdown, RetirementResult } from './types';
+import { FinancialIndependenceInputs, YearlyBreakdown, FinancialIndependenceResult } from './types';
 import {
     MAX_AGE_MAPPING,
     INFLATION_RATE,
@@ -58,15 +58,15 @@ const getInflationAdjustedExpense = (
 };
 
 /**
- * Check if SWP is sustainable from retirement year to max age
+ * Check if SWP is sustainable from financial independence year to max age
  * Returns true if final corpus >= 10% of initial corpus
  */
 const checkSwpSustainability = (
     corpus: number,
     monthlyWithdrawal: number,
-    yearsInRetirement: number
+    yearsInFinancialIndependence: number
 ): { sustainable: boolean; finalCorpus: number; finalCorpusPercentage: number } => {
-    if (corpus <= 0 || yearsInRetirement <= 0) {
+    if (corpus <= 0 || yearsInFinancialIndependence <= 0) {
         return { sustainable: false, finalCorpus: 0, finalCorpusPercentage: 0 };
     }
 
@@ -75,7 +75,7 @@ const checkSwpSustainability = (
         monthlyWithdrawal,
         SWP_STEP_UP_PERCENTAGE,
         SWP_RETURN_RATE,
-        yearsInRetirement,
+        yearsInFinancialIndependence,
         0 // No inflation adjustment in SWP calculation, we handle it ourselves
     );
     const finalCorpus = swpResult.results.finalValue;
@@ -89,8 +89,8 @@ const checkSwpSustainability = (
     };
 };
 
-export const useRetirementPlanner = (inputs: RetirementInputs | null) => {
-    const result = useMemo<RetirementResult | null>(() => {
+export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInputs | null) => {
+    const result = useMemo<FinancialIndependenceResult | null>(() => {
         if (!inputs) return null;
 
         const { currentAge, monthlyExpense, monthlyInvestment, healthStatus } = inputs;
@@ -103,20 +103,21 @@ export const useRetirementPlanner = (inputs: RetirementInputs | null) => {
             return {
                 maxAge,
                 currentAge,
-                canRetire: false,
-                earliestRetirementAge: null,
+                canBeFinanciallyIndependent: false,
+                earliestFinancialIndependenceAge: null,
                 yearlyBreakdown: [],
-                message: `Your current age (${currentAge}) is at or exceeds the estimated max age (${maxAge}). Unable to plan retirement.`
+                message: `Your current age (${currentAge}) is at or exceeds the estimated max age (${maxAge}). Unable to plan for financial independence.`
             };
         }
 
         const yearlyBreakdown: YearlyBreakdown[] = [];
-        let earliestRetirementAge: number | null = null;
+        let earliestFIBAge: number | null = null;
+        let sustainableButAfter60 = false;
 
         // Calculate for each year from current age to max age
         for (let age = currentAge; age <= maxAge; age++) {
             const yearsFromNow = age - currentAge;
-            const yearsInRetirement = maxAge - age;
+            const yearsInFinancialIndependence = maxAge - age;
 
             // Calculate SIP corpus at this age
             const sipCorpus = calculateCorpusWithVariableRate(monthlyInvestment, yearsFromNow);
@@ -135,8 +136,8 @@ export const useRetirementPlanner = (inputs: RetirementInputs | null) => {
             let swpFinalCorpus = 0;
             let swpFinalCorpusPercentage = 0;
 
-            if (yearsInRetirement > 0 && sipCorpus > 0) {
-                const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInRetirement);
+            if (yearsInFinancialIndependence > 0 && sipCorpus > 0) {
+                const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInFinancialIndependence);
                 swpSustainable = swpCheck.sustainable;
                 swpFinalCorpus = swpCheck.finalCorpus;
                 swpFinalCorpusPercentage = swpCheck.finalCorpusPercentage;
@@ -149,34 +150,43 @@ export const useRetirementPlanner = (inputs: RetirementInputs | null) => {
                 sipReturnRate,
                 inflationAdjustedExpense: Math.round(inflationAdjustedExpense),
                 targetWithdrawal: Math.round(targetWithdrawal),
-                yearsInRetirement,
+                yearsInFinancialIndependence,
                 swpSustainable,
                 swpFinalCorpus: Math.round(swpFinalCorpus),
                 swpFinalCorpusPercentage: Math.round(swpFinalCorpusPercentage * 100) / 100
             });
 
-            // Track earliest retirement age
-            if (swpSustainable && earliestRetirementAge === null) {
-                earliestRetirementAge = age;
+            // Track earliest financial independence age (but only if <= 60)
+            if (swpSustainable) {
+                if (age <= 60) {
+                    if (earliestFIBAge === null) {
+                        earliestFIBAge = age;
+                    }
+                } else if (earliestFIBAge === null) {
+                    // It becomes sustainable only after 60
+                    sustainableButAfter60 = true;
+                }
             }
         }
 
         // Generate result message
         let message: string;
-        if (earliestRetirementAge === currentAge) {
-            message = `🎉 Great news! You can retire immediately at age ${currentAge}. Your current corpus and investments are sufficient to sustain your lifestyle until age ${maxAge}.`;
-        } else if (earliestRetirementAge !== null) {
-            const yearsToRetirement = earliestRetirementAge - currentAge;
-            message = `✅ You can retire at age ${earliestRetirementAge} (in ${yearsToRetirement} years). Keep investing ₹${monthlyInvestment.toLocaleString('en-IN')} per month to achieve this goal.`;
+        if (earliestFIBAge === currentAge) {
+            message = `🎉 Great news! You can be financially independent immediately at age ${currentAge}. Your current corpus and investments are sufficient to sustain your lifestyle until age ${maxAge}.`;
+        } else if (earliestFIBAge !== null) {
+            const yearsToFI = earliestFIBAge - currentAge;
+            message = `✅ You can be financially independent at age ${earliestFIBAge} (in ${yearsToFI} years). Keep investing ₹${monthlyInvestment.toLocaleString('en-IN')} per month to achieve this goal.`;
+        } else if (sustainableButAfter60) {
+            message = `Your current plan doesn’t reach financial independence before age 60.`;
         } else {
-            message = `⚠️ Based on your current investment of ₹${monthlyInvestment.toLocaleString('en-IN')}/month and expenses of ₹${monthlyExpense.toLocaleString('en-IN')}/month, you cannot retire before age ${maxAge} with the current configuration. Consider increasing your monthly investment or reducing your expenses.`;
+            message = `⚠️ Based on your current investment of ₹${monthlyInvestment.toLocaleString('en-IN')}/month and expenses of ₹${monthlyExpense.toLocaleString('en-IN')}/month, you cannot achieve financial independence before age ${maxAge} with the current configuration. Consider increasing your monthly investment or reducing your expenses.`;
         }
 
         return {
             maxAge,
             currentAge,
-            canRetire: earliestRetirementAge !== null,
-            earliestRetirementAge,
+            canBeFinanciallyIndependent: earliestFIBAge !== null,
+            earliestFinancialIndependenceAge: earliestFIBAge,
             yearlyBreakdown,
             message
         };

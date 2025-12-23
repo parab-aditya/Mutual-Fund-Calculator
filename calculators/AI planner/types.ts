@@ -1,6 +1,6 @@
-// Retirement Planning Types
+// Financial Independence Planning Types
 
-export interface RetirementInputs {
+export interface FinancialIndependenceInputs {
     currentAge: number;
     monthlyExpense: number;
     monthlyInvestment: number;
@@ -14,17 +14,17 @@ export interface YearlyBreakdown {
     sipReturnRate: number;
     inflationAdjustedExpense: number;
     targetWithdrawal: number; // With lifestyle buffer
-    yearsInRetirement: number;
+    yearsInFinancialIndependence: number;
     swpSustainable: boolean;
     swpFinalCorpus: number;
     swpFinalCorpusPercentage: number; // Final corpus as % of initial
 }
 
-export interface RetirementResult {
+export interface FinancialIndependenceResult {
     maxAge: number;
     currentAge: number;
-    canRetire: boolean;
-    earliestRetirementAge: number | null;
+    canBeFinanciallyIndependent: boolean;
+    earliestFinancialIndependenceAge: number | null;
     yearlyBreakdown: YearlyBreakdown[];
     message: string;
 }
