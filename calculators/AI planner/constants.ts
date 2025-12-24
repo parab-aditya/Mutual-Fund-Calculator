@@ -7,12 +7,25 @@ export const MAX_AGE_MAPPING: Record<string, number> = {
     very_healthy: 90,
 };
 
+// Health Lifestyle Options (for form and type safety)
+export const HEALTH_LIFESTYLE_OPTIONS = [
+    { value: 'needs_improvement', label: 'Needs Improvement', emoji: '❤️‍🩹' },
+    { value: 'generally_healthy', label: 'Generally Healthy', emoji: '👍' },
+    { value: 'very_healthy', label: 'Very Healthy', emoji: '💪' },
+] as const;
+
+// Input Validation Limits
+export const MAX_AGE_INPUT = 99;
+export const MAX_MONTHLY_EXPENDITURE = 1000000;
+export const MAX_MONTHLY_INVESTMENT = 500000;
+
 // Return Rates
 export const INFLATION_RATE = 7; // 7% annual inflation
 export const SIP_RETURN_RATE_SHORT_TERM = 12; // 12% for < 7 years
 export const SIP_RETURN_RATE_LONG_TERM = 14; // 14% for >= 7 years
 export const SIP_SHORT_TERM_THRESHOLD = 7; // Years threshold for return rate switch
 export const SWP_RETURN_RATE = 10; // 10% annual returns during withdrawal phase
+export const SWP_MONTHLY_RATE = 0.005; // 0.5% monthly sustainable withdrawal rate
 
 // Step-up and Buffer
 export const SWP_STEP_UP_PERCENTAGE = 8; // 8% annual increase in withdrawal

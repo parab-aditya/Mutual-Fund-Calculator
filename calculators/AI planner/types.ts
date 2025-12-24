@@ -1,10 +1,13 @@
 // Financial Independence Planning Types
 
+// Health status type for type safety
+export type HealthStatus = 'needs_improvement' | 'generally_healthy' | 'very_healthy';
+
 export interface FinancialIndependenceInputs {
     currentAge: number;
     monthlyExpense: number;
     monthlyInvestment: number;
-    healthStatus: string; // 'needs_improvement' | 'generally_healthy' | 'very_healthy'
+    healthStatus: HealthStatus;
     runOptimization?: boolean; // Whether to run optimization
 }
 
@@ -61,4 +64,14 @@ export interface FinancialIndependenceResult {
     yearlyBreakdown: YearlyBreakdown[];
     message: string;
     optimization?: OptimizationResult; // Optimization results
+}
+
+// Shared display data for plan cards
+export interface PlanDisplayData {
+    fiAge: number;
+    yearsToFI: number;
+    finalCorpus: number;
+    monthlyWithdrawal: number;
+    todayValue: number;
+    lifestyleImprovement: number;
 }
