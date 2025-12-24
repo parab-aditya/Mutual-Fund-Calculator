@@ -25,7 +25,6 @@ export const SIP_RETURN_RATE_SHORT_TERM = 12; // 12% for < 7 years
 export const SIP_RETURN_RATE_LONG_TERM = 14; // 14% for >= 7 years
 export const SIP_SHORT_TERM_THRESHOLD = 7; // Years threshold for return rate switch
 export const SWP_RETURN_RATE = 10; // 10% annual returns during withdrawal phase
-export const SWP_MONTHLY_RATE = 0.005; // 0.5% monthly sustainable withdrawal rate
 
 // Step-up and Buffer
 export const SWP_STEP_UP_PERCENTAGE = 8; // 8% annual increase in withdrawal

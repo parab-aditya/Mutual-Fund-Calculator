@@ -3,7 +3,7 @@
  * Eliminates duplicate calculation logic between CurrentPlanCard and AIPlanCard
  */
 
-import { INFLATION_RATE, SWP_MONTHLY_RATE } from '../constants';
+import { INFLATION_RATE } from '../constants';
 import { PlanDisplayData } from '../types';
 
 /**
@@ -20,9 +20,10 @@ export function calculatePlanMetrics(
     const yearsToFI = fiAge - currentAge;
     const inflationRate = INFLATION_RATE / 100;
 
-    // Calculate sustainable withdrawal based on corpus
-    const sustainableWithdrawal = corpus * SWP_MONTHLY_RATE;
-    const monthlyWithdrawal = Math.max(targetWithdrawal, sustainableWithdrawal);
+    // Use target withdrawal directly (matches FI calculation logic)
+    // This ensures consistency: the displayed withdrawal is exactly what was used
+    // to determine FI sustainability (including 8% annual step-up)
+    const monthlyWithdrawal = targetWithdrawal;
 
     // Calculate today's value (inflation-adjusted)
     const todayValue = monthlyWithdrawal / Math.pow(1 + inflationRate, yearsToFI);

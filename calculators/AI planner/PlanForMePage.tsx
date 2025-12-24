@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFinancialIndependencePlanner, runOptimization } from './useFinancialIndependencePlanner';
 import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData } from './types';
-import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, SWP_MONTHLY_RATE, LIFESTYLE_BUFFER } from './constants';
+import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
 
 // Components
@@ -144,8 +144,8 @@ const PlanForMePage: React.FC = () => {
         const inflationRate = INFLATION_RATE / 100;
         const inflatedExpense = fiInputs.monthlyExpense * Math.pow(1 + inflationRate, yearsToFI);
         const targetWithdrawal = inflatedExpense * (1 + LIFESTYLE_BUFFER);
-        const sustainableWithdrawal = estimatedCorpus * SWP_MONTHLY_RATE;
-        const monthlyWithdrawal = Math.max(targetWithdrawal, sustainableWithdrawal);
+        // Use target withdrawal directly (matches FI calculation logic)
+        const monthlyWithdrawal = targetWithdrawal;
         const todayValue = monthlyWithdrawal / Math.pow(1 + inflationRate, yearsToFI);
         const lifestyleImprovement = ((todayValue / fiInputs.monthlyExpense) - 1) * 100;
 
