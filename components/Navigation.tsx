@@ -125,17 +125,44 @@ const Navigation: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Plan For Me Button - Right aligned */}
+                {/* AI Planner Button - Siri-inspired design */}
                 <button
                     onClick={handlePlanForMeClick}
-                    className={`shrink-0 px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-2 shadow-sm sm:justify-self-end
+                    className={`group shrink-0 px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-2 sm:gap-3 sm:justify-self-end overflow-hidden
             ${location.pathname === '/plan-for-me'
-                            ? 'bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 text-emerald-800 dark:text-emerald-200 ring-2 ring-emerald-200/50 dark:ring-emerald-700/50 shadow-inner'
-                            : 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-100 border border-emerald-100 dark:border-emerald-800 hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-md'
+                            ? 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-lg shadow-fuchsia-500/30 dark:shadow-fuchsia-500/20 scale-[1.02]'
+                            : 'bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/20 dark:via-fuchsia-500/20 dark:to-pink-500/20 text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-700/60 hover:from-violet-500 hover:via-fuchsia-500 hover:to-pink-500 hover:text-white hover:border-transparent hover:shadow-lg hover:shadow-fuchsia-500/25 hover:scale-[1.02]'
                         }`}
                 >
-                    <span className="whitespace-nowrap">Plan For Me</span>
-                    <span className="text-base sm:text-lg">📋</span>
+                    {/* Siri-like AI orb icon */}
+                    <div className={`relative w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all duration-300
+                        ${location.pathname === '/plan-for-me'
+                            ? 'bg-white/25'
+                            : 'bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 group-hover:bg-white/25'
+                        }`}
+                    >
+                        {/* Animated pulse ring */}
+                        <div className={`absolute inset-0 rounded-full animate-ping opacity-40
+                            ${location.pathname === '/plan-for-me'
+                                ? 'bg-white/30'
+                                : 'bg-gradient-to-br from-violet-400 via-fuchsia-400 to-pink-400 group-hover:bg-white/30'
+                            }`}
+                            style={{ animationDuration: '2s' }}
+                        />
+                        {/* AI sparkle icon */}
+                        <svg
+                            className={`w-3 h-3 sm:w-3.5 sm:h-3.5 relative z-10 transition-colors duration-300
+                                ${location.pathname === '/plan-for-me'
+                                    ? 'text-white'
+                                    : 'text-white group-hover:text-white'
+                                }`}
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M12 2L13.09 8.26L19 7L14.74 11.09L21 14L14.74 12.91L13.09 19L12 12.74L5 14L10.26 11.09L4 8L10.26 9.09L12 2Z" />
+                        </svg>
+                    </div>
+                    <span className="whitespace-nowrap font-bold tracking-tight">AI Planner</span>
                 </button>
             </div>
         </div>

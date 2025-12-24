@@ -74,4 +74,5 @@ export interface PlanDisplayData {
     monthlyWithdrawal: number;
     todayValue: number;
     lifestyleImprovement: number;
+    maxAge: number; // Max age until withdrawals are sustainable
 }

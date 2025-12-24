@@ -14,7 +14,8 @@ export function calculatePlanMetrics(
     targetWithdrawal: number,
     currentAge: number,
     fiAge: number,
-    monthlyExpense: number
+    monthlyExpense: number,
+    maxAge: number
 ): PlanDisplayData {
     const yearsToFI = fiAge - currentAge;
     const inflationRate = INFLATION_RATE / 100;
@@ -36,6 +37,7 @@ export function calculatePlanMetrics(
         monthlyWithdrawal: Math.round(monthlyWithdrawal),
         todayValue: Math.round(todayValue),
         lifestyleImprovement: Math.round(lifestyleImprovement),
+        maxAge,
     };
 }
 

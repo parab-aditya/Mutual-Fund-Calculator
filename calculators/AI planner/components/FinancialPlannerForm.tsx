@@ -66,16 +66,16 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
     };
 
     return (
-        <div className="max-w-xl mx-auto py-12">
+        <div className="max-w-xl mx-auto">
             {/* Main Card */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-700/60 p-8 transform transition-all hover:shadow-2xl hover:scale-[1.005]">
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-700/60 p-5 sm:p-6 transform transition-all hover:shadow-2xl hover:scale-[1.005]">
                 {/* Heading */}
-                <h1 className="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-8 leading-tight">
+                <h1 className="text-xl sm:text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-5 sm:mb-6 leading-tight">
                     Financial Independence Plan
                 </h1>
 
                 {/* Form Fields */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-5">
                     {/* Age Input */}
                     <div className="bg-slate-50 dark:bg-slate-900/30 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-700/60 transition-colors focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
                         <div className="flex items-center justify-between gap-4">
@@ -186,7 +186,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                     type="button"
                     disabled={!isFormValid}
                     onClick={onSubmit}
-                    className={`mt-8 w-full py-4 rounded-2xl text-lg font-bold shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${isFormValid
+                    className={`mt-6 w-full py-3.5 rounded-2xl text-base sm:text-lg font-bold shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${isFormValid
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 dark:hover:shadow-blue-900/40'
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
                         }`}

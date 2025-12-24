@@ -116,7 +116,8 @@ const PlanForMePage: React.FC = () => {
             fiYearData.targetWithdrawal,
             fiInputs.currentAge,
             fiAge,
-            fiInputs.monthlyExpense
+            fiInputs.monthlyExpense,
+            fiResult.maxAge
         );
     }, [fiResult, fiInputs]);
 
@@ -165,6 +166,7 @@ const PlanForMePage: React.FC = () => {
                 rec.stepUpPercent,
                 rec.sipIncreasePercent
             ),
+            maxAge: fiResult.maxAge,
         };
     }, [optimizationResult, fiInputs, fiResult]);
 

@@ -80,7 +80,7 @@ export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
                             <p className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
-                                From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month, increasing by 10% every year!
+                                From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month (till age {planData.maxAge}), increasing by 10% every year!
                             </p>
                         </div>
                     </div>
