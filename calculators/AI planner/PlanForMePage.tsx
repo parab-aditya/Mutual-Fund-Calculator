@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { numberToIndianWords, formatToWords } from '../../utils/formatters';
 import { useFinancialIndependencePlanner, runOptimization } from './useFinancialIndependencePlanner';
 import { FinancialIndependenceInputs, OptimizationResult, DifficultyLevel } from './types';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface FormData {
     age: string;
@@ -337,6 +338,17 @@ const PlanForMePage: React.FC = () => {
                                                         <span className="text-lg font-medium text-slate-500 dark:text-slate-400 ml-2">({currentPlanData.yearsToFI} years from now)</span>
                                                     </span>
                                                 </p>
+                                            </div>
+
+                                            {/* Lottie Animation Filler */}
+                                            <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-6 sm:-mb-2 overflow-hidden">
+                                                <div className="w-full max-w-[280px]">
+                                                    <DotLottieReact
+                                                        src="https://lottie.host/00e578e3-64b1-424a-872c-46fb72938e94/sIFnrUv63S.lottie"
+                                                        loop
+                                                        autoplay
+                                                    />
+                                                </div>
                                             </div>
 
                                             {/* Stats Grid */}
