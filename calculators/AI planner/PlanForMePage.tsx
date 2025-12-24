@@ -208,6 +208,19 @@ const PlanForMePage: React.FC = () => {
         }));
     };
 
+    const formatSmartNumber = (value: number) => {
+        if (value >= 10000000) {
+            return `${(value / 10000000).toFixed(2)}Cr`;
+        }
+        if (value >= 100000) {
+            return `${(value / 100000).toFixed(2)}L`;
+        }
+        if (value >= 1000) {
+            return `${(value / 1000).toFixed(1)}k`;
+        }
+        return Math.floor(value).toString();
+    };
+
     const getCurrentPlanData = () => {
         if (!fiResult || !fiInputs) return null;
 
@@ -219,15 +232,22 @@ const PlanForMePage: React.FC = () => {
 
         if (!fiYearData) return null;
 
+        // Calculate potential separate from target needed
+        // If corpus is large, showing only target (based on expense) is misleading
+        // Rule of thumb: 0.5% monthly SWP (6% yearly) is sustainable
+        const sustainableWithdrawal = fiYearData.sipCorpus * 0.005;
+        const monthlyWithdrawal = Math.max(fiYearData.targetWithdrawal, sustainableWithdrawal);
+
         const inflationRate = 0.07;
-        const todayValue = fiYearData.targetWithdrawal / Math.pow(1 + inflationRate, yearsToFI);
+        // Don't round yet for accurate percentages
+        const todayValue = monthlyWithdrawal / Math.pow(1 + inflationRate, yearsToFI);
         const lifestyleImprovement = ((todayValue / fiInputs.monthlyExpense) - 1) * 100;
 
         return {
             fiAge,
             yearsToFI,
             finalCorpus: fiYearData.sipCorpus,
-            monthlyWithdrawal: fiYearData.targetWithdrawal,
+            monthlyWithdrawal: Math.round(monthlyWithdrawal),
             todayValue: Math.round(todayValue),
             lifestyleImprovement: Math.round(lifestyleImprovement),
         };
@@ -254,7 +274,12 @@ const PlanForMePage: React.FC = () => {
 
         const inflationRate = 0.07;
         const inflatedExpense = fiInputs.monthlyExpense * Math.pow(1 + inflationRate, yearsToFI);
-        const monthlyWithdrawal = Math.round(inflatedExpense * 1.25);
+
+        // Calculate both target and potential
+        const targetWithdrawal = inflatedExpense * 1.25;
+        const sustainableWithdrawal = estimatedCorpus * 0.005;
+        const monthlyWithdrawal = Math.max(targetWithdrawal, sustainableWithdrawal);
+
         const todayValue = monthlyWithdrawal / Math.pow(1 + inflationRate, yearsToFI);
         const lifestyleImprovement = ((todayValue / fiInputs.monthlyExpense) - 1) * 100;
 
@@ -262,7 +287,7 @@ const PlanForMePage: React.FC = () => {
             fiAge: rec.fiAge,
             yearsSaved,
             finalCorpus: Math.round(estimatedCorpus),
-            monthlyWithdrawal,
+            monthlyWithdrawal: Math.round(monthlyWithdrawal),
             todayValue: Math.round(todayValue),
             lifestyleImprovement: Math.round(lifestyleImprovement),
             stepUpPercent: rec.stepUpPercent,
@@ -372,7 +397,7 @@ const PlanForMePage: React.FC = () => {
                                                     <div>
                                                         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
                                                         <p className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
-                                                            From age <span className="font-bold">{currentPlanData.fiAge}</span>, you can withdraw <span className="font-bold">₹{(currentPlanData.monthlyWithdrawal / 100000).toFixed(1)}L</span> per month, increasing by 10% every year!
+                                                            From age <span className="font-bold">{currentPlanData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(currentPlanData.monthlyWithdrawal)}</span> per month, increasing by 10% every year!
                                                         </p>
                                                     </div>
                                                 </div>
@@ -381,7 +406,7 @@ const PlanForMePage: React.FC = () => {
                                                 <div className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
                                                     <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
                                                     <span className="leading-relaxed">
-                                                        <span className="font-bold text-slate-900 dark:text-white">₹{(currentPlanData.monthlyWithdrawal / 100000).toFixed(1)}L</span> at age {currentPlanData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{Math.round(currentPlanData.todayValue / 1000)}k</span> in today's terms (inflation-adjusted). That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{currentPlanData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
+                                                        <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(currentPlanData.monthlyWithdrawal)}</span> at age {currentPlanData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(currentPlanData.todayValue)}</span> in today's terms (inflation-adjusted). That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{currentPlanData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
                                                     </span>
                                                 </div>
                                             </div>
@@ -484,7 +509,7 @@ const PlanForMePage: React.FC = () => {
                                                     <div>
                                                         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
                                                         <p className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
-                                                            From age <span className="font-bold">{aiPlanData.fiAge}</span>, you can withdraw <span className="font-bold">₹{(aiPlanData.monthlyWithdrawal / 100000).toFixed(1)}L</span> per month, increasing by 10% every year!
+                                                            From age <span className="font-bold">{aiPlanData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(aiPlanData.monthlyWithdrawal)}</span> per month, increasing by 10% every year!
                                                         </p>
                                                     </div>
                                                 </div>
@@ -493,7 +518,7 @@ const PlanForMePage: React.FC = () => {
                                                 <div className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
                                                     <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
                                                     <span className="leading-relaxed">
-                                                        <span className="font-bold text-slate-900 dark:text-white">₹{(aiPlanData.monthlyWithdrawal / 100000).toFixed(1)}L</span> at age {aiPlanData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{Math.round(aiPlanData.todayValue / 1000)}k</span> in today's terms (inflation-adjusted). That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{aiPlanData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
+                                                        <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(aiPlanData.monthlyWithdrawal)}</span> at age {aiPlanData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(aiPlanData.todayValue)}</span> in today's terms (inflation-adjusted). That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{aiPlanData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
                                                     </span>
                                                 </div>
                                             </div>
