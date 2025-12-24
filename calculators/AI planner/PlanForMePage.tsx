@@ -341,7 +341,7 @@ const PlanForMePage: React.FC = () => {
                                             </div>
 
                                             {/* Lottie Animation Filler */}
-                                            <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-6 sm:-mb-2 overflow-hidden">
+                                            <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-4 overflow-hidden">
                                                 <div className="w-full max-w-[280px]">
                                                     <DotLottieReact
                                                         src="https://lottie.host/00e578e3-64b1-424a-872c-46fb72938e94/sIFnrUv63S.lottie"
