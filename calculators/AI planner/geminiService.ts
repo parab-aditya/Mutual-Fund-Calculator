@@ -4,7 +4,7 @@
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { OptimizationSolution, AIRecommendation } from './types';
+import { OptimizationSolution, AIRecommendation, DifficultyLevel } from './types';
 
 // Get API key from environment (Vite exposes env vars through import.meta.env)
 // @ts-ignore - Vite provides import.meta.env at runtime
@@ -41,6 +41,26 @@ export const getAIRecommendation = async (
         console.error('Gemini API error, using fallback:', error);
         return getFallbackRecommendation(baselineFiAge, solutions, preferences);
     }
+};
+
+/**
+ * Calculate difficulty level based on step-up and SIP increase percentages
+ */
+const calculateDifficulty = (stepUpPercent: number, sipIncreasePercent: number): DifficultyLevel => {
+    // Easy: only step-up up to 5% OR only SIP increase up to 10%
+    if ((stepUpPercent <= 5 && sipIncreasePercent === 0) ||
+        (stepUpPercent === 0 && sipIncreasePercent <= 10)) {
+        return 'Easy';
+    }
+
+    // Aggressive: both high values or very high single values
+    if ((stepUpPercent >= 10 && sipIncreasePercent >= 10) ||
+        stepUpPercent > 10 || sipIncreasePercent > 15) {
+        return 'Aggressive';
+    }
+
+    // Moderate: everything else
+    return 'Moderate';
 };
 
 /**
@@ -89,8 +109,14 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, just JSON):
 {
     "recommendedIndex": <number>,
     "explanation": "<string>",
-    "alternatives": ["<string>", "<string>"]
-}`;
+    "alternatives": ["<string>", "<string>"],
+    "difficulty": "Easy" | "Moderate" | "Aggressive"
+}
+
+DIFFICULTY CRITERIA:
+- Easy: Only step-up up to 5% OR only SIP increase up to 10%
+- Moderate: Step-up 7-10% alone, or SIP increase 10-15% alone, or mild combinations
+- Aggressive: Both high step-up (10%) and high SIP increase (10%+), or extreme values`;
 };
 
 /**
@@ -119,18 +145,28 @@ const parseAIResponse = (response: string, solutions: OptimizationSolution[]): A
             throw new Error('Invalid recommended index');
         }
 
+        // Validate and extract difficulty
+        const recommendedSolution = solutions[recommendedIndex];
+        let difficulty: DifficultyLevel = parsed.difficulty;
+        if (!['Easy', 'Moderate', 'Aggressive'].includes(difficulty)) {
+            difficulty = calculateDifficulty(recommendedSolution.stepUpPercent, recommendedSolution.sipIncreasePercent);
+        }
+
         return {
             recommendedIndex,
             explanation: parsed.explanation || 'This solution offers the best balance of FI age improvement with manageable behavior change.',
-            alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : []
+            alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : [],
+            difficulty
         };
     } catch (error) {
         console.error('Failed to parse AI response:', error, response);
-        // Return first solution as fallback
+        // Return first solution as fallback with calculated difficulty
+        const fallbackSolution = solutions[0];
         return {
             recommendedIndex: 0,
             explanation: 'This solution offers significant improvement in your financial independence timeline.',
-            alternatives: []
+            alternatives: [],
+            difficulty: calculateDifficulty(fallbackSolution.stepUpPercent, fallbackSolution.sipIncreasePercent)
         };
     }
 };
@@ -148,7 +184,8 @@ const getFallbackRecommendation = (
         return {
             recommendedIndex: -1,
             explanation: 'No optimization solutions available.',
-            alternatives: []
+            alternatives: [],
+            difficulty: 'Easy'
         };
     }
 
@@ -207,9 +244,13 @@ const getFallbackRecommendation = (
         explanation = `This plan reduces your FI age from ${baselineFiAge} to ${best.solution.fiAge} (${best.solution.improvementYears} years earlier) with minimal adjustments to your current savings behavior.`;
     }
 
+    // Calculate difficulty for the recommended solution
+    const difficulty = calculateDifficulty(best.solution.stepUpPercent, best.solution.sipIncreasePercent);
+
     return {
         recommendedIndex: best.index,
         explanation,
-        alternatives
+        alternatives,
+        difficulty
     };
 };

@@ -30,11 +30,15 @@ export interface OptimizationSolution {
     improvementYears: number; // Years improved from baseline
 }
 
+// Difficulty level for AI recommendations
+export type DifficultyLevel = 'Easy' | 'Moderate' | 'Aggressive';
+
 // AI recommendation response
 export interface AIRecommendation {
     recommendedIndex: number;  // Index of recommended solution
     explanation: string;
     alternatives: string[];
+    difficulty: DifficultyLevel; // Difficulty of the recommended change
 }
 
 // Full optimization result

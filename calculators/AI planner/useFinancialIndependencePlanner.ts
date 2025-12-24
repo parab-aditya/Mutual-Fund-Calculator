@@ -275,7 +275,8 @@ export const runOptimization = async (
             recommendation: {
                 recommendedIndex: 0,
                 explanation: 'This solution offers the best improvement in your financial independence timeline.',
-                alternatives: []
+                alternatives: [],
+                difficulty: 'Easy' as const
             },
             skipOptimization: false
         };
