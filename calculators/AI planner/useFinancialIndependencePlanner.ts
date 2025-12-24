@@ -153,7 +153,7 @@ export const runOptimization = async (
             recommendedSolution: null,
             recommendation: null,
             skipOptimization: true,
-            skipReason: `Already optimal! Your baseline FI age of ${baselineFiAge} is at or below the target of ${OPTIMIZATION_TARGET_FI_AGE}.`
+            skipReason: `Already optimal! Your financial independence age is ${baselineFiAge} which is already optimised. Keep investing!`
         };
     }
 
