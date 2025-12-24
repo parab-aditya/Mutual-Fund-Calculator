@@ -36,8 +36,6 @@ export const SWP_SUSTAINABILITY_BUFFER = 0.10; // 10% of initial corpus must rem
 // Optimization Constraints
 // ============================================
 
-export const OPTIMIZATION_MAX_STEP_UP = 10; // Max 10%
-export const OPTIMIZATION_MAX_SIP_INCREASE = 20; // Max 20%
 export const OPTIMIZATION_TARGET_FI_AGE = 40; // Target to reach
 
 // Test values for step-up only (ordered by preference)
@@ -54,10 +52,4 @@ export const COMBINED_SCENARIOS: Array<[number, number]> = [
     [7, 10],
     [10, 5],
     [10, 10],
-];
-
-// Fallback aggressive scenarios (only if nothing else works)
-export const AGGRESSIVE_SCENARIOS: Array<[number, number]> = [
-    [10, 15],
-    [10, 20],
 ];

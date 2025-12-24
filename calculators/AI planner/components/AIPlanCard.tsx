@@ -3,6 +3,7 @@ import { formatToWords } from '../../../utils/formatters';
 import { SparkleIcon, WalletIcon, ChartIcon, ArrowUpIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
 import { DifficultyLevel, OptimizationResult } from '../types';
+import { SWP_STEP_UP_PERCENTAGE } from '../constants';
 
 // Difficulty pill config
 const difficultyConfig: Record<DifficultyLevel, { bg: string; text: string; icon: string; border: string }> = {
@@ -128,7 +129,7 @@ export const AIPlanCard: React.FC<AIPlanCardProps> = ({
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
                                 <p className="text-sm sm:text-[15px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
-                                    From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month (till age {planData.maxAge}), increasing by 10% every year!
+                                    From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month (till age {planData.maxAge}), increasing by {SWP_STEP_UP_PERCENTAGE}% every year!
                                 </p>
                             </div>
                         </div>
