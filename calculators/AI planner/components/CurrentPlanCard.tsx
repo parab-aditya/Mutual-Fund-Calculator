@@ -39,11 +39,11 @@ export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
             <div className="flex-1 flex flex-col">
                 {/* Hero Summary */}
                 <div className="bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-900/10 dark:to-slate-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-6 mb-8 shadow-sm">
-                    <p className="text-lg text-slate-700 dark:text-blue-100 leading-relaxed font-medium">
+                    <p className="text-base sm:text-lg text-slate-700 dark:text-blue-100 leading-relaxed font-medium">
                         If you continue investing <span className="font-bold whitespace-nowrap">₹{inputs.monthlyInvestment.toLocaleString('en-IN')}</span> per month, you can become financially independent by{' '}
-                        <span className="block mt-2 text-3xl font-extrabold text-blue-600 dark:text-blue-400">
+                        <span className="block mt-2 text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400">
                             Age {planData.fiAge}
-                            <span className="text-lg font-medium text-slate-500 dark:text-slate-400 ml-2">({planData.yearsToFI} years from now)</span>
+                            <span className="text-sm sm:text-lg font-medium text-slate-500 dark:text-slate-400 ml-2">({planData.yearsToFI} years from now)</span>
                         </span>
                     </p>
                 </div>
@@ -74,12 +74,12 @@ export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
 
                     {/* Passive Income */}
                     <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/20 border border-slate-100 dark:border-slate-700/50">
-                        <div className="mt-1 w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center flex-shrink-0">
+                        <div className="mt-0.5 w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0">
                             <ChartIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                         </div>
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
-                            <p className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                            <p className="text-sm sm:text-[15px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
                                 From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month (till age {planData.maxAge}), increasing by 10% every year!
                             </p>
                         </div>

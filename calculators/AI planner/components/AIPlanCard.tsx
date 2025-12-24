@@ -78,12 +78,12 @@ export const AIPlanCard: React.FC<AIPlanCardProps> = ({
                     {/* Hero Summary */}
                     <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl p-6 mb-8 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                        <p className="text-lg text-emerald-900 dark:text-emerald-100 leading-relaxed font-medium relative z-10">
+                        <p className="text-base sm:text-lg text-emerald-900 dark:text-emerald-100 leading-relaxed font-medium relative z-10">
                             By making a small change, you can reach financial independence by{' '}
-                            <span className="block mt-2 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                            <span className="block mt-2 text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
                                 Age {planData.fiAge}
                                 {planData.yearsSaved > 0 && (
-                                    <span className="inline-flex items-center ml-3 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 rounded-full text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                                    <span className="inline-flex items-center ml-3 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 rounded-full text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300">
                                         🚀 {planData.yearsSaved} Years Earlier
                                     </span>
                                 )}
@@ -122,12 +122,12 @@ export const AIPlanCard: React.FC<AIPlanCardProps> = ({
 
                         {/* Passive Income */}
                         <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/20 border border-slate-100 dark:border-slate-700/50">
-                            <div className="mt-1 w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center flex-shrink-0">
+                            <div className="mt-0.5 w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center flex-shrink-0">
                                 <ChartIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
                             </div>
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Passive Income</p>
-                                <p className="text-base font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
+                                <p className="text-sm sm:text-[15px] font-medium text-slate-800 dark:text-slate-100 leading-relaxed">
                                     From age <span className="font-bold">{planData.fiAge}</span>, you can withdraw <span className="font-bold">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> per month (till age {planData.maxAge}), increasing by 10% every year!
                                 </p>
                             </div>
