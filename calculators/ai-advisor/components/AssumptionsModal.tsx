@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
     MAX_AGE_MAPPING,
     INFLATION_RATE,
@@ -63,8 +64,8 @@ export const AssumptionsModal = memo<AssumptionsModalProps>(function Assumptions
 
     const maxAge = MAX_AGE_MAPPING[healthStatus];
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    const modalContent = (
+        <div className="fixed inset-0 z-[50] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
@@ -176,4 +177,8 @@ export const AssumptionsModal = memo<AssumptionsModalProps>(function Assumptions
             `}</style>
         </div>
     );
+
+    // Use portal to render modal at document.body level
+    // This ensures the modal is always centered on viewport, not affected by parent containers
+    return createPortal(modalContent, document.body);
 });
