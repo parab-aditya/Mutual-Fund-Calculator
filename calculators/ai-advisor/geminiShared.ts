@@ -44,7 +44,7 @@ Context: Baseline FI=${baselineFiAge}, Target=${preferences.targetAge}
 Solutions (i=index, fi=FI age, su=step-up%, si=SIP increase%):
 ${JSON.stringify(solutionsData)}
 
-Rank by: 1) Lowest fi, 2) Lowest su, 3) Lowest si
+Rank by: 1) Easiest difficulty (Easy < Moderate < Aggressive), 2) Lowest fi, 3) Lowest su, 4) Lowest si
 Bonus: fi≤${preferences.targetAge} is preferred even with slightly higher su/si.
 
 Respond JSON only:
