@@ -135,7 +135,17 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                         <div className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
                             <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
                             <span className="leading-relaxed">
-                                <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> at age {planData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(planData.todayValue)}</span> in today's terms (inflation & 12.5% LTCG tax adjusted). That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{planData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
+                                <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(planData.monthlyWithdrawal)}</span> at age {planData.fiAge} equals <span className="font-bold text-slate-900 dark:text-white">₹{formatSmartNumber(planData.todayValue)}</span> in today's terms
+                                <span className="relative inline-flex items-center ml-0.5 group/tooltip cursor-pointer align-middle">
+                                    <svg className="w-4 h-4 text-slate-400 hover:text-slate-500 dark:text-slate-500 dark:hover:text-slate-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 16v-4" />
+                                        <path d="M12 8h.01" />
+                                    </svg>
+                                    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 px-3 py-2 text-[13px] font-normal text-white bg-[#3c4043] dark:bg-[#5f6368] rounded shadow-[0_1px_3px_0_rgba(60,64,67,0.3),0_4px_8px_3px_rgba(60,64,67,0.15)] opacity-0 scale-95 group-hover/tooltip:opacity-100 group-hover/tooltip:scale-100 transition-all duration-150 ease-out whitespace-nowrap z-50">
+                                        Adjusted for inflation & 12.5% LTCG tax
+                                    </span>
+                                </span>. That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{planData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
                             </span>
                         </div>
                     </div>
