@@ -22,12 +22,32 @@ import {
 } from '../constants';
 
 // ============================================
+// Safety Constants
+// ============================================
+const MAX_CACHE_SIZE = 1000; // Prevent unbounded memory growth
+const MAX_BINARY_SEARCH_ITERATIONS = 100; // Safety limit for binary search
+const VALID_HEALTH_STATUSES = ['needs_improvement', 'generally_healthy', 'very_healthy'] as const;
+const DEFAULT_MAX_AGE = 80;
+
+// ============================================
 // Calculation Cache for Memoization
 // ============================================
 const corpusCache = new Map<string, number>();
 
 const getCacheKey = (monthlyInvestment: number, years: number, stepUp: number): string => {
     return `${monthlyInvestment}-${years}-${stepUp}`;
+};
+
+/**
+ * Evict oldest entries if cache exceeds max size
+ */
+const maintainCacheSize = (): void => {
+    if (corpusCache.size > MAX_CACHE_SIZE) {
+        // Remove first 20% of entries (oldest due to Map insertion order)
+        const entriesToRemove = Math.floor(MAX_CACHE_SIZE * 0.2);
+        const keys = Array.from(corpusCache.keys()).slice(0, entriesToRemove);
+        keys.forEach(key => corpusCache.delete(key));
+    }
 };
 
 // ============================================
@@ -99,6 +119,8 @@ const calculateCorpusWithVariableRate = (
         result = existingCorpusGrowth + remainingResult.totalValue;
     }
 
+    // Maintain cache size before adding new entry
+    maintainCacheSize();
     corpusCache.set(cacheKey, result);
     return result;
 };
@@ -178,6 +200,7 @@ const checkSwpSustainability = (
 
 /**
  * Calculate FI age using BINARY SEARCH (O(log n) instead of O(n))
+ * Includes iteration safety guard to prevent infinite loops
  */
 const calculateFiAge = (
     monthlyInvestment: number,
@@ -186,11 +209,18 @@ const calculateFiAge = (
     maxAge: number,
     stepUpPercent: number = 0
 ): number | null => {
+    // Guard: Validate inputs to prevent edge case loops
+    if (currentAge >= 60 || currentAge >= maxAge || monthlyInvestment <= 0 || monthlyExpense <= 0) {
+        return null;
+    }
+
     let low = currentAge;
     let high = Math.min(60, maxAge);
     let result: number | null = null;
+    let iterations = 0;
 
-    while (low <= high) {
+    while (low <= high && iterations < MAX_BINARY_SEARCH_ITERATIONS) {
+        iterations++;
         const mid = Math.floor((low + high) / 2);
         const yearsFromNow = mid - currentAge;
         const yearsInFI = maxAge - mid;
@@ -317,7 +347,12 @@ const runOptimization = async (
     corpusCache.clear();
 
     const { currentAge, monthlyExpense, monthlyInvestment, healthStatus } = inputs;
-    const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
+
+    // Guard: Validate healthStatus and get maxAge with proper fallback
+    const validHealthStatus = VALID_HEALTH_STATUSES.includes(healthStatus as typeof VALID_HEALTH_STATUSES[number])
+        ? healthStatus
+        : 'generally_healthy';
+    const maxAge = MAX_AGE_MAPPING[validHealthStatus] ?? DEFAULT_MAX_AGE;
 
     if (baselineFiAge !== null && baselineFiAge <= OPTIMIZATION_TARGET_FI_AGE) {
         return {
