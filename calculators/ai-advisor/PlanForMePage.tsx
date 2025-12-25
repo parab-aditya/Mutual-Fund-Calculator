@@ -177,10 +177,9 @@ const PlanForMePage: React.FC = () => {
     }, [isFormValid]);
 
     const handleReset = useCallback(() => {
-        setShowResults(false);
-        setOptimizationResult(null);
-        setOptimizationRunId(null);
-        currentRunIdRef.current = null;
+        // Full page refresh is the most reliable way to reset all state
+        // This avoids complex timing issues with React state in production
+        window.location.reload();
     }, []);
 
     const handleFormChange = useCallback((newData: FormData) => {
