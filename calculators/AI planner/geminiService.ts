@@ -1,16 +1,24 @@
 /**
  * Gemini AI Service for Financial Independence Optimization
- * Uses Google Gemini API to intelligently rank optimization solutions
+ * 
+ * This service handles AI recommendations with a hybrid approach:
+ * 1. Production (Vercel): Calls /api/gemini-recommendation serverless function
+ * 2. Local Dev: Can use VITE_GEMINI_API_KEY for direct calls (optional)
+ * 3. Fallback: Local algorithm if API is unavailable
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { OptimizationSolution, AIRecommendation, DifficultyLevel } from './types';
 
-// Get API key from environment (Vite exposes env vars through import.meta.env)
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+// Local dev API key (only for local testing, not used in production)
+const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+
+// Determine if we're in production (Vercel)
+const isProduction = import.meta.env.PROD;
 
 /**
  * Get AI recommendation for the best optimization solution
+ * Tries server-side API first, falls back to direct call or local algorithm
  */
 export const getAIRecommendation = async (
     baselineFiAge: number,
@@ -21,28 +29,73 @@ export const getAIRecommendation = async (
         targetAge: number;
     }
 ): Promise<AIRecommendation> => {
-    // If no API key, use fallback
-    if (!GEMINI_API_KEY) {
-        console.warn('[Gemini] API key not configured, using fallback ranking');
-        return getFallbackRecommendation(baselineFiAge, solutions, preferences);
-    }
-
-    console.log('[Gemini] Calling Gemini API for AI recommendation...');
-
+    // Strategy 1: Try server-side API (secure, works in production)
     try {
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
-
-        const prompt = buildPrompt(baselineFiAge, solutions, preferences);
-        const result = await model.generateContent(prompt);
-        const response = result.response.text();
-        console.log('[Gemini] API call successful, parsing response...');
-
-        return parseAIResponse(response, solutions);
+        console.log('[Gemini] Trying server-side API...');
+        const serverResult = await callServerAPI(baselineFiAge, solutions, preferences);
+        if (serverResult) {
+            console.log(`[Gemini] Server API success (source: ${serverResult.source})`);
+            return serverResult.recommendation;
+        }
     } catch (error) {
-        console.error('[Gemini] API error, using fallback:', error);
-        return getFallbackRecommendation(baselineFiAge, solutions, preferences);
+        console.warn('[Gemini] Server API failed:', error);
     }
+
+    // Strategy 2: Direct Gemini call (only for local dev with VITE_ key)
+    if (!isProduction && VITE_GEMINI_API_KEY) {
+        console.log('[Gemini] Trying direct API call (local dev)...');
+        try {
+            const directResult = await callGeminiDirect(baselineFiAge, solutions, preferences);
+            return directResult;
+        } catch (error) {
+            console.error('[Gemini] Direct API error:', error);
+        }
+    }
+
+    // Strategy 3: Local fallback algorithm
+    console.log('[Gemini] Using local fallback algorithm');
+    return getFallbackRecommendation(baselineFiAge, solutions, preferences);
+};
+
+/**
+ * Call the server-side API endpoint
+ */
+const callServerAPI = async (
+    baselineFiAge: number,
+    solutions: OptimizationSolution[],
+    preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
+): Promise<{ recommendation: AIRecommendation; source: string } | null> => {
+    const response = await fetch('/api/gemini-recommendation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ baselineFiAge, solutions, preferences })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Server API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+};
+
+/**
+ * Direct Gemini API call (for local development only)
+ */
+const callGeminiDirect = async (
+    baselineFiAge: number,
+    solutions: OptimizationSolution[],
+    preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
+): Promise<AIRecommendation> => {
+    const genAI = new GoogleGenerativeAI(VITE_GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+
+    const prompt = buildPrompt(baselineFiAge, solutions, preferences);
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
+    console.log('[Gemini] Direct API call successful, parsing response...');
+
+    return parseAIResponse(response, solutions);
 };
 
 /**

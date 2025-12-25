@@ -1,6 +1,16 @@
 {
   "rewrites": [
-    { "source": "/assets/:file*", "destination": "/assets/:file*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/assets/:file*",
+      "destination": "/assets/:file*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
