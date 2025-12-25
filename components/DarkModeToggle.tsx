@@ -7,7 +7,7 @@ const DarkModeToggle: React.FC = () => {
     return (
         <button
             onClick={toggleTheme}
-            className="fixed top-4 right-4 z-50 group"
+            className="fixed top-4 right-4 z-50"
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
             <div className="relative w-14 h-7 sm:w-16 sm:h-8 rounded-full bg-slate-200/80 dark:bg-slate-700/80 backdrop-blur-md border border-slate-300/50 dark:border-slate-600/50 shadow-lg transition-colors duration-300 overflow-hidden">
@@ -60,11 +60,6 @@ const DarkModeToggle: React.FC = () => {
                     </svg>
                 </div>
             </div>
-
-            {/* Hover tooltip */}
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none shadow-lg">
-                {isDark ? 'Light mode' : 'Dark mode'}
-            </span>
         </button>
     );
 };

@@ -81,7 +81,12 @@ const Navigation: React.FC = () => {
     };
 
     const handlePlanForMeClick = () => {
-        navigate('/sip-calculator/plan-for-me');
+        // If already on the AI Advisor page, refresh to start over
+        if (location.pathname === '/sip-calculator/plan-for-me') {
+            window.location.reload();
+        } else {
+            navigate('/sip-calculator/plan-for-me');
+        }
     };
 
     return (

@@ -8,7 +8,7 @@ import { getAIRecommendation } from './geminiService';
 import { runOptimizationFallback } from './optimizationFallback';
 
 // Components
-import { RefreshIcon, CurrentPlanCard, AIPlanCard, FinancialPlannerForm, FormData } from './components';
+import { CurrentPlanCard, AIPlanCard, FinancialPlannerForm, FormData } from './components';
 import { calculatePlanMetrics, getProposedChangeText } from './utils/planMetrics';
 
 const PlanForMePage: React.FC = () => {
@@ -176,11 +176,6 @@ const PlanForMePage: React.FC = () => {
         });
     }, [isFormValid]);
 
-    const handleReset = useCallback(() => {
-        // Full page refresh is the most reliable way to reset all state
-        // This avoids complex timing issues with React state in production
-        window.location.reload();
-    }, []);
 
     const handleFormChange = useCallback((newData: FormData) => {
         setFormData(newData);
@@ -263,7 +258,7 @@ const PlanForMePage: React.FC = () => {
                     {showResults && fiResult ? (
                         <div className="space-y-6 animate-fade-in">
                             {/* Header with Summary */}
-                            <div className="flex justify-between items-center bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl p-2 px-4 shadow-sm border border-slate-100 dark:border-slate-700">
+                            <div className="flex justify-center items-center bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl p-2 px-4 shadow-sm border border-slate-100 dark:border-slate-700">
                                 <div className="flex gap-6 text-sm">
                                     <div className="flex flex-col">
                                         <span className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Present Age</span>
@@ -280,14 +275,6 @@ const PlanForMePage: React.FC = () => {
                                         <span className="font-bold text-slate-800 dark:text-slate-200">₹{fiInputs?.monthlyInvestment.toLocaleString('en-IN')} /mo</span>
                                     </div>
                                 </div>
-
-                                <button
-                                    onClick={handleReset}
-                                    className="p-2.5 rounded-full bg-white dark:bg-slate-800 shadow-sm text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 hover:scale-110 border border-slate-100 dark:border-slate-700"
-                                    title="Start Over"
-                                >
-                                    <RefreshIcon className="w-5 h-5" />
-                                </button>
                             </div>
 
                             {/* Cards Grid */}
