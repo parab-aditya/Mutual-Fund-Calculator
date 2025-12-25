@@ -138,7 +138,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                     <div className="bg-slate-50 dark:bg-slate-900/30 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-700/60 transition-colors focus-within:border-blue-400 dark:focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
                         <div className="flex items-center justify-between gap-4 mb-2">
                             <label className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                                Your Monthly Expenditure:
+                                Your Monthly Expenditure (excluding EMIs):
                             </label>
                             <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 w-40">
                                 <span className="text-slate-400 font-medium mr-2">₹</span>
