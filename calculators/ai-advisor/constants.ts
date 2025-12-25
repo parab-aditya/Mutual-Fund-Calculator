@@ -17,7 +17,7 @@ export const HEALTH_LIFESTYLE_OPTIONS = [
 // Input Validation Limits
 export const MAX_AGE_INPUT = 99;
 export const MAX_MONTHLY_EXPENDITURE = 1000000;
-export const MAX_MONTHLY_INVESTMENT = 500000;
+export const MAX_MONTHLY_INVESTMENT = 1000000;
 
 // Return Rates
 export const INFLATION_RATE = 7; // 7% annual inflation
