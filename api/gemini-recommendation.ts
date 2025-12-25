@@ -274,7 +274,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log('[API] Calling Gemini API...');
 
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
         const prompt = buildPrompt(baselineFiAge, solutions, preferences);
         const result = await model.generateContent(prompt);
