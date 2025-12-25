@@ -70,7 +70,7 @@ export const getAIRecommendation = async (
     if (!isLocalDevelopment()) {
         try {
             console.log('🤖 [Gemini] Initiating AI request via Server API...');
-            const response = await fetch(resolveApiPath('/api/gemini-recommendation'), {
+            const response = await fetch(resolveApiPath('/api/ai-recommendation'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ baselineFiAge, solutions, preferences })
