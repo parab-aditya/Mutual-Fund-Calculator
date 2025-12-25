@@ -74,11 +74,11 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                 <CardHeader difficulty={planData.difficulty} />
                 <div className="flex-1 flex flex-col">
                     {/* Hero Summary */}
-                    <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl p-6 mb-8 relative overflow-hidden">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl p-5 mb-6 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none"></div>
-                        <p className="text-base sm:text-lg text-emerald-900 dark:text-emerald-100 leading-relaxed font-medium relative z-10">
+                        <p className="text-sm sm:text-base text-emerald-900 dark:text-emerald-100 leading-relaxed font-medium relative z-10">
                             By making a small change, you can reach financial independence by{' '}
-                            <span className="block mt-2 text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                            <span className="block mt-1.5 text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
                                 Age {planData.fiAge}
                                 {planData.yearsSaved > 0 && (
                                     <span className="inline-flex items-center ml-3 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/20 rounded-full text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300">
@@ -90,7 +90,7 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                     </div>
 
                     {/* Proposed Change - Ticket/Coupon Style */}
-                    <div className="mb-8 relative">
+                    <div className="mb-6 relative">
                         <div className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl border-2 border-dashed border-emerald-200 dark:border-emerald-700/50"></div>
                         <div className="relative p-5 flex items-start gap-4">
                             <div className="mt-1 w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 text-emerald-600">
@@ -114,7 +114,7 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                             </div>
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Final Corpus at Age {planData.fiAge}</p>
-                                <p className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">₹{formatToWords(planData.finalCorpus)}</p>
+                                <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">₹{formatToWords(planData.finalCorpus)}</p>
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
 // Card wrapper component (memoized)
 const CardWrapper = memo<{ children: React.ReactNode }>(function CardWrapper({ children }) {
     return (
-        <div className="group relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-900/20 border-2 border-emerald-400/30 dark:border-emerald-500/30 p-6 sm:p-8 flex flex-col h-full transform transition-all duration-300 hover:scale-[1.01]">
+        <div className="group relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-900/20 border-2 border-emerald-400/30 dark:border-emerald-500/30 p-5 sm:p-6 flex flex-col h-full transform transition-all duration-300 hover:scale-[1.01]">
             {/* Recommended Badge */}
             <div className="absolute -top-4 right-8 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
                 <SparkleIcon className="w-4 h-4" />
@@ -205,12 +205,12 @@ const CardWrapper = memo<{ children: React.ReactNode }>(function CardWrapper({ c
 // Card header component (memoized)
 const CardHeader = memo<{ difficulty: DifficultyLevel | null }>(function CardHeader({ difficulty }) {
     return (
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
                     <SparkleIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">AI-Optimised</h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">AI-Optimised</h2>
             </div>
             {difficulty && (
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${difficultyConfig[difficulty].bg} ${difficultyConfig[difficulty].text} ${difficultyConfig[difficulty].border}`}>

@@ -29,21 +29,21 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
     }
 
     return (
-        <div className="group relative bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200/60 dark:border-slate-700/60 p-6 sm:p-8 flex flex-col h-full transition-all duration-300 hover:shadow-2xl hover:border-blue-200/60 dark:hover:border-blue-800/30">
+        <div className="group relative bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200/60 dark:border-slate-700/60 p-5 sm:p-6 flex flex-col h-full transition-all duration-300 hover:shadow-2xl hover:border-blue-200/60 dark:hover:border-blue-800/30">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-5">
                 <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                     <TrendUpIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Current Plan</h2>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Current Plan</h2>
             </div>
 
             <div className="flex-1 flex flex-col">
                 {/* Hero Summary */}
-                <div className="bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-900/10 dark:to-slate-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-6 mb-8 shadow-sm">
-                    <p className="text-base sm:text-lg text-slate-700 dark:text-blue-100 leading-relaxed font-medium">
+                <div className="bg-gradient-to-br from-blue-50 to-slate-50 dark:from-blue-900/10 dark:to-slate-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-5 mb-6 shadow-sm">
+                    <p className="text-sm sm:text-base text-slate-700 dark:text-blue-100 leading-relaxed font-medium">
                         If you continue investing <span className="font-bold whitespace-nowrap">₹{inputs.monthlyInvestment.toLocaleString('en-IN')}</span> per month, you can become financially independent by{' '}
-                        <span className="block mt-2 text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400">
+                        <span className="block mt-1.5 text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400">
                             Age {planData.fiAge}
                             <span className="text-sm sm:text-lg font-medium text-slate-500 dark:text-slate-400 ml-2">({planData.yearsToFI} years from now)</span>
                         </span>
@@ -51,8 +51,8 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                 </div>
 
                 {/* Lottie Animation Filler */}
-                <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-4 overflow-hidden">
-                    <div className="w-full max-w-[280px]">
+                <div className="flex-1 flex items-center justify-center -mt-2 mb-3 sm:-mt-2 overflow-hidden">
+                    <div className="w-full max-w-[240px]">
                         <DotLottieReact
                             src={resolveAssetPath('/animations/financial-planning.lottie')}
                             loop
@@ -72,7 +72,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                         </div>
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Final Corpus at Age {planData.fiAge}</p>
-                            <p className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">₹{formatToWords(planData.finalCorpus)}</p>
+                            <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">₹{formatToWords(planData.finalCorpus)}</p>
                         </div>
                     </div>
 
