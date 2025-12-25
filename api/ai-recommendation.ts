@@ -34,11 +34,15 @@ interface RequestBody {
 
 // =============================================================================
 // AI PROVIDER CONFIGURATION
+// 
+// To change models, set these in Vercel Environment Variables:
+//   OPENROUTER_MODEL=google/gemini-2.0-flash-001
+//   GEMINI_MODEL=gemini-2.0-flash
 // =============================================================================
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_MODEL = 'google/gemini-2.5-flash-preview';
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
 // =============================================================================
 // HELPER FUNCTIONS (inlined from geminiShared.ts)

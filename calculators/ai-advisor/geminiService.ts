@@ -18,11 +18,15 @@ import { resolveApiPath } from '../../utils/basePath';
 
 // =============================================================================
 // AI PROVIDER CONFIGURATION
+// 
+// To change models, set these in .env.local:
+//   VITE_OPENROUTER_MODEL=google/gemini-2.0-flash-001
+//   VITE_GEMINI_MODEL=gemini-2.0-flash
 // =============================================================================
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_MODEL = 'google/gemini-3-flash-preview';
-const GEMINI_MODEL = 'gemini-3-flash-preview';
+const OPENROUTER_MODEL = import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemini-2.0-flash-001';
+const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
 
 // Local dev API keys (from .env.local, only for local testing)
 // Priority: OpenRouter > Gemini
