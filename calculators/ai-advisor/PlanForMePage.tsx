@@ -277,27 +277,7 @@ const PlanForMePage: React.FC = () => {
                 <div className="w-full max-w-6xl">
                     {/* Results View */}
                     {showResults && fiResult ? (
-                        <div className="space-y-6 animate-fade-in">
-                            {/* Header with Summary */}
-                            <div className="flex justify-center items-center bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl p-2 px-4 shadow-sm border border-slate-100 dark:border-slate-700">
-                                <div className="flex gap-6 text-sm">
-                                    <div className="flex flex-col">
-                                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Present Age</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{fiInputs?.currentAge} years</span>
-                                    </div>
-                                    <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
-                                    <div className="flex flex-col">
-                                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Expenses</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">₹{fiInputs?.monthlyExpense.toLocaleString('en-IN')} /mo</span>
-                                    </div>
-                                    <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
-                                    <div className="flex flex-col">
-                                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Investment</span>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">₹{fiInputs?.monthlyInvestment.toLocaleString('en-IN')} /mo</span>
-                                    </div>
-                                </div>
-                            </div>
-
+                        <div className="animate-fade-in">
                             {/* Cards Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                                 {/* Current Plan Card */}
@@ -312,6 +292,7 @@ const PlanForMePage: React.FC = () => {
                                     isOptimizing={optimizationRunId !== null && optimizationResult === null}
                                     planData={aiPlanData}
                                     optimizationResult={optimizationResult}
+                                    inputs={fiInputs}
                                 />
                             </div>
                         </div>

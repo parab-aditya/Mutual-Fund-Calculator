@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { formatToWords } from '../../../utils/formatters';
 import { SparkleIcon, WalletIcon, ChartIcon, ArrowUpIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
-import { DifficultyLevel, OptimizationResult } from '../types';
+import { DifficultyLevel, OptimizationResult, FinancialIndependenceInputs } from '../types';
 import { SWP_STEP_UP_PERCENTAGE } from '../constants';
 import AIOptimizationLoader from './AIOptimizationLoader';
+import { AssumptionsModal } from './AssumptionsModal';
 
 // Difficulty pill config
 const difficultyConfig: Record<DifficultyLevel, { bg: string; text: string; icon: string; border: string }> = {
@@ -47,13 +48,16 @@ interface AIPlanCardProps {
     isOptimizing: boolean;
     planData: AIPlanDisplayData | null;
     optimizationResult: OptimizationResult | null;
+    inputs: FinancialIndependenceInputs | null;
 }
 
 export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
     isOptimizing,
     planData,
-    optimizationResult
+    optimizationResult,
+    inputs
 }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     // Loading state
     if (isOptimizing) {
         return (
@@ -148,8 +152,30 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                                 </span>. That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{planData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
                             </span>
                         </div>
+
+                        {/* Assumptions Link */}
+                        {inputs && (
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="mt-4 text-xs font-medium text-emerald-500 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 hover:underline transition-colors duration-200 cursor-pointer"
+                            >
+                                Assumptions & Calculations →
+                            </button>
+                        )}
                     </div>
                 </div>
+
+                {/* Assumptions Modal */}
+                {inputs && (
+                    <AssumptionsModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        userAge={inputs.currentAge}
+                        monthlyExpense={inputs.monthlyExpense}
+                        monthlyInvestment={inputs.monthlyInvestment}
+                        healthStatus={inputs.healthStatus}
+                    />
+                )}
             </CardWrapper>
         );
     }

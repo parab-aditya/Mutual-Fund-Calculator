@@ -1,11 +1,12 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { formatToWords } from '../../../utils/formatters';
 import { TrendUpIcon, WalletIcon, ChartIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
-import { PlanDisplayData, FinancialIndependenceInputs, MinimumInvestmentData } from '../types';
+import { PlanDisplayData, FinancialIndependenceInputs, MinimumInvestmentData, HealthStatus } from '../types';
 import { SWP_STEP_UP_PERCENTAGE } from '../constants';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { resolveAssetPath } from '../../../utils/basePath';
+import { AssumptionsModal } from './AssumptionsModal';
 
 interface CurrentPlanCardProps {
     planData: PlanDisplayData | null;
@@ -18,6 +19,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
     inputs,
     minimumInvestmentData
 }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     if (!planData) {
         return (
@@ -183,8 +185,26 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                             </span>. That is <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs">{planData.lifestyleImprovement}% better lifestyle</span> than your current expenses!
                         </span>
                     </div>
+
+                    {/* Assumptions Link */}
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="mt-4 text-xs font-medium text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors duration-200 cursor-pointer"
+                    >
+                        Assumptions & Calculations →
+                    </button>
                 </div>
             </div>
+
+            {/* Assumptions Modal */}
+            <AssumptionsModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                userAge={inputs.currentAge}
+                monthlyExpense={inputs.monthlyExpense}
+                monthlyInvestment={inputs.monthlyInvestment}
+                healthStatus={inputs.healthStatus}
+            />
         </div>
     );
 });

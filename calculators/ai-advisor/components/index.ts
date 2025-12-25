@@ -2,3 +2,4 @@ export { RefreshIcon, TrendUpIcon, SparkleIcon, WalletIcon, ChartIcon, ArrowUpIc
 export { CurrentPlanCard } from './CurrentPlanCard';
 export { AIPlanCard } from './AIPlanCard';
 export { FinancialPlannerForm, type FormData } from './FinancialPlannerForm';
+export { AssumptionsModal } from './AssumptionsModal';
