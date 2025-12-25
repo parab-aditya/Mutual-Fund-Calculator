@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildPrompt, parseAIResponse, getFallbackRecommendation } from '../calculators/AI planner/geminiShared';
-import { OptimizationSolution, AIRecommendation, DifficultyLevel } from '../calculators/AI planner/types';
+import { OptimizationSolution } from '../calculators/AI planner/types';
 
 interface RequestBody {
     baselineFiAge: number;
@@ -25,17 +25,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(204).end();
     }
 
+    // Explicit method guard - only allow POST
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+        return res.status(405).json({
+            error: 'Method not allowed',
+            message: `Expected POST, received ${req.method}`,
+            recommendation: null,
+            source: 'error'
+        });
     }
 
     try {
         const body: RequestBody = req.body;
+
+        // Validate request body exists
+        if (!body || typeof body !== 'object') {
+            return res.status(400).json({
+                error: 'Invalid request body',
+                recommendation: null,
+                source: 'error'
+            });
+        }
+
         const { baselineFiAge, solutions, preferences } = body;
 
-        // Validate request
+        // Validate required fields
         if (!solutions || !Array.isArray(solutions) || solutions.length === 0) {
-            return res.status(400).json({ error: 'Invalid request: solutions array required' });
+            console.warn('[API] Invalid request: solutions array required');
+            return res.status(400).json({
+                error: 'Invalid request: solutions array required',
+                recommendation: null,
+                source: 'error'
+            });
+        }
+
+        if (typeof baselineFiAge !== 'number' || !preferences) {
+            console.warn('[API] Invalid request: missing baselineFiAge or preferences');
+            // Use fallback instead of erroring
+            const fallback = getFallbackRecommendation(baselineFiAge || 60, solutions, preferences || { targetAge: 45, preferLowerStepUp: true, preferLowerSipIncrease: true });
+            return res.status(200).json({ recommendation: fallback, source: 'fallback' });
         }
 
         // Get API key from environment (server-side, secure!)
@@ -64,17 +92,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (error) {
         console.error('[API] Error:', error);
 
-        // Try to use fallback
+        // Always try to return a valid response with fallback
         try {
-            const body: RequestBody = req.body;
-            const fallback = getFallbackRecommendation(
-                body.baselineFiAge,
-                body.solutions,
-                body.preferences
-            );
-            return res.status(200).json({ recommendation: fallback, source: 'fallback', error: String(error) });
-        } catch {
-            return res.status(500).json({ error: 'Failed to process request' });
+            const body: RequestBody = req.body || {};
+            const { baselineFiAge = 60, solutions = [], preferences = { targetAge: 45, preferLowerStepUp: true, preferLowerSipIncrease: true } } = body;
+
+            if (solutions.length > 0) {
+                const fallback = getFallbackRecommendation(baselineFiAge, solutions, preferences);
+                return res.status(200).json({
+                    recommendation: fallback,
+                    source: 'fallback',
+                    error: String(error)
+                });
+            }
+        } catch (fallbackError) {
+            console.error('[API] Fallback also failed:', fallbackError);
         }
+
+        return res.status(500).json({
+            error: 'Failed to process request',
+            message: String(error),
+            recommendation: null,
+            source: 'error'
+        });
     }
 }
