@@ -2,261 +2,28 @@ import { useMemo } from 'react';
 import { FinancialIndependenceInputs, YearlyBreakdown, FinancialIndependenceResult, OptimizationSolution, OptimizationResult } from './types';
 import {
     MAX_AGE_MAPPING,
-    INFLATION_RATE,
     SIP_RETURN_RATE_SHORT_TERM,
     SIP_RETURN_RATE_LONG_TERM,
     SIP_SHORT_TERM_THRESHOLD,
-    SWP_RETURN_RATE,
-    SWP_STEP_UP_PERCENTAGE,
     LIFESTYLE_BUFFER,
-    SWP_SUSTAINABILITY_BUFFER,
     STEP_UP_TEST_VALUES,
     SIP_INCREASE_TEST_VALUES,
     COMBINED_SCENARIOS,
     OPTIMIZATION_TARGET_FI_AGE,
     LTCG_TAX_RATE,
-    FD_ANNUAL_GROWTH_RATE,
-    MF_ANNUAL_GROWTH_RATE,
 } from './constants';
-import { calculateSipCorpus } from '../sip/useSipCalculator';
-import { calculateSwpSeries } from '../swp/useSwpCalculator';
+import {
+    calculateExistingCorpusGrowth,
+    calculateCorpusWithVariableRate,
+    getInflationAdjustedExpense,
+    checkSwpSustainability,
+    calculateFiAge,
+    calculateMinimumInvestmentForFI,
+} from './utils/calculationUtils';
 import { getAIRecommendation } from './geminiService';
 
-/**
- * Calculate the future value of pre-existing corpus after specified years.
- * FD grows at 7% annually, MF grows at 12% annually.
- */
-export const calculateExistingCorpusGrowth = (
-    fdCorpus: number = 0,
-    mfCorpus: number = 0,
-    years: number
-): number => {
-    if (years <= 0) return fdCorpus + mfCorpus;
-
-    const fdGrown = fdCorpus * Math.pow(1 + FD_ANNUAL_GROWTH_RATE / 100, years);
-    const mfGrown = mfCorpus * Math.pow(1 + MF_ANNUAL_GROWTH_RATE / 100, years);
-
-    return fdGrown + mfGrown;
-};
-
-/**
- * Calculate SIP corpus for a given number of years, using appropriate return rate.
- * Uses 12% for < 7 years, 14% for >= 7 years
- * Now supports annual step-up (DRY: reuses calculateSipCorpus which has step-up support)
- */
-export const calculateCorpusWithVariableRate = (
-    monthlyInvestment: number,
-    years: number,
-    stepUpPercent: number = 0
-): number => {
-    if (years <= 0) return 0;
-
-    if (years < SIP_SHORT_TERM_THRESHOLD) {
-        // Use short-term rate for all years
-        const result = calculateSipCorpus(monthlyInvestment, SIP_RETURN_RATE_SHORT_TERM, years, stepUpPercent);
-        return result.totalValue;
-    } else {
-        // First 7 years at 12%, rest at 14%
-        // Calculate corpus after 7 years at 12% WITH step-up
-        const after7Years = calculateSipCorpus(monthlyInvestment, SIP_RETURN_RATE_SHORT_TERM, SIP_SHORT_TERM_THRESHOLD, stepUpPercent);
-
-        // Calculate what the monthly SIP would be after 7 years of step-up
-        const sipAfter7Years = monthlyInvestment * Math.pow(1 + stepUpPercent / 100, SIP_SHORT_TERM_THRESHOLD);
-
-        // Remaining years at 14% - continue with the stepped-up SIP
-        const remainingYears = years - SIP_SHORT_TERM_THRESHOLD;
-
-        // Use calculateSipCorpus for remaining period, but we need to compound existing corpus too
-        const remainingResult = calculateSipCorpus(sipAfter7Years, SIP_RETURN_RATE_LONG_TERM, remainingYears, stepUpPercent);
-
-        // Compound existing corpus for remaining period
-        const existingCorpusGrowth = after7Years.totalValue * Math.pow(1 + SIP_RETURN_RATE_LONG_TERM / 100, remainingYears);
-
-        return existingCorpusGrowth + remainingResult.totalValue;
-    }
-};
-
-/**
- * Calculate inflation-adjusted monthly expense for a given year
- */
-const getInflationAdjustedExpense = (
-    currentExpense: number,
-    yearsFromNow: number
-): number => {
-    return currentExpense * Math.pow(1 + INFLATION_RATE / 100, yearsFromNow);
-};
-
-/**
- * Calculate minimum monthly investment needed to achieve FI by a target age.
- * Uses binary search with checkSwpSustainability() to find the exact minimum corpus,
- * ensuring consistency with the main FI calculation logic.
- * Returns null if calculation is not possible (e.g., already past target age).
- */
-export const calculateMinimumInvestmentForFI = (
-    currentAge: number,
-    monthlyExpense: number,
-    healthStatus: string,
-    targetFIAge: number = 60,
-    existingFDCorpus: number = 0,
-    existingMFCorpus: number = 0
-): { minimumInvestment: number; requiredCorpus: number } | null => {
-    const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
-    const yearsToFI = targetFIAge - currentAge;
-    const yearsInRetirement = maxAge - targetFIAge;
-
-    if (yearsToFI <= 0 || yearsInRetirement <= 0) return null;
-
-    // Calculate inflation-adjusted expense at FI age
-    const inflatedExpense = getInflationAdjustedExpense(monthlyExpense, yearsToFI);
-
-    // Target withdrawal with lifestyle buffer, grossed up for LTCG tax
-    const targetWithdrawal = inflatedExpense * (1 + LIFESTYLE_BUFFER);
-    const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
-
-    // Calculate grown existing corpus at FI age
-    const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsToFI);
-
-    // Find minimum corpus that passes SWP sustainability check
-    // Use binary search for efficiency - this ensures we use the SAME logic as calculateFiAge
-    let minCorpus = grossWithdrawal * 12 * 10; // Start with 10x annual withdrawal
-    let maxCorpus = grossWithdrawal * 12 * 50; // Max 50x annual withdrawal
-    let requiredCorpus = minCorpus;
-
-    // Binary search to find minimum sustainable corpus
-    while (maxCorpus - minCorpus > 1000) { // Precision: within ₹1000
-        const midCorpus = Math.floor((minCorpus + maxCorpus) / 2);
-        const swpCheck = checkSwpSustainability(midCorpus, grossWithdrawal, yearsInRetirement);
-
-        if (swpCheck.sustainable) {
-            requiredCorpus = midCorpus;
-            maxCorpus = midCorpus; // Try lower corpus
-        } else {
-            minCorpus = midCorpus; // Need higher corpus
-        }
-    }
-
-    // Final verification - ensure the corpus is actually sustainable
-    const finalCheck = checkSwpSustainability(requiredCorpus, grossWithdrawal, yearsInRetirement);
-    if (!finalCheck.sustainable) {
-        requiredCorpus = maxCorpus; // Use the higher bound if needed
-    }
-
-    // Calculate how much corpus is still needed from SIP after existing corpus grows
-    const corpusNeededFromSip = Math.max(0, requiredCorpus - grownExistingCorpus);
-
-    // If existing corpus already covers required corpus, no additional SIP needed
-    if (corpusNeededFromSip <= 0) {
-        return { minimumInvestment: 0, requiredCorpus };
-    }
-
-    // Calculate required monthly SIP using binary search with calculateCorpusWithVariableRate
-    // This ensures we use the SAME variable rate logic (12% for <7 years, 14% for >=7 years)
-    let minSip = 1000;
-    let maxSip = corpusNeededFromSip / (yearsToFI * 12); // Upper bound: save remaining corpus linearly
-    let minimumInvestment = minSip;
-
-    // Binary search to find minimum SIP that generates corpusNeededFromSip
-    while (maxSip - minSip > 100) { // Precision: within ₹100
-        const midSip = Math.floor((minSip + maxSip) / 2);
-        const generatedCorpus = calculateCorpusWithVariableRate(midSip, yearsToFI, 0);
-
-        if (generatedCorpus >= corpusNeededFromSip) {
-            minimumInvestment = midSip;
-            maxSip = midSip; // Try lower SIP
-        } else {
-            minSip = midSip; // Need higher SIP
-        }
-    }
-
-    // Final verification - ensure the SIP generates enough corpus
-    const finalCorpus = calculateCorpusWithVariableRate(minimumInvestment, yearsToFI, 0);
-    if (finalCorpus < corpusNeededFromSip) {
-        minimumInvestment = Math.ceil(maxSip);
-    }
-
-    return { minimumInvestment, requiredCorpus };
-};
-
-/**
- * Check if SWP is sustainable from financial independence year to max age
- * Returns true if final corpus >= 10% of initial corpus
- */
-const checkSwpSustainability = (
-    corpus: number,
-    monthlyWithdrawal: number,
-    yearsInFinancialIndependence: number
-): { sustainable: boolean; finalCorpus: number; finalCorpusPercentage: number } => {
-    if (corpus <= 0 || yearsInFinancialIndependence <= 0) {
-        return { sustainable: false, finalCorpus: 0, finalCorpusPercentage: 0 };
-    }
-
-    const swpResult = calculateSwpSeries(
-        corpus,
-        monthlyWithdrawal,
-        SWP_STEP_UP_PERCENTAGE,
-        SWP_RETURN_RATE,
-        yearsInFinancialIndependence,
-        0 // No inflation adjustment in SWP calculation, we handle it ourselves
-    );
-    const finalCorpus = swpResult.results.finalValue;
-    const minRequiredCorpus = corpus * SWP_SUSTAINABILITY_BUFFER;
-    const finalCorpusPercentage = (finalCorpus / corpus) * 100;
-
-    return {
-        sustainable: finalCorpus >= minRequiredCorpus,
-        finalCorpus,
-        finalCorpusPercentage
-    };
-};
-
-/**
- * Calculate the FI age for given parameters
- * Returns the earliest age at which FI is sustainable, or null if never
- */
-const calculateFiAge = (
-    monthlyInvestment: number,
-    monthlyExpense: number,
-    currentAge: number,
-    maxAge: number,
-    stepUpPercent: number = 0,
-    existingFDCorpus: number = 0,
-    existingMFCorpus: number = 0
-): number | null => {
-    for (let age = currentAge; age <= maxAge; age++) {
-        const yearsFromNow = age - currentAge;
-        const yearsInFinancialIndependence = maxAge - age;
-
-        if (yearsInFinancialIndependence <= 0) continue;
-
-        // Calculate SIP corpus at this age with step-up
-        const sipCorpus = calculateCorpusWithVariableRate(monthlyInvestment, yearsFromNow, stepUpPercent);
-
-        // Calculate grown existing corpus at this age
-        const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsFromNow);
-
-        // Total corpus = SIP corpus + grown existing corpus
-        const totalCorpus = sipCorpus + grownExistingCorpus;
-
-        // Calculate inflation-adjusted expense at this age
-        const inflationAdjustedExpense = getInflationAdjustedExpense(monthlyExpense, yearsFromNow);
-
-        // Target withdrawal = expense + 25% lifestyle buffer
-        const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
-
-        // Gross up withdrawal to account for LTCG tax
-        // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
-        const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
-
-        // Check SWP sustainability
-        if (totalCorpus > 0) {
-            const swpCheck = checkSwpSustainability(totalCorpus, grossWithdrawal, yearsInFinancialIndependence);
-            if (swpCheck.sustainable && age <= 60) {
-                return age;
-            }
-        }
-    }
-    return null;
-};
+// Re-export for backward compatibility
+export { calculateExistingCorpusGrowth, calculateCorpusWithVariableRate, calculateMinimumInvestmentForFI };
 
 /**
  * Run optimization to find the best step-up and SIP increase combination
@@ -456,7 +223,6 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
             const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
 
             // Gross up withdrawal to account for LTCG tax
-            // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
             const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
 
             // Check SWP sustainability using total corpus (SIP + existing)
@@ -474,7 +240,7 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
             yearlyBreakdown.push({
                 year: age,
                 yearsFromNow,
-                sipCorpus: Math.round(totalCorpus), // Now includes existing corpus
+                sipCorpus: Math.round(totalCorpus),
                 sipReturnRate,
                 inflationAdjustedExpense: Math.round(inflationAdjustedExpense),
                 targetWithdrawal: Math.round(targetWithdrawal),
@@ -491,7 +257,6 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
                         earliestFIBAge = age;
                     }
                 } else if (earliestFIBAge === null) {
-                    // It becomes sustainable only after 60
                     sustainableButAfter60 = true;
                 }
             }

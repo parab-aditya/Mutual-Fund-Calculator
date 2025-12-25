@@ -231,7 +231,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                 {/* FD Corpus */}
                                 <div>
                                     <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                                        FD Corpus (7% growth)
+                                        FD Corpus
                                     </label>
                                     <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2">
                                         <span className="text-slate-400 font-medium mr-1 text-sm">₹</span>
@@ -254,7 +254,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                 {/* MF Corpus */}
                                 <div>
                                     <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                                        MF Corpus (12% growth)
+                                        MF Corpus
                                     </label>
                                     <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2">
                                         <span className="text-slate-400 font-medium mr-1 text-sm">₹</span>
