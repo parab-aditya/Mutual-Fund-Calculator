@@ -21,6 +21,7 @@ const PlanForMePage: React.FC = () => {
 
     const [showResults, setShowResults] = useState(false);
     const [shouldOptimize, setShouldOptimize] = useState(false);
+    const [pendingOptimization, setPendingOptimization] = useState(false); // Used to trigger optimization after fiInputs is computed
     const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
 
     // Use Web Worker for optimization
@@ -51,6 +52,16 @@ const PlanForMePage: React.FC = () => {
 
     // Use the financial independence planner hook
     const fiResult = useFinancialIndependencePlanner(fiInputs);
+
+    // Bridge effect: Wait for fiInputs to be computed before triggering optimization
+    // This fixes the race condition when setting showResults + pendingOptimization in same render
+    useEffect(() => {
+        if (pendingOptimization && fiInputs && fiResult) {
+            console.log('🔀 [Optimization] fiInputs ready, triggering optimization...');
+            setPendingOptimization(false);
+            setShouldOptimize(true);
+        }
+    }, [pendingOptimization, fiInputs, fiResult]);
 
     // Optimization effect with proper cleanup and trigger pattern
     useEffect(() => {
@@ -153,13 +164,15 @@ const PlanForMePage: React.FC = () => {
     const handlePlanForMe = useCallback(() => {
         if (!isFormValid) return;
         setShowResults(true);
-        setShouldOptimize(true);
+        // Use pendingOptimization to wait for fiInputs to be computed in the next render
+        setPendingOptimization(true);
     }, [isFormValid]);
 
     const handleReset = useCallback(() => {
         setShowResults(false);
         setOptimizationResult(null);
         setShouldOptimize(false);
+        setPendingOptimization(false);
     }, []);
 
     const handleFormChange = useCallback((newData: FormData) => {
