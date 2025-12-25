@@ -87,9 +87,28 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
     };
 
     return (
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-xl mx-auto relative group transform transition-all duration-500 hover:scale-[1.005]">
+            <style>{`
+                @keyframes border-flow {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                .ai-border-animated {
+                    background: linear-gradient(60deg, #4285F4, #9B72CB, #D96570, #9B72CB, #4285F4);
+                    background-size: 300% 300%;
+                    animation: border-flow 4s ease infinite;
+                }
+            `}</style>
+
+            {/* Animated Glow */}
+            <div className="absolute -inset-1 rounded-3xl ai-border-animated opacity-20 blur-lg group-hover:opacity-40 transition duration-500"></div>
+
+            {/* Animated Border */}
+            <div className="absolute -inset-[2px] rounded-3xl ai-border-animated opacity-70 group-hover:opacity-100 transition duration-500"></div>
+
             {/* Main Card */}
-            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-700/60 p-5 sm:p-6 transform transition-all hover:shadow-2xl hover:scale-[1.005]">
+            <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-5 sm:p-6">
                 {/* Heading */}
                 <h1 className="text-xl sm:text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-5 sm:mb-6 leading-tight">
                     Plan Your Financial Independence
