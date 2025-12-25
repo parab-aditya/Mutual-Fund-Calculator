@@ -76,3 +76,11 @@ export interface PlanDisplayData {
     lifestyleImprovement: number;
     maxAge: number; // Max age until withdrawals are sustainable
 }
+
+// Data for when FI is not achievable - shows minimum investment needed
+export interface MinimumInvestmentData {
+    minimumInvestment: number;    // Minimum monthly investment required for FI by 60
+    currentInvestment: number;    // Current monthly investment
+    investmentGap: number;        // Difference between minimum and current
+    targetFIAge: number;          // Target age for FI (usually 60)
+}

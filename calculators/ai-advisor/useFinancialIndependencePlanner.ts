@@ -68,6 +68,84 @@ const getInflationAdjustedExpense = (
 };
 
 /**
+ * Calculate minimum monthly investment needed to achieve FI by a target age.
+ * Uses binary search with checkSwpSustainability() to find the exact minimum corpus,
+ * ensuring consistency with the main FI calculation logic.
+ * Returns null if calculation is not possible (e.g., already past target age).
+ */
+export const calculateMinimumInvestmentForFI = (
+    currentAge: number,
+    monthlyExpense: number,
+    healthStatus: string,
+    targetFIAge: number = 60
+): { minimumInvestment: number; requiredCorpus: number } | null => {
+    const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
+    const yearsToFI = targetFIAge - currentAge;
+    const yearsInRetirement = maxAge - targetFIAge;
+
+    if (yearsToFI <= 0 || yearsInRetirement <= 0) return null;
+
+    // Calculate inflation-adjusted expense at FI age
+    const inflatedExpense = getInflationAdjustedExpense(monthlyExpense, yearsToFI);
+
+    // Target withdrawal with lifestyle buffer, grossed up for LTCG tax
+    const targetWithdrawal = inflatedExpense * (1 + LIFESTYLE_BUFFER);
+    const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
+
+    // Find minimum corpus that passes SWP sustainability check
+    // Use binary search for efficiency - this ensures we use the SAME logic as calculateFiAge
+    let minCorpus = grossWithdrawal * 12 * 10; // Start with 10x annual withdrawal
+    let maxCorpus = grossWithdrawal * 12 * 50; // Max 50x annual withdrawal
+    let requiredCorpus = minCorpus;
+
+    // Binary search to find minimum sustainable corpus
+    while (maxCorpus - minCorpus > 1000) { // Precision: within ₹1000
+        const midCorpus = Math.floor((minCorpus + maxCorpus) / 2);
+        const swpCheck = checkSwpSustainability(midCorpus, grossWithdrawal, yearsInRetirement);
+
+        if (swpCheck.sustainable) {
+            requiredCorpus = midCorpus;
+            maxCorpus = midCorpus; // Try lower corpus
+        } else {
+            minCorpus = midCorpus; // Need higher corpus
+        }
+    }
+
+    // Final verification - ensure the corpus is actually sustainable
+    const finalCheck = checkSwpSustainability(requiredCorpus, grossWithdrawal, yearsInRetirement);
+    if (!finalCheck.sustainable) {
+        requiredCorpus = maxCorpus; // Use the higher bound if needed
+    }
+
+    // Calculate required monthly SIP using binary search with calculateCorpusWithVariableRate
+    // This ensures we use the SAME variable rate logic (12% for <7 years, 14% for >=7 years)
+    let minSip = 1000;
+    let maxSip = requiredCorpus / (yearsToFI * 12); // Upper bound: save entire corpus linearly
+    let minimumInvestment = minSip;
+
+    // Binary search to find minimum SIP that generates requiredCorpus
+    while (maxSip - minSip > 100) { // Precision: within ₹100
+        const midSip = Math.floor((minSip + maxSip) / 2);
+        const generatedCorpus = calculateCorpusWithVariableRate(midSip, yearsToFI, 0);
+
+        if (generatedCorpus >= requiredCorpus) {
+            minimumInvestment = midSip;
+            maxSip = midSip; // Try lower SIP
+        } else {
+            minSip = midSip; // Need higher SIP
+        }
+    }
+
+    // Final verification - ensure the SIP generates enough corpus
+    const finalCorpus = calculateCorpusWithVariableRate(minimumInvestment, yearsToFI, 0);
+    if (finalCorpus < requiredCorpus) {
+        minimumInvestment = Math.ceil(maxSip);
+    }
+
+    return { minimumInvestment, requiredCorpus };
+};
+
+/**
  * Check if SWP is sustainable from financial independence year to max age
  * Returns true if final corpus >= 10% of initial corpus
  */

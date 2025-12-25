@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
+import { useFinancialIndependencePlanner, calculateMinimumInvestmentForFI } from './useFinancialIndependencePlanner';
 import { useOptimizationWorker } from './hooks/useOptimizationWorker';
-import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData } from './types';
+import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData, MinimumInvestmentData } from './types';
 import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER, OPTIMIZATION_TARGET_FI_AGE } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
 import { getAIRecommendation } from './geminiService';
@@ -201,6 +201,27 @@ const PlanForMePage: React.FC = () => {
         );
     }, [fiResult, fiInputs]);
 
+    // Calculate minimum investment data when FI is not achievable before 60
+    const minimumInvestmentData = useMemo<MinimumInvestmentData | null>(() => {
+        if (!fiInputs || currentPlanData) return null; // Only when FI not achievable
+
+        const result = calculateMinimumInvestmentForFI(
+            fiInputs.currentAge,
+            fiInputs.monthlyExpense,
+            fiInputs.healthStatus,
+            60
+        );
+
+        if (!result) return null;
+
+        return {
+            minimumInvestment: result.minimumInvestment,
+            currentInvestment: fiInputs.monthlyInvestment,
+            investmentGap: result.minimumInvestment - fiInputs.monthlyInvestment,
+            targetFIAge: 60,
+        };
+    }, [fiInputs, currentPlanData]);
+
     // Calculate AI plan display data
     const aiPlanData = useMemo(() => {
         if (!optimizationResult?.recommendedSolution || !fiInputs || !fiResult) return null;
@@ -280,18 +301,11 @@ const PlanForMePage: React.FC = () => {
                             {/* Cards Grid */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                                 {/* Current Plan Card */}
-                                {currentPlanData ? (
-                                    <CurrentPlanCard
-                                        planData={currentPlanData}
-                                        inputs={fiInputs!}
-                                    />
-                                ) : (
-                                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-                                        <p className="text-amber-800 dark:text-amber-200 font-medium">
-                                            {fiResult.message}
-                                        </p>
-                                    </div>
-                                )}
+                                <CurrentPlanCard
+                                    planData={currentPlanData}
+                                    inputs={fiInputs!}
+                                    minimumInvestmentData={minimumInvestmentData}
+                                />
 
                                 {/* AI Plan Card */}
                                 <AIPlanCard
