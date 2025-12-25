@@ -188,6 +188,8 @@ async function callOpenRouter(prompt: string, apiKey: string): Promise<string> {
 // =============================================================================
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+    const startTime = Date.now();
+
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -226,11 +228,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         let responseText: string;
         let source: string;
 
+        const apiCallStart = Date.now();
+        const initTime = apiCallStart - startTime;
+        console.log(`[API] ⏱️ Function init took ${initTime}ms`);
+
         if (OPENROUTER_API_KEY) {
             console.log('[API] Calling OpenRouter API...');
             responseText = await callOpenRouter(prompt, OPENROUTER_API_KEY);
             source = 'openrouter';
-            console.log('[API] OpenRouter API call successful');
+            const apiCallDuration = Date.now() - apiCallStart;
+            console.log(`[API] ✅ OpenRouter API call successful (${apiCallDuration}ms)`);
         } else {
             console.log('[API] Calling Gemini API...');
             const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
@@ -238,10 +245,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const result = await model.generateContent(prompt);
             responseText = result.response.text();
             source = 'gemini';
-            console.log('[API] Gemini API call successful');
+            const apiCallDuration = Date.now() - apiCallStart;
+            console.log(`[API] ✅ Gemini API call successful (${apiCallDuration}ms)`);
         }
 
         const recommendation = parseAIResponse(responseText, solutions);
+        const totalTime = Date.now() - startTime;
+        console.log(`[API] 🏁 Total request time: ${totalTime}ms`);
+
         return res.status(200).json({ recommendation, source });
     } catch (error) {
         console.error('[API] Error:', error);
