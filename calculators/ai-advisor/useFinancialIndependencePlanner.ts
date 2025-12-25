@@ -14,6 +14,7 @@ import {
     SIP_INCREASE_TEST_VALUES,
     COMBINED_SCENARIOS,
     OPTIMIZATION_TARGET_FI_AGE,
+    LTCG_TAX_RATE,
 } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
 import { calculateSwpSeries } from '../swp/useSwpCalculator';
@@ -124,9 +125,13 @@ const calculateFiAge = (
         // Target withdrawal = expense + 25% lifestyle buffer
         const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
 
+        // Gross up withdrawal to account for LTCG tax
+        // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
+        const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
+
         // Check SWP sustainability
         if (sipCorpus > 0) {
-            const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInFinancialIndependence);
+            const swpCheck = checkSwpSustainability(sipCorpus, grossWithdrawal, yearsInFinancialIndependence);
             if (swpCheck.sustainable && age <= 60) {
                 return age;
             }
@@ -325,13 +330,17 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
             // Target withdrawal = expense + 25% lifestyle buffer
             const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
 
+            // Gross up withdrawal to account for LTCG tax
+            // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
+            const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
+
             // Check SWP sustainability
             let swpSustainable = false;
             let swpFinalCorpus = 0;
             let swpFinalCorpusPercentage = 0;
 
             if (yearsInFinancialIndependence > 0 && sipCorpus > 0) {
-                const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInFinancialIndependence);
+                const swpCheck = checkSwpSustainability(sipCorpus, grossWithdrawal, yearsInFinancialIndependence);
                 swpSustainable = swpCheck.sustainable;
                 swpFinalCorpus = swpCheck.finalCorpus;
                 swpFinalCorpusPercentage = swpCheck.finalCorpusPercentage;

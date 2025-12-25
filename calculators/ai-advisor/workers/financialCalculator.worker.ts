@@ -18,6 +18,7 @@ import {
     SIP_INCREASE_TEST_VALUES,
     COMBINED_SCENARIOS,
     OPTIMIZATION_TARGET_FI_AGE,
+    LTCG_TAX_RATE,
 } from '../constants';
 
 // ============================================
@@ -203,8 +204,12 @@ const calculateFiAge = (
         const inflationAdjustedExpense = getInflationAdjustedExpense(monthlyExpense, yearsFromNow);
         const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
 
+        // Gross up withdrawal to account for LTCG tax
+        // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
+        const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
+
         if (sipCorpus > 0) {
-            const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInFI);
+            const swpCheck = checkSwpSustainability(sipCorpus, grossWithdrawal, yearsInFI);
 
             if (swpCheck.sustainable) {
                 result = mid;
