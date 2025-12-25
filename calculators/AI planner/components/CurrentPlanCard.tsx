@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { formatToWords } from '../../../utils/formatters';
 import { TrendUpIcon, WalletIcon, ChartIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
@@ -12,11 +12,11 @@ interface CurrentPlanCardProps {
     message?: string;
 }
 
-export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
+export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCard({
     planData,
     inputs,
     message
-}) => {
+}) {
     if (!planData) {
         return (
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
@@ -53,9 +53,10 @@ export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
                 <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-4 overflow-hidden">
                     <div className="w-full max-w-[280px]">
                         <DotLottieReact
-                            src="https://lottie.host/00e578e3-64b1-424a-872c-46fb72938e94/sIFnrUv63S.lottie"
+                            src="/animations/financial-planning.lottie"
                             loop
                             autoplay
+                            speed={0.8}
                         />
                     </div>
                 </div>
@@ -97,4 +98,4 @@ export const CurrentPlanCard: React.FC<CurrentPlanCardProps> = ({
             </div>
         </div>
     );
-};
+});

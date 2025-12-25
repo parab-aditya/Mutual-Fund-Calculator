@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { numberToIndianWords } from '../../../utils/formatters';
 import {
     HEALTH_LIFESTYLE_OPTIONS,
@@ -28,6 +29,22 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
     onSubmit,
     isFormValid
 }) => {
+    // Local state for immediate UI updates (no lag while typing)
+    const [localFormData, setLocalFormData] = useState(formData);
+
+    // Debounced callback to parent - 150ms delay for calculations
+    const debouncedFormChange = useDebouncedCallback(
+        (newData: FormData) => onFormChange(newData),
+        150
+    );
+
+    // Keep local state in sync with parent when formData changes externally
+    useEffect(() => {
+        if (JSON.stringify(localFormData) !== JSON.stringify(formData)) {
+            setLocalFormData(formData);
+        }
+    }, [formData]);
+
     const handleInputChange = (field: keyof FormData, value: string) => {
         const numericValue = value.replace(/[^0-9]/g, '');
 
@@ -46,17 +63,21 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
             if (investmentNum > MAX_MONTHLY_INVESTMENT) return;
         }
 
-        onFormChange({
-            ...formData,
+        const newFormData = {
+            ...localFormData,
             [field]: numericValue
-        });
+        };
+        setLocalFormData(newFormData);
+        debouncedFormChange(newFormData);
     };
 
     const handleHealthLifestyleChange = (value: string) => {
-        onFormChange({
-            ...formData,
+        const newFormData = {
+            ...localFormData,
             healthLifestyle: value as HealthStatus
-        });
+        };
+        setLocalFormData(newFormData);
+        debouncedFormChange(newFormData);
     };
 
     const formatCurrency = (value: string): string => {
@@ -85,7 +106,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                             <input
                                 type="text"
                                 inputMode="numeric"
-                                value={formData.age}
+                                value={localFormData.age}
                                 onChange={(e) => handleInputChange('age', e.target.value)}
                                 placeholder="30"
                                 maxLength={2}
@@ -105,16 +126,16 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                 <input
                                     type="text"
                                     inputMode="numeric"
-                                    value={formatCurrency(formData.monthlyExpenditure)}
+                                    value={formatCurrency(localFormData.monthlyExpenditure)}
                                     onChange={(e) => handleInputChange('monthlyExpenditure', e.target.value)}
                                     placeholder="1,00,000"
                                     className="w-full text-lg font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
                                 />
                             </div>
                         </div>
-                        {formData.monthlyExpenditure && parseInt(formData.monthlyExpenditure) > 0 && (
+                        {localFormData.monthlyExpenditure && parseInt(localFormData.monthlyExpenditure) > 0 && (
                             <div className="text-right text-xs font-medium text-slate-500 dark:text-slate-400">
-                                {numberToIndianWords(parseInt(formData.monthlyExpenditure))}
+                                {numberToIndianWords(parseInt(localFormData.monthlyExpenditure))}
                             </div>
                         )}
                     </div>
@@ -130,16 +151,16 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                 <input
                                     type="text"
                                     inputMode="numeric"
-                                    value={formatCurrency(formData.monthlyInvestment)}
+                                    value={formatCurrency(localFormData.monthlyInvestment)}
                                     onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
                                     placeholder="50,000"
                                     className="w-full text-lg font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
                                 />
                             </div>
                         </div>
-                        {formData.monthlyInvestment && parseInt(formData.monthlyInvestment) > 0 && (
+                        {localFormData.monthlyInvestment && parseInt(localFormData.monthlyInvestment) > 0 && (
                             <div className="text-right text-xs font-medium text-slate-500 dark:text-slate-400">
-                                {numberToIndianWords(parseInt(formData.monthlyInvestment))}
+                                {numberToIndianWords(parseInt(localFormData.monthlyInvestment))}
                             </div>
                         )}
                     </div>
@@ -153,7 +174,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                             {HEALTH_LIFESTYLE_OPTIONS.map((option) => (
                                 <label
                                     key={option.value}
-                                    className={`cursor-pointer group relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${formData.healthLifestyle === option.value
+                                    className={`cursor-pointer group relative flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${localFormData.healthLifestyle === option.value
                                         ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-400 shadow-md'
                                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-200 dark:hover:border-blue-800'
                                         }`}
@@ -162,14 +183,14 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                         type="radio"
                                         name="healthLifestyle"
                                         value={option.value}
-                                        checked={formData.healthLifestyle === option.value}
+                                        checked={localFormData.healthLifestyle === option.value}
                                         onChange={(e) => handleHealthLifestyleChange(e.target.value)}
                                         className="sr-only"
                                     />
                                     <span className="text-xl mb-1 filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-110">
                                         {option.emoji}
                                     </span>
-                                    <span className={`text-[10px] sm:text-xs font-bold text-center leading-tight ${formData.healthLifestyle === option.value
+                                    <span className={`text-[10px] sm:text-xs font-bold text-center leading-tight ${localFormData.healthLifestyle === option.value
                                         ? 'text-blue-700 dark:text-blue-300'
                                         : 'text-slate-500 dark:text-slate-400'
                                         }`}>

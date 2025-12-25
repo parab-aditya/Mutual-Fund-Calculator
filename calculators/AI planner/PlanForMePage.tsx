@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useFinancialIndependencePlanner, runOptimization } from './useFinancialIndependencePlanner';
+import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
+import { useOptimizationWorker } from './hooks/useOptimizationWorker';
 import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData } from './types';
 import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
@@ -19,6 +20,9 @@ const PlanForMePage: React.FC = () => {
     const [showResults, setShowResults] = useState(false);
     const [shouldOptimize, setShouldOptimize] = useState(false);
     const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+
+    // Use Web Worker for optimization
+    const { runOptimization } = useOptimizationWorker();
 
     // Validation helper
     const isFieldValid = useCallback((field: keyof FormData): boolean => {
@@ -84,22 +88,22 @@ const PlanForMePage: React.FC = () => {
         };
     }, [shouldOptimize, fiInputs, fiResult]);
 
-    // Handlers
-    const handlePlanForMe = () => {
+    // Handlers - wrapped in useCallback for stable references
+    const handlePlanForMe = useCallback(() => {
         if (!isFormValid) return;
         setShowResults(true);
         setShouldOptimize(true);
-    };
+    }, [isFormValid]);
 
-    const handleReset = () => {
+    const handleReset = useCallback(() => {
         setShowResults(false);
         setOptimizationResult(null);
         setShouldOptimize(false);
-    };
+    }, []);
 
-    const handleFormChange = (newData: FormData) => {
+    const handleFormChange = useCallback((newData: FormData) => {
         setFormData(newData);
-    };
+    }, []);
 
     // Calculate current plan display data
     const currentPlanData = useMemo<PlanDisplayData | null>(() => {

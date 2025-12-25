@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { formatToWords } from '../../../utils/formatters';
 import { SparkleIcon, WalletIcon, ChartIcon, ArrowUpIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
@@ -48,11 +48,11 @@ interface AIPlanCardProps {
     optimizationResult: OptimizationResult | null;
 }
 
-export const AIPlanCard: React.FC<AIPlanCardProps> = ({
+export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
     isOptimizing,
     planData,
     optimizationResult
-}) => {
+}) {
     // Loading state
     if (isOptimizing) {
         return (
@@ -189,34 +189,38 @@ export const AIPlanCard: React.FC<AIPlanCardProps> = ({
             </div>
         </CardWrapper>
     );
-};
+});
 
-// Card wrapper component
-const CardWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <div className="group relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-900/20 border-2 border-emerald-400/30 dark:border-emerald-500/30 p-6 sm:p-8 flex flex-col h-full transform transition-all duration-300 hover:scale-[1.01]">
-        {/* Recommended Badge */}
-        <div className="absolute -top-4 right-8 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
-            <SparkleIcon className="w-4 h-4" />
-            RECOMMENDED
+// Card wrapper component (memoized)
+const CardWrapper = memo<{ children: React.ReactNode }>(function CardWrapper({ children }) {
+    return (
+        <div className="group relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-900/20 border-2 border-emerald-400/30 dark:border-emerald-500/30 p-6 sm:p-8 flex flex-col h-full transform transition-all duration-300 hover:scale-[1.01]">
+            {/* Recommended Badge */}
+            <div className="absolute -top-4 right-8 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
+                <SparkleIcon className="w-4 h-4" />
+                RECOMMENDED
+            </div>
+            {children}
         </div>
-        {children}
-    </div>
-);
+    );
+});
 
-// Card header component
-const CardHeader: React.FC<{ difficulty: DifficultyLevel | null }> = ({ difficulty }) => (
-    <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                <SparkleIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+// Card header component (memoized)
+const CardHeader = memo<{ difficulty: DifficultyLevel | null }>(function CardHeader({ difficulty }) {
+    return (
+        <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                    <SparkleIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">AI-Optimised</h2>
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">AI-Optimised</h2>
+            {difficulty && (
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${difficultyConfig[difficulty].bg} ${difficultyConfig[difficulty].text} ${difficultyConfig[difficulty].border}`}>
+                    <span>{difficultyConfig[difficulty].icon}</span>
+                    {difficulty}
+                </div>
+            )}
         </div>
-        {difficulty && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${difficultyConfig[difficulty].bg} ${difficultyConfig[difficulty].text} ${difficultyConfig[difficulty].border}`}>
-                <span>{difficultyConfig[difficulty].icon}</span>
-                {difficulty}
-            </div>
-        )}
-    </div>
-);
+    );
+});
