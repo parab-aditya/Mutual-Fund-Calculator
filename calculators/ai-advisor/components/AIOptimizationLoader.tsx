@@ -1,36 +1,36 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Loader = () => {
-  return (
-    <StyledWrapper>
-      <div className="loader">
-        <svg width={100} height={100} viewBox="0 0 100 100">
-          <defs>
-            <mask id="clipping">
-              <polygon points="0,0 100,0 100,100 0,100" fill="black" />
-              <polygon points="25,25 75,25 50,75" fill="white" />
-              <polygon points="50,25 75,75 25,75" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-              <polygon points="35,35 65,35 50,65" fill="white" />
-            </mask>
-          </defs>
-        </svg>
-        <div className="box" />
-      </div>
-    </StyledWrapper>
-  );
+const AIOptimizationLoader = () => {
+    return (
+        <StyledWrapper>
+            <div className="loader">
+                <svg width={100} height={100} viewBox="0 0 100 100">
+                    <defs>
+                        <mask id="clipping">
+                            <polygon points="0,0 100,0 100,100 0,100" fill="black" />
+                            <polygon points="25,25 75,25 50,75" fill="white" />
+                            <polygon points="50,25 75,75 25,75" fill="white" />
+                            <polygon points="35,35 65,35 50,65" fill="white" />
+                            <polygon points="35,35 65,35 50,65" fill="white" />
+                            <polygon points="35,35 65,35 50,65" fill="white" />
+                            <polygon points="35,35 65,35 50,65" fill="white" />
+                        </mask>
+                    </defs>
+                </svg>
+                <div className="box" />
+            </div>
+        </StyledWrapper>
+    );
 }
 
 const StyledWrapper = styled.div`
   .loader {
-    --color-one: #ffbf48;
-    --color-two: #be4a1d;
-    --color-three: #ffbf4780;
-    --color-four: #bf4a1d80;
-    --color-five: #ffbf4740;
+    --color-one: #10b981;
+    --color-two: #059669;
+    --color-three: #10b98180;
+    --color-four: #05966980;
+    --color-five: #10b98140;
     --time-animation: 2s;
     --size: 1; /* You can change the size */
     position: relative;
@@ -167,6 +167,7 @@ const StyledWrapper = styled.div`
     100% {
       filter: hue-rotate(0deg);
     }
-  }`;
+  }
+`;
 
-export default Loader;
+export default AIOptimizationLoader;

@@ -4,6 +4,7 @@ import { SparkleIcon, WalletIcon, ChartIcon, ArrowUpIcon, CheckCircleIcon } from
 import { formatSmartNumber } from '../utils/planMetrics';
 import { DifficultyLevel, OptimizationResult } from '../types';
 import { SWP_STEP_UP_PERCENTAGE } from '../constants';
+import AIOptimizationLoader from './AIOptimizationLoader';
 
 // Difficulty pill config
 const difficultyConfig: Record<DifficultyLevel, { bg: string; text: string; icon: string; border: string }> = {
@@ -58,12 +59,8 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
         return (
             <CardWrapper>
                 <CardHeader difficulty={null} />
-                <div className="flex-1 flex flex-col items-center justify-center space-y-4 py-12">
-                    <div className="relative w-16 h-16">
-                        <div className="absolute inset-0 border-4 border-slate-100 dark:border-slate-700 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                        <SparkleIcon className="absolute inset-0 m-auto w-6 h-6 text-emerald-500 animate-pulse" />
-                    </div>
+                <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-12">
+                    <AIOptimizationLoader />
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Running AI Optimization...</p>
                 </div>
             </CardWrapper>
