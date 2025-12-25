@@ -7,8 +7,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { OptimizationSolution, AIRecommendation, DifficultyLevel } from './types';
 
 // Get API key from environment (Vite exposes env vars through import.meta.env)
-// @ts-ignore - Vite provides import.meta.env at runtime
-const GEMINI_API_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY as string || '';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 /**
  * Get AI recommendation for the best optimization solution
@@ -24,21 +23,24 @@ export const getAIRecommendation = async (
 ): Promise<AIRecommendation> => {
     // If no API key, use fallback
     if (!GEMINI_API_KEY) {
-        console.warn('Gemini API key not found, using fallback ranking');
+        console.warn('[Gemini] API key not configured, using fallback ranking');
         return getFallbackRecommendation(baselineFiAge, solutions, preferences);
     }
 
+    console.log('[Gemini] Calling Gemini API for AI recommendation...');
+
     try {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
         const prompt = buildPrompt(baselineFiAge, solutions, preferences);
         const result = await model.generateContent(prompt);
         const response = result.response.text();
+        console.log('[Gemini] API call successful, parsing response...');
 
         return parseAIResponse(response, solutions);
     } catch (error) {
-        console.error('Gemini API error, using fallback:', error);
+        console.error('[Gemini] API error, using fallback:', error);
         return getFallbackRecommendation(baselineFiAge, solutions, preferences);
     }
 };

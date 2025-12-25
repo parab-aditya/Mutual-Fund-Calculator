@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
 import { useOptimizationWorker } from './hooks/useOptimizationWorker';
 import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData } from './types';
-import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER } from './constants';
+import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER, OPTIMIZATION_TARGET_FI_AGE } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
+import { getAIRecommendation } from './geminiService';
 
 // Components
 import { RefreshIcon, CurrentPlanCard, AIPlanCard, FinancialPlannerForm, FormData } from './components';
@@ -58,12 +59,46 @@ const PlanForMePage: React.FC = () => {
 
         const fetchOptimization = async () => {
             try {
-                const result = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
-                if (!cancelled) {
-                    setOptimizationResult(result);
+                // Step 1: Get solutions from worker (heavy CPU calculations)
+                console.log('[Optimization] Running worker calculations...');
+                const workerResult = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
+
+                if (cancelled) return;
+
+                // Step 2: If we have solutions, get AI recommendation from Gemini
+                if (workerResult.solutions.length > 0 && !workerResult.skipOptimization) {
+                    console.log('[Optimization] Worker complete, calling Gemini API...');
+                    const aiRecommendation = await getAIRecommendation(
+                        workerResult.baselineFiAge ?? 60,
+                        workerResult.solutions,
+                        {
+                            preferLowerStepUp: true,
+                            preferLowerSipIncrease: true,
+                            targetAge: OPTIMIZATION_TARGET_FI_AGE
+                        }
+                    );
+
+                    if (cancelled) return;
+
+                    // Enhance result with AI recommendation
+                    const recommendedSolution = aiRecommendation.recommendedIndex >= 0
+                        && aiRecommendation.recommendedIndex < workerResult.solutions.length
+                        ? workerResult.solutions[aiRecommendation.recommendedIndex]
+                        : workerResult.solutions[0];
+
+                    console.log('[Optimization] Complete with AI recommendation');
+                    setOptimizationResult({
+                        ...workerResult,
+                        recommendation: aiRecommendation,
+                        recommendedSolution
+                    });
+                } else {
+                    // No solutions or skip optimization - use worker result as-is
+                    console.log('[Optimization] Complete (skipped AI - no solutions or already optimal)');
+                    setOptimizationResult(workerResult);
                 }
             } catch (error) {
-                console.error('Optimization failed:', error);
+                console.error('[Optimization] Failed:', error);
                 if (!cancelled) {
                     setOptimizationResult({
                         baselineFiAge: fiResult.earliestFinancialIndependenceAge,
@@ -86,7 +121,7 @@ const PlanForMePage: React.FC = () => {
         return () => {
             cancelled = true;
         };
-    }, [shouldOptimize, fiInputs, fiResult]);
+    }, [shouldOptimize, fiInputs, fiResult, runOptimization]);
 
     // Handlers - wrapped in useCallback for stable references
     const handlePlanForMe = useCallback(() => {
