@@ -111,7 +111,9 @@ const PlanForMePage: React.FC = () => {
                         ? workerResult.solutions[recommendation.recommendedIndex]
                         : workerResult.solutions[0];
 
-                    if (source === 'gemini') {
+                    if (source === 'openrouter') {
+                        console.log('🤖✅ [Optimization] Complete! Applied OPENROUTER AI recommendation.');
+                    } else if (source === 'gemini') {
                         console.log('🤖✅ [Optimization] Complete! Applied GEMINI AI recommendation.');
                     } else {
                         console.log('⚠️🏁 [Optimization] Complete! Applied FALLBACK recommendation (Internal Logic).');

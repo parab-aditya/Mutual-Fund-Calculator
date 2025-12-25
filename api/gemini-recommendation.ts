@@ -2,6 +2,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // =============================================================================
+// AI PROVIDER CONFIGURATION
+// =============================================================================
+
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_MODEL = 'google/gemini-3-flash-preview';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
+
+// =============================================================================
 // TYPES (inlined to avoid import issues with paths containing spaces)
 // =============================================================================
 
@@ -53,52 +61,28 @@ function buildPrompt(
     solutions: OptimizationSolution[],
     preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
 ): string {
+    // Minimal solution data - only what's needed for ranking
     const solutionsData = solutions.map((s, index) => ({
-        index,
-        fiAge: s.fiAge,
-        stepUpPercent: s.stepUpPercent,
-        sipIncreasePercent: s.sipIncreasePercent,
-        newMonthlySip: s.newMonthlySip,
-        improvementYears: s.improvementYears
+        i: index,
+        fi: s.fiAge,
+        su: s.stepUpPercent,
+        si: s.sipIncreasePercent
     }));
 
-    return `You are a financial advisor AI. Analyze these financial independence (FI) optimization solutions and recommend the BEST one.
+    return `Pick the best financial independence (FI) solution.
 
-CONTEXT:
-- Baseline FI Age (no changes): ${baselineFiAge} years
-- Target FI Age: ${preferences.targetAge} years
-- User prefers lower step-up: ${preferences.preferLowerStepUp}
-- User prefers lower SIP increase: ${preferences.preferLowerSipIncrease}
+Context: Baseline FI=${baselineFiAge}, Target=${preferences.targetAge}
 
-AVAILABLE SOLUTIONS:
-${JSON.stringify(solutionsData, null, 2)}
+Solutions (i=index, fi=FI age, su=step-up%, si=SIP increase%):
+${JSON.stringify(solutionsData)}
 
-RANKING CRITERIA (in order of importance):
-1. Lowest FI age (most important)
-2. Lowest step-up percentage (preferred lever - easier to commit to)
-3. Lowest SIP increase percentage (one-time change, but requires more money)
+Rank by: 1) Lowest fi, 2) Lowest su, 3) Lowest si
+Bonus: fi≤${preferences.targetAge} is preferred even with slightly higher su/si.
 
-SPECIAL RULE:
-If a solution reaches FI age ≤ ${preferences.targetAge} with only slightly more effort (1-2% higher step-up or SIP increase), prefer it over an easier plan that only reaches FI age 42-43.
+Respond JSON only:
+{"recommendedIndex":<number>,"difficulty":"Easy"|"Moderate"|"Aggressive"}
 
-INSTRUCTIONS:
-1. Pick exactly ONE recommended solution from the list
-2. Explain WHY in 2-3 sentences (be specific about trade-offs)
-3. Mention 1-2 alternatives briefly
-4. Do NOT invent new values - only use solutions from the list
-
-RESPOND IN THIS EXACT JSON FORMAT (no markdown, just JSON):
-{
-    "recommendedIndex": <number>,
-    "explanation": "<string>",
-    "alternatives": ["<string>", "<string>"],
-    "difficulty": "Easy" | "Moderate" | "Aggressive"
-}
-
-DIFFICULTY CRITERIA:
-- Easy: Only step-up up to 5% OR only SIP increase up to 10%
-- Moderate: Step-up 7-10% alone, or SIP increase 10-15% alone, or mild combinations
-- Aggressive: Both high step-up (10%) and high SIP increase (10%+), or extreme values`;
+Difficulty: Easy=su≤5 OR si≤10, Aggressive=su≥10 AND si≥10, else Moderate`;
 }
 
 function parseAIResponse(response: string, solutions: OptimizationSolution[]): AIRecommendation {
@@ -128,10 +112,13 @@ function parseAIResponse(response: string, solutions: OptimizationSolution[]): A
             difficulty = calculateDifficulty(recommendedSolution.stepUpPercent, recommendedSolution.sipIncreasePercent);
         }
 
+        // Generate explanation locally (not from AI to save tokens)
+        const explanation = `Recommended: ${recommendedSolution.stepUpPercent}% step-up + ${recommendedSolution.sipIncreasePercent}% SIP increase for FI at age ${recommendedSolution.fiAge}.`;
+
         return {
             recommendedIndex,
-            explanation: parsed.explanation || 'This solution offers the best balance of FI age improvement with manageable behavior change.',
-            alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : [],
+            explanation,
+            alternatives: [], // We don't display alternatives in UI
             difficulty
         };
     } catch (error) {
@@ -213,6 +200,33 @@ function getFallbackRecommendation(
 }
 
 // =============================================================================
+// OPENROUTER API HELPER
+// =============================================================================
+
+async function callOpenRouter(prompt: string, apiKey: string): Promise<string> {
+    const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://whatifmoney.in',
+            'X-Title': 'WhatifMoney AI Planner'
+        },
+        body: JSON.stringify({
+            model: OPENROUTER_MODEL,
+            messages: [{ role: 'user', content: prompt }]
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
+}
+
+// =============================================================================
 // VERCEL SERVERLESS FUNCTION HANDLER
 // =============================================================================
 
@@ -263,28 +277,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(200).json({ recommendation: fallback, source: 'fallback' });
         }
 
+        const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-        if (!GEMINI_API_KEY) {
-            console.warn('[API] Gemini API key not configured, using fallback');
+        // Priority: OpenRouter > Gemini > Fallback
+        if (!OPENROUTER_API_KEY && !GEMINI_API_KEY) {
+            console.warn('[API] No AI API key configured, using fallback');
             const fallback = getFallbackRecommendation(baselineFiAge, solutions, preferences);
             return res.status(200).json({ recommendation: fallback, source: 'fallback' });
         }
 
-        console.log('[API] Calling Gemini API...');
-
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
-
         const prompt = buildPrompt(baselineFiAge, solutions, preferences);
-        const result = await model.generateContent(prompt);
-        const response = result.response.text();
+        let responseText: string;
 
-        console.log('[API] Gemini API call successful');
+        // Use OpenRouter if available (priority), otherwise use Gemini
+        if (OPENROUTER_API_KEY) {
+            console.log('[API] Calling OpenRouter API...');
+            responseText = await callOpenRouter(prompt, OPENROUTER_API_KEY);
+            console.log('[API] OpenRouter API call successful');
+        } else {
+            console.log('[API] Calling Gemini API...');
+            const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
+            const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+            const result = await model.generateContent(prompt);
+            responseText = result.response.text();
+            console.log('[API] Gemini API call successful');
+        }
 
-        const recommendation = parseAIResponse(response, solutions);
+        const recommendation = parseAIResponse(responseText, solutions);
+        const source = OPENROUTER_API_KEY ? 'openrouter' : 'gemini';
 
-        return res.status(200).json({ recommendation, source: 'gemini' });
+        return res.status(200).json({ recommendation, source });
     } catch (error) {
         console.error('[API] Error:', error);
 

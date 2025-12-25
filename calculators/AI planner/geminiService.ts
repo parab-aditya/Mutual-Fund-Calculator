@@ -1,8 +1,12 @@
 /**
- * Gemini AI Service for Financial Independence Optimization
+ * AI Service for Financial Independence Optimization
+ * 
+ * Supports both OpenRouter and Gemini APIs:
+ * - Priority: OpenRouter > Gemini > Fallback
+ * - If both API keys are set, OpenRouter is used
  * 
  * Architecture:
- * 1. Local Dev: Direct Gemini API call using VITE_GEMINI_API_KEY
+ * 1. Local Dev: Direct API call using VITE_OPENROUTER_API_KEY or VITE_GEMINI_API_KEY
  * 2. Production (Vercel): Calls /api/gemini-recommendation serverless function
  * 3. Fallback: Local algorithm if API is unavailable
  */
@@ -12,7 +16,17 @@ import { OptimizationSolution, AIRecommendation } from './types';
 import { buildPrompt, parseAIResponse, getFallbackRecommendation } from './geminiShared';
 import { resolveApiPath } from '../../utils/basePath';
 
-// Local dev API key (from .env.local, only for local testing)
+// =============================================================================
+// AI PROVIDER CONFIGURATION
+// =============================================================================
+
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_MODEL = 'google/gemini-3-flash-preview';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
+
+// Local dev API keys (from .env.local, only for local testing)
+// Priority: OpenRouter > Gemini
+const VITE_OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
 const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Check if we're in local development
@@ -33,17 +47,22 @@ export const getAIRecommendation = async (
         preferLowerSipIncrease: boolean;
         targetAge: number;
     }
-): Promise<{ recommendation: AIRecommendation; source: 'gemini' | 'fallback' }> => {
+): Promise<{ recommendation: AIRecommendation; source: 'gemini' | 'openrouter' | 'fallback' }> => {
 
-    // Strategy 1: Local development - direct Gemini call
-    if (isLocalDevelopment() && VITE_GEMINI_API_KEY) {
-        console.log('🤖 [Gemini] Local dev detected, calling Gemini API directly...');
+    // Strategy 1: Local development - direct API call (OpenRouter takes priority)
+    if (isLocalDevelopment() && (VITE_OPENROUTER_API_KEY || VITE_GEMINI_API_KEY)) {
+        const useOpenRouter = !!VITE_OPENROUTER_API_KEY;
+        const providerName = useOpenRouter ? 'OpenRouter' : 'Gemini';
+
+        console.log(`🤖 [AI] Local dev detected, calling ${providerName} API directly...`);
         try {
-            const result = await callGeminiDirect(baselineFiAge, solutions, preferences);
-            console.log('✅ [Gemini] SUCCESS: Recommendation received from Gemini AI (Direct)');
-            return { recommendation: result, source: 'gemini' };
+            const result = useOpenRouter
+                ? await callOpenRouterDirect(baselineFiAge, solutions, preferences)
+                : await callGeminiDirect(baselineFiAge, solutions, preferences);
+            console.log(`✅ [AI] SUCCESS: Recommendation received from ${providerName} (Direct)`);
+            return { recommendation: result, source: useOpenRouter ? 'openrouter' : 'gemini' };
         } catch (error) {
-            console.warn('⚠️ [Gemini] Direct API call failed:', error);
+            console.warn(`⚠️ [AI] ${providerName} direct API call failed:`, error);
         }
     }
 
@@ -62,9 +81,11 @@ export const getAIRecommendation = async (
             }
 
             const data = await response.json();
-            const source: 'gemini' | 'fallback' = data.source === 'gemini' ? 'gemini' : 'fallback';
+            const source: 'gemini' | 'openrouter' | 'fallback' =
+                data.source === 'openrouter' ? 'openrouter' :
+                    data.source === 'gemini' ? 'gemini' : 'fallback';
 
-            console.log(`✅ [Gemini] SUCCESS: Recommendation received (source: ${source})`);
+            console.log(`✅ [AI] SUCCESS: Recommendation received (source: ${source})`);
             return { recommendation: data.recommendation, source };
         } catch (error) {
             console.warn('⚠️ [Gemini] Server API failed:', error);
@@ -78,6 +99,40 @@ export const getAIRecommendation = async (
 };
 
 /**
+ * Direct OpenRouter API call (for local development)
+ */
+const callOpenRouterDirect = async (
+    baselineFiAge: number,
+    solutions: OptimizationSolution[],
+    preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
+): Promise<AIRecommendation> => {
+    const prompt = buildPrompt(baselineFiAge, solutions, preferences);
+
+    const response = await fetch(OPENROUTER_API_URL, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${VITE_OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': window.location.origin,
+            'X-Title': 'WhatifMoney AI Planner'
+        },
+        body: JSON.stringify({
+            model: OPENROUTER_MODEL,
+            messages: [{ role: 'user', content: prompt }]
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`OpenRouter API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+
+    return parseAIResponse(content, solutions);
+};
+
+/**
  * Direct Gemini API call (for local development)
  */
 const callGeminiDirect = async (
@@ -86,7 +141,7 @@ const callGeminiDirect = async (
     preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
 ): Promise<AIRecommendation> => {
     const genAI = new GoogleGenerativeAI(VITE_GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
     const prompt = buildPrompt(baselineFiAge, solutions, preferences);
     const result = await model.generateContent(prompt);
