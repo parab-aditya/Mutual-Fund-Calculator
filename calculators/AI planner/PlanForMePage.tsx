@@ -5,6 +5,7 @@ import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisp
 import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER, OPTIMIZATION_TARGET_FI_AGE } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
 import { getAIRecommendation } from './geminiService';
+import { runOptimizationFallback } from './optimizationFallback';
 
 // Components
 import { RefreshIcon, CurrentPlanCard, AIPlanCard, FinancialPlannerForm, FormData } from './components';
@@ -58,16 +59,40 @@ const PlanForMePage: React.FC = () => {
         let cancelled = false;
 
         const fetchOptimization = async () => {
+            let workerResult: OptimizationResult | null = null;
+
             try {
-                // Step 1: Get solutions from worker (heavy CPU calculations)
+                // Step 1: Try to get solutions from worker (heavy CPU calculations)
                 console.log('[Optimization] Running worker calculations...');
-                const workerResult = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
+                workerResult = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
+            } catch (workerError) {
+                // Worker failed - use main-thread fallback
+                console.warn('[Optimization] Worker failed, using main-thread fallback:', workerError);
+                try {
+                    workerResult = runOptimizationFallback(fiInputs, fiResult.earliestFinancialIndependenceAge);
+                } catch (fallbackError) {
+                    console.error('[Optimization] Fallback also failed:', fallbackError);
+                }
+            }
 
-                if (cancelled) return;
+            if (cancelled) return;
 
+            if (!workerResult) {
+                setOptimizationResult({
+                    baselineFiAge: fiResult.earliestFinancialIndependenceAge,
+                    solutions: [],
+                    recommendedSolution: null,
+                    recommendation: null,
+                    skipOptimization: false,
+                    error: 'Failed to run optimization. Please try again.'
+                });
+                return;
+            }
+
+            try {
                 // Step 2: If we have solutions, get AI recommendation from Gemini
                 if (workerResult.solutions.length > 0 && !workerResult.skipOptimization) {
-                    console.log('[Optimization] Worker complete, calling Gemini API...');
+                    console.log('[Optimization] Calculations complete, calling Gemini API...');
                     const aiRecommendation = await getAIRecommendation(
                         workerResult.baselineFiAge ?? 60,
                         workerResult.solutions,
@@ -93,21 +118,15 @@ const PlanForMePage: React.FC = () => {
                         recommendedSolution
                     });
                 } else {
-                    // No solutions or skip optimization - use worker result as-is
+                    // No solutions or skip optimization - use result as-is
                     console.log('[Optimization] Complete (skipped AI - no solutions or already optimal)');
                     setOptimizationResult(workerResult);
                 }
             } catch (error) {
-                console.error('[Optimization] Failed:', error);
+                console.error('[Optimization] AI recommendation failed, using fallback result:', error);
+                // Still show the worker result even if AI fails
                 if (!cancelled) {
-                    setOptimizationResult({
-                        baselineFiAge: fiResult.earliestFinancialIndependenceAge,
-                        solutions: [],
-                        recommendedSolution: null,
-                        recommendation: null,
-                        skipOptimization: false,
-                        error: 'Failed to run optimization. Please try again.'
-                    });
+                    setOptimizationResult(workerResult);
                 }
             } finally {
                 if (!cancelled) {

@@ -57,6 +57,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                             loop
                             autoplay
                             speed={0.8}
+                            renderConfig={{ autoResize: true }}
                         />
                     </div>
                 </div>
