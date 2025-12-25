@@ -8,6 +8,8 @@ export interface FinancialIndependenceInputs {
     monthlyExpense: number;
     monthlyInvestment: number;
     healthStatus: HealthStatus;
+    existingFDCorpus?: number;    // Pre-existing FD corpus (grows at 7% annually)
+    existingMFCorpus?: number;    // Pre-existing MF corpus (grows at 12% annually)
     runOptimization?: boolean; // Whether to run optimization
 }
 

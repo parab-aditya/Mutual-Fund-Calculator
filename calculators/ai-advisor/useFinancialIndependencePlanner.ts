@@ -15,17 +15,36 @@ import {
     COMBINED_SCENARIOS,
     OPTIMIZATION_TARGET_FI_AGE,
     LTCG_TAX_RATE,
+    FD_ANNUAL_GROWTH_RATE,
+    MF_ANNUAL_GROWTH_RATE,
 } from './constants';
 import { calculateSipCorpus } from '../sip/useSipCalculator';
 import { calculateSwpSeries } from '../swp/useSwpCalculator';
 import { getAIRecommendation } from './geminiService';
 
 /**
+ * Calculate the future value of pre-existing corpus after specified years.
+ * FD grows at 7% annually, MF grows at 12% annually.
+ */
+export const calculateExistingCorpusGrowth = (
+    fdCorpus: number = 0,
+    mfCorpus: number = 0,
+    years: number
+): number => {
+    if (years <= 0) return fdCorpus + mfCorpus;
+
+    const fdGrown = fdCorpus * Math.pow(1 + FD_ANNUAL_GROWTH_RATE / 100, years);
+    const mfGrown = mfCorpus * Math.pow(1 + MF_ANNUAL_GROWTH_RATE / 100, years);
+
+    return fdGrown + mfGrown;
+};
+
+/**
  * Calculate SIP corpus for a given number of years, using appropriate return rate.
  * Uses 12% for < 7 years, 14% for >= 7 years
  * Now supports annual step-up (DRY: reuses calculateSipCorpus which has step-up support)
  */
-const calculateCorpusWithVariableRate = (
+export const calculateCorpusWithVariableRate = (
     monthlyInvestment: number,
     years: number,
     stepUpPercent: number = 0
@@ -77,7 +96,9 @@ export const calculateMinimumInvestmentForFI = (
     currentAge: number,
     monthlyExpense: number,
     healthStatus: string,
-    targetFIAge: number = 60
+    targetFIAge: number = 60,
+    existingFDCorpus: number = 0,
+    existingMFCorpus: number = 0
 ): { minimumInvestment: number; requiredCorpus: number } | null => {
     const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
     const yearsToFI = targetFIAge - currentAge;
@@ -91,6 +112,9 @@ export const calculateMinimumInvestmentForFI = (
     // Target withdrawal with lifestyle buffer, grossed up for LTCG tax
     const targetWithdrawal = inflatedExpense * (1 + LIFESTYLE_BUFFER);
     const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
+
+    // Calculate grown existing corpus at FI age
+    const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsToFI);
 
     // Find minimum corpus that passes SWP sustainability check
     // Use binary search for efficiency - this ensures we use the SAME logic as calculateFiAge
@@ -117,18 +141,26 @@ export const calculateMinimumInvestmentForFI = (
         requiredCorpus = maxCorpus; // Use the higher bound if needed
     }
 
+    // Calculate how much corpus is still needed from SIP after existing corpus grows
+    const corpusNeededFromSip = Math.max(0, requiredCorpus - grownExistingCorpus);
+
+    // If existing corpus already covers required corpus, no additional SIP needed
+    if (corpusNeededFromSip <= 0) {
+        return { minimumInvestment: 0, requiredCorpus };
+    }
+
     // Calculate required monthly SIP using binary search with calculateCorpusWithVariableRate
     // This ensures we use the SAME variable rate logic (12% for <7 years, 14% for >=7 years)
     let minSip = 1000;
-    let maxSip = requiredCorpus / (yearsToFI * 12); // Upper bound: save entire corpus linearly
+    let maxSip = corpusNeededFromSip / (yearsToFI * 12); // Upper bound: save remaining corpus linearly
     let minimumInvestment = minSip;
 
-    // Binary search to find minimum SIP that generates requiredCorpus
+    // Binary search to find minimum SIP that generates corpusNeededFromSip
     while (maxSip - minSip > 100) { // Precision: within ₹100
         const midSip = Math.floor((minSip + maxSip) / 2);
         const generatedCorpus = calculateCorpusWithVariableRate(midSip, yearsToFI, 0);
 
-        if (generatedCorpus >= requiredCorpus) {
+        if (generatedCorpus >= corpusNeededFromSip) {
             minimumInvestment = midSip;
             maxSip = midSip; // Try lower SIP
         } else {
@@ -138,7 +170,7 @@ export const calculateMinimumInvestmentForFI = (
 
     // Final verification - ensure the SIP generates enough corpus
     const finalCorpus = calculateCorpusWithVariableRate(minimumInvestment, yearsToFI, 0);
-    if (finalCorpus < requiredCorpus) {
+    if (finalCorpus < corpusNeededFromSip) {
         minimumInvestment = Math.ceil(maxSip);
     }
 
@@ -186,7 +218,9 @@ const calculateFiAge = (
     monthlyExpense: number,
     currentAge: number,
     maxAge: number,
-    stepUpPercent: number = 0
+    stepUpPercent: number = 0,
+    existingFDCorpus: number = 0,
+    existingMFCorpus: number = 0
 ): number | null => {
     for (let age = currentAge; age <= maxAge; age++) {
         const yearsFromNow = age - currentAge;
@@ -196,6 +230,12 @@ const calculateFiAge = (
 
         // Calculate SIP corpus at this age with step-up
         const sipCorpus = calculateCorpusWithVariableRate(monthlyInvestment, yearsFromNow, stepUpPercent);
+
+        // Calculate grown existing corpus at this age
+        const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsFromNow);
+
+        // Total corpus = SIP corpus + grown existing corpus
+        const totalCorpus = sipCorpus + grownExistingCorpus;
 
         // Calculate inflation-adjusted expense at this age
         const inflationAdjustedExpense = getInflationAdjustedExpense(monthlyExpense, yearsFromNow);
@@ -208,8 +248,8 @@ const calculateFiAge = (
         const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
 
         // Check SWP sustainability
-        if (sipCorpus > 0) {
-            const swpCheck = checkSwpSustainability(sipCorpus, grossWithdrawal, yearsInFinancialIndependence);
+        if (totalCorpus > 0) {
+            const swpCheck = checkSwpSustainability(totalCorpus, grossWithdrawal, yearsInFinancialIndependence);
             if (swpCheck.sustainable && age <= 60) {
                 return age;
             }
@@ -225,7 +265,7 @@ export const runOptimization = async (
     inputs: FinancialIndependenceInputs,
     baselineFiAge: number | null
 ): Promise<OptimizationResult> => {
-    const { currentAge, monthlyExpense, monthlyInvestment, healthStatus } = inputs;
+    const { currentAge, monthlyExpense, monthlyInvestment, healthStatus, existingFDCorpus = 0, existingMFCorpus = 0 } = inputs;
     const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
 
     // Step 0: Check if optimization is needed
@@ -256,7 +296,7 @@ export const runOptimization = async (
 
     // Step 1: Test step-up only scenarios
     for (const stepUp of STEP_UP_TEST_VALUES) {
-        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp);
+        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
@@ -271,7 +311,7 @@ export const runOptimization = async (
     // Step 2: Test SIP increase only scenarios
     for (const sipIncrease of SIP_INCREASE_TEST_VALUES) {
         const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0);
+        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
@@ -286,7 +326,7 @@ export const runOptimization = async (
     // Step 3: Test combined scenarios (limited pairs)
     for (const [stepUp, sipIncrease] of COMBINED_SCENARIOS) {
         const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp);
+        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             // Check if we already have this exact combination
             const exists = solutions.some(s =>
@@ -370,7 +410,7 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
     const result = useMemo<FinancialIndependenceResult | null>(() => {
         if (!inputs) return null;
 
-        const { currentAge, monthlyExpense, monthlyInvestment, healthStatus } = inputs;
+        const { currentAge, monthlyExpense, monthlyInvestment, healthStatus, existingFDCorpus = 0, existingMFCorpus = 0 } = inputs;
 
         // Get max age based on health status
         const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
@@ -398,6 +438,13 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
 
             // Calculate SIP corpus at this age (no step-up for baseline)
             const sipCorpus = calculateCorpusWithVariableRate(monthlyInvestment, yearsFromNow, 0);
+
+            // Calculate grown existing corpus at this age
+            const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsFromNow);
+
+            // Total corpus = SIP corpus + grown existing corpus
+            const totalCorpus = sipCorpus + grownExistingCorpus;
+
             const sipReturnRate = yearsFromNow < SIP_SHORT_TERM_THRESHOLD
                 ? SIP_RETURN_RATE_SHORT_TERM
                 : SIP_RETURN_RATE_LONG_TERM;
@@ -412,13 +459,13 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
             // User wants to receive targetWithdrawal net, so they need to withdraw more before tax
             const grossWithdrawal = targetWithdrawal / (1 - LTCG_TAX_RATE / 100);
 
-            // Check SWP sustainability
+            // Check SWP sustainability using total corpus (SIP + existing)
             let swpSustainable = false;
             let swpFinalCorpus = 0;
             let swpFinalCorpusPercentage = 0;
 
-            if (yearsInFinancialIndependence > 0 && sipCorpus > 0) {
-                const swpCheck = checkSwpSustainability(sipCorpus, grossWithdrawal, yearsInFinancialIndependence);
+            if (yearsInFinancialIndependence > 0 && totalCorpus > 0) {
+                const swpCheck = checkSwpSustainability(totalCorpus, grossWithdrawal, yearsInFinancialIndependence);
                 swpSustainable = swpCheck.sustainable;
                 swpFinalCorpus = swpCheck.finalCorpus;
                 swpFinalCorpusPercentage = swpCheck.finalCorpusPercentage;
@@ -427,7 +474,7 @@ export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInp
             yearlyBreakdown.push({
                 year: age,
                 yearsFromNow,
-                sipCorpus: Math.round(sipCorpus),
+                sipCorpus: Math.round(totalCorpus), // Now includes existing corpus
                 sipReturnRate,
                 inflationAdjustedExpense: Math.round(inflationAdjustedExpense),
                 targetWithdrawal: Math.round(targetWithdrawal),

@@ -5,7 +5,8 @@ import {
     HEALTH_LIFESTYLE_OPTIONS,
     MAX_AGE_INPUT,
     MAX_MONTHLY_EXPENDITURE,
-    MAX_MONTHLY_INVESTMENT
+    MAX_MONTHLY_INVESTMENT,
+    MAX_EXISTING_CORPUS
 } from '../constants';
 import { HealthStatus } from '../types';
 
@@ -14,6 +15,9 @@ export interface FormData {
     monthlyExpenditure: string;
     monthlyInvestment: string;
     healthLifestyle: HealthStatus | '';
+    hasExistingCorpus: boolean;
+    fdCorpus: string;
+    mfCorpus: string;
 }
 
 interface FinancialPlannerFormProps {
@@ -63,6 +67,12 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
             if (investmentNum > MAX_MONTHLY_INVESTMENT) return;
         }
 
+        // Validate corpus fields (max 5 crores each)
+        if ((field === 'fdCorpus' || field === 'mfCorpus') && numericValue !== '') {
+            const corpusNum = parseInt(numericValue);
+            if (corpusNum > MAX_EXISTING_CORPUS) return;
+        }
+
         const newFormData = {
             ...localFormData,
             [field]: numericValue
@@ -75,6 +85,18 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
         const newFormData = {
             ...localFormData,
             healthLifestyle: value as HealthStatus
+        };
+        setLocalFormData(newFormData);
+        debouncedFormChange(newFormData);
+    };
+
+    const handleExistingCorpusToggle = (checked: boolean) => {
+        const newFormData = {
+            ...localFormData,
+            hasExistingCorpus: checked,
+            // Reset corpus values when unchecked
+            fdCorpus: checked ? localFormData.fdCorpus : '',
+            mfCorpus: checked ? localFormData.mfCorpus : ''
         };
         setLocalFormData(newFormData);
         debouncedFormChange(newFormData);
@@ -184,7 +206,77 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                         )}
                     </div>
 
-                    {/* Health & Lifestyle Question */}
+                    {/* Pre-existing Corpus Section */}
+                    <div className="bg-slate-50 dark:bg-slate-900/30 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-700/60 transition-all duration-300">
+                        {/* Toggle Checkbox */}
+                        <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    checked={localFormData.hasExistingCorpus}
+                                    onChange={(e) => handleExistingCorpusToggle(e.target.checked)}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-emerald-500 transition-colors"></div>
+                                <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></div>
+                            </div>
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                                I have a pre-existing corpus
+                            </span>
+                        </label>
+
+                        {/* Corpus Inputs - Shown when toggle is on */}
+                        {localFormData.hasExistingCorpus && (
+                            <div className="mt-4 grid grid-cols-2 gap-3 animate-fade-in">
+                                {/* FD Corpus */}
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                                        FD Corpus (7% growth)
+                                    </label>
+                                    <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2">
+                                        <span className="text-slate-400 font-medium mr-1 text-sm">₹</span>
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={formatCurrency(localFormData.fdCorpus)}
+                                            onChange={(e) => handleInputChange('fdCorpus', e.target.value)}
+                                            placeholder="0"
+                                            className="w-full text-base font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
+                                        />
+                                    </div>
+                                    {localFormData.fdCorpus && parseInt(localFormData.fdCorpus) > 0 && (
+                                        <div className="text-right text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                                            {numberToIndianWords(parseInt(localFormData.fdCorpus))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* MF Corpus */}
+                                <div>
+                                    <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">
+                                        MF Corpus (12% growth)
+                                    </label>
+                                    <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2">
+                                        <span className="text-slate-400 font-medium mr-1 text-sm">₹</span>
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={formatCurrency(localFormData.mfCorpus)}
+                                            onChange={(e) => handleInputChange('mfCorpus', e.target.value)}
+                                            placeholder="0"
+                                            className="w-full text-base font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
+                                        />
+                                    </div>
+                                    {localFormData.mfCorpus && parseInt(localFormData.mfCorpus) > 0 && (
+                                        <div className="text-right text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                                            {numberToIndianWords(parseInt(localFormData.mfCorpus))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-3 ml-1">
                             How would you describe your Health & Lifestyle?

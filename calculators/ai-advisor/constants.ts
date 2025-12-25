@@ -18,6 +18,11 @@ export const HEALTH_LIFESTYLE_OPTIONS = [
 export const MAX_AGE_INPUT = 99;
 export const MAX_MONTHLY_EXPENDITURE = 1000000;
 export const MAX_MONTHLY_INVESTMENT = 1000000;
+export const MAX_EXISTING_CORPUS = 50000000; // 5 crores max for each FD and MF
+
+// Pre-existing Corpus Growth Rates
+export const FD_ANNUAL_GROWTH_RATE = 7;  // 7% annual for FD
+export const MF_ANNUAL_GROWTH_RATE = 12; // 12% annual for Mutual Funds
 
 // Return Rates
 export const INFLATION_RATE = 7; // 7% annual inflation

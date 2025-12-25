@@ -18,6 +18,8 @@ import {
     SIP_INCREASE_TEST_VALUES,
     COMBINED_SCENARIOS,
     OPTIMIZATION_TARGET_FI_AGE,
+    FD_ANNUAL_GROWTH_RATE,
+    MF_ANNUAL_GROWTH_RATE,
 } from './constants';
 
 // ============================================
@@ -80,6 +82,23 @@ const calculateCorpusWithVariableRate = (
 
 const getInflationAdjustedExpense = (currentExpense: number, yearsFromNow: number): number => {
     return currentExpense * Math.pow(1 + INFLATION_RATE / 100, yearsFromNow);
+};
+
+/**
+ * Calculate the future value of pre-existing corpus after specified years.
+ * FD grows at 7% annually, MF grows at 12% annually.
+ */
+const calculateExistingCorpusGrowth = (
+    fdCorpus: number = 0,
+    mfCorpus: number = 0,
+    years: number
+): number => {
+    if (years <= 0) return fdCorpus + mfCorpus;
+
+    const fdGrown = fdCorpus * Math.pow(1 + FD_ANNUAL_GROWTH_RATE / 100, years);
+    const mfGrown = mfCorpus * Math.pow(1 + MF_ANNUAL_GROWTH_RATE / 100, years);
+
+    return fdGrown + mfGrown;
 };
 
 const calculateSwpSeries = (
@@ -147,7 +166,9 @@ const calculateFiAge = (
     monthlyExpense: number,
     currentAge: number,
     maxAge: number,
-    stepUpPercent: number = 0
+    stepUpPercent: number = 0,
+    existingFDCorpus: number = 0,
+    existingMFCorpus: number = 0
 ): number | null => {
     let low = currentAge;
     let high = Math.min(60, maxAge);
@@ -164,11 +185,14 @@ const calculateFiAge = (
         }
 
         const sipCorpus = calculateCorpusWithVariableRate(monthlyInvestment, yearsFromNow, stepUpPercent);
+        const grownExistingCorpus = calculateExistingCorpusGrowth(existingFDCorpus, existingMFCorpus, yearsFromNow);
+        const totalCorpus = sipCorpus + grownExistingCorpus;
+
         const inflationAdjustedExpense = getInflationAdjustedExpense(monthlyExpense, yearsFromNow);
         const targetWithdrawal = inflationAdjustedExpense * (1 + LIFESTYLE_BUFFER);
 
-        if (sipCorpus > 0) {
-            const swpCheck = checkSwpSustainability(sipCorpus, targetWithdrawal, yearsInFI);
+        if (totalCorpus > 0) {
+            const swpCheck = checkSwpSustainability(totalCorpus, targetWithdrawal, yearsInFI);
 
             if (swpCheck.sustainable) {
                 result = mid;
@@ -269,7 +293,7 @@ export const runOptimizationFallback = (
 ): OptimizationResult => {
     console.log('[Optimization] Running main-thread fallback calculations...');
 
-    const { currentAge, monthlyExpense, monthlyInvestment, healthStatus } = inputs;
+    const { currentAge, monthlyExpense, monthlyInvestment, healthStatus, existingFDCorpus = 0, existingMFCorpus = 0 } = inputs;
     const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
 
     if (baselineFiAge !== null && baselineFiAge <= OPTIMIZATION_TARGET_FI_AGE) {
@@ -298,7 +322,7 @@ export const runOptimizationFallback = (
 
     // Test step-up only scenarios
     for (const stepUp of STEP_UP_TEST_VALUES) {
-        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp);
+        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
@@ -313,7 +337,7 @@ export const runOptimizationFallback = (
     // Test SIP increase only scenarios
     for (const sipIncrease of SIP_INCREASE_TEST_VALUES) {
         const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0);
+        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
@@ -328,7 +352,7 @@ export const runOptimizationFallback = (
     // Test combined scenarios
     for (const [stepUp, sipIncrease] of COMBINED_SCENARIOS) {
         const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp);
+        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
         if (fiAge !== null && fiAge < effectiveBaseline) {
             const exists = solutions.some(s =>
                 s.stepUpPercent === stepUp && s.sipIncreasePercent === sipIncrease

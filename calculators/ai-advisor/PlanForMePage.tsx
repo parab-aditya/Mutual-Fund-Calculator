@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useFinancialIndependencePlanner, calculateMinimumInvestmentForFI } from './useFinancialIndependencePlanner';
+import { useFinancialIndependencePlanner, calculateMinimumInvestmentForFI, calculateCorpusWithVariableRate, calculateExistingCorpusGrowth } from './useFinancialIndependencePlanner';
 import { useOptimizationWorker } from './hooks/useOptimizationWorker';
 import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData, MinimumInvestmentData } from './types';
-import { SIP_SHORT_TERM_THRESHOLD, SIP_RETURN_RATE_LONG_TERM, INFLATION_RATE, LIFESTYLE_BUFFER, OPTIMIZATION_TARGET_FI_AGE } from './constants';
-import { calculateSipCorpus } from '../sip/useSipCalculator';
+import { INFLATION_RATE, LIFESTYLE_BUFFER, OPTIMIZATION_TARGET_FI_AGE } from './constants';
 import { getAIRecommendation } from './geminiService';
 import { runOptimizationFallback } from './optimizationFallback';
 
@@ -17,6 +16,9 @@ const PlanForMePage: React.FC = () => {
         monthlyExpenditure: '',
         monthlyInvestment: '',
         healthLifestyle: 'generally_healthy',
+        hasExistingCorpus: false,
+        fdCorpus: '',
+        mfCorpus: '',
     });
 
     const [showResults, setShowResults] = useState(false);
@@ -31,7 +33,9 @@ const PlanForMePage: React.FC = () => {
 
     // Validation helper
     const isFieldValid = useCallback((field: keyof FormData): boolean => {
-        return formData[field] !== '' && parseInt(formData[field]) > 0;
+        const value = formData[field];
+        if (typeof value === 'boolean') return true; // Boolean fields are always valid
+        return value !== '' && parseInt(value) > 0;
     }, [formData]);
 
     const isFormValid = useMemo(() => {
@@ -49,6 +53,8 @@ const PlanForMePage: React.FC = () => {
             monthlyExpense: parseInt(formData.monthlyExpenditure),
             monthlyInvestment: parseInt(formData.monthlyInvestment),
             healthStatus: formData.healthLifestyle as HealthStatus,
+            existingFDCorpus: formData.hasExistingCorpus && formData.fdCorpus ? parseInt(formData.fdCorpus) : 0,
+            existingMFCorpus: formData.hasExistingCorpus && formData.mfCorpus ? parseInt(formData.mfCorpus) : 0,
         };
     }, [formData, isFormValid, showResults]);
 
@@ -209,7 +215,9 @@ const PlanForMePage: React.FC = () => {
             fiInputs.currentAge,
             fiInputs.monthlyExpense,
             fiInputs.healthStatus,
-            60
+            60,
+            fiInputs.existingFDCorpus || 0,
+            fiInputs.existingMFCorpus || 0
         );
 
         if (!result) return null;
@@ -230,17 +238,18 @@ const PlanForMePage: React.FC = () => {
         const baselineAge = fiResult.earliestFinancialIndependenceAge ?? 60;
         const yearsSaved = baselineAge - rec.fiAge;
         const yearsToFI = rec.fiAge - fiInputs.currentAge;
-        const sipRate = yearsToFI < SIP_SHORT_TERM_THRESHOLD ? 0.12 : SIP_RETURN_RATE_LONG_TERM / 100;
 
-        // Calculate estimated corpus with step-up
-        let estimatedCorpus = 0;
-        let currentSip = rec.newMonthlySip;
-        for (let year = 0; year < yearsToFI; year++) {
-            estimatedCorpus = (estimatedCorpus + currentSip * 12) * (1 + sipRate);
-            if (rec.stepUpPercent > 0) {
-                currentSip = currentSip * (1 + rec.stepUpPercent / 100);
-            }
-        }
+        // Calculate estimated corpus using the correct hybrid rate logic (consistent with Current Plan Card)
+        const sipCorpus = calculateCorpusWithVariableRate(rec.newMonthlySip, yearsToFI, rec.stepUpPercent);
+
+        // Add grown existing corpus (FD at 7%, MF at 12%)
+        const existingCorpusGrown = calculateExistingCorpusGrowth(
+            fiInputs.existingFDCorpus || 0,
+            fiInputs.existingMFCorpus || 0,
+            yearsToFI
+        );
+
+        const estimatedCorpus = sipCorpus + existingCorpusGrown;
 
         const inflationRate = INFLATION_RATE / 100;
         const inflatedExpense = fiInputs.monthlyExpense * Math.pow(1 + inflationRate, yearsToFI);
