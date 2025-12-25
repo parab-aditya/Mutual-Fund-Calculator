@@ -92,7 +92,7 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
             <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-700/60 p-5 sm:p-6 transform transition-all hover:shadow-2xl hover:scale-[1.005]">
                 {/* Heading */}
                 <h1 className="text-xl sm:text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-5 sm:mb-6 leading-tight">
-                    Financial Independence Plan
+                    Plan Your Financial Independence
                 </h1>
 
                 {/* Form Fields */}
