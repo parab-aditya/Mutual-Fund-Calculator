@@ -72,7 +72,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                                     <div className="flex-1">
                                         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Minimum Investment for FI by {minimumInvestmentData.targetFIAge}</p>
                                         <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">
-                                            ₹{minimumInvestmentData.minimumInvestment.toLocaleString('en-IN')}<span className="text-base font-semibold text-slate-500 dark:text-slate-400">/month</span>
+                                            ₹{minimumInvestmentData.minimumInvestment.toLocaleString('en-IN')}<span className="text-base font-semibold text-slate-500 dark:text-slate-400"> / month</span>
                                         </p>
                                     </div>
                                 </div>
@@ -86,7 +86,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                                     </svg>
                                 </div>
                                 <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
-                                    Increase your investment by <span className="font-bold text-blue-600 dark:text-blue-400">₹{minimumInvestmentData.investmentGap.toLocaleString('en-IN')}/month</span> to reach FI by age {minimumInvestmentData.targetFIAge}
+                                    Increase your investment by <span className="font-bold text-blue-600 dark:text-blue-400">₹{minimumInvestmentData.investmentGap.toLocaleString('en-IN')} /month</span> to reach FI by age {minimumInvestmentData.targetFIAge}
                                 </p>
                             </div>
                         </div>
