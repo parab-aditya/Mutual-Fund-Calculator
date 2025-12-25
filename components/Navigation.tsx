@@ -80,7 +80,7 @@ const Navigation: React.FC = () => {
     };
 
     const handlePlanForMeClick = () => {
-        navigate('/plan-for-me');
+        navigate('/sip-calculator/plan-for-me');
     };
 
     return (
@@ -129,21 +129,21 @@ const Navigation: React.FC = () => {
                 <button
                     onClick={handlePlanForMeClick}
                     className={`group shrink-0 px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-2 sm:gap-3 sm:justify-self-end overflow-hidden
-            ${location.pathname === '/plan-for-me'
+            ${location.pathname === '/sip-calculator/plan-for-me'
                             ? 'bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 text-white shadow-lg shadow-fuchsia-500/30 dark:shadow-fuchsia-500/20 scale-[1.02]'
                             : 'bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-pink-500/10 dark:from-violet-500/20 dark:via-fuchsia-500/20 dark:to-pink-500/20 text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-700/60 hover:from-violet-500 hover:via-fuchsia-500 hover:to-pink-500 hover:text-white hover:border-transparent hover:shadow-lg hover:shadow-fuchsia-500/25 hover:scale-[1.02]'
                         }`}
                 >
                     {/* Siri-like AI orb icon */}
                     <div className={`relative w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all duration-300
-                        ${location.pathname === '/plan-for-me'
+                        ${location.pathname === '/sip-calculator/plan-for-me'
                             ? 'bg-white/25'
                             : 'bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 group-hover:bg-white/25'
                         }`}
                     >
                         {/* Animated pulse ring */}
                         <div className={`absolute inset-0 rounded-full animate-ping opacity-40
-                            ${location.pathname === '/plan-for-me'
+                            ${location.pathname === '/sip-calculator/plan-for-me'
                                 ? 'bg-white/30'
                                 : 'bg-gradient-to-br from-violet-400 via-fuchsia-400 to-pink-400 group-hover:bg-white/30'
                             }`}
@@ -152,7 +152,7 @@ const Navigation: React.FC = () => {
                         {/* AI sparkle icon */}
                         <svg
                             className={`w-3 h-3 sm:w-3.5 sm:h-3.5 relative z-10 transition-colors duration-300
-                                ${location.pathname === '/plan-for-me'
+                                ${location.pathname === '/sip-calculator/plan-for-me'
                                     ? 'text-white'
                                     : 'text-white group-hover:text-white'
                                 }`}

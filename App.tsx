@@ -65,7 +65,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/sip-calculator" replace />} />
         <Route path="/sip-calculator" element={<HomePage />} />
         <Route path="/sip-calculator/coast-fire" element={<CoastFirePage />} />
-        <Route path="/plan-for-me" element={<PlanForMePage />} />
+        <Route path="/sip-calculator/plan-for-me" element={<PlanForMePage />} />
         <Route path="*" element={<Navigate to="/sip-calculator" replace />} />
       </Routes>
 
