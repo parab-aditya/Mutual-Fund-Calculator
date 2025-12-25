@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Types for the API
@@ -205,38 +206,29 @@ const parseAIResponse = (response: string, solutions: OptimizationSolution[]): A
     }
 };
 
-// Vercel Serverless Function Handler
-export default async function handler(req: Request): Promise<Response> {
-    // CORS headers
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Content-Type': 'application/json',
-    };
+// Vercel Serverless Function Handler (Node.js runtime)
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers });
+        return res.status(204).end();
     }
 
     if (req.method !== 'POST') {
-        return new Response(
-            JSON.stringify({ error: 'Method not allowed' }),
-            { status: 405, headers }
-        );
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        const body: RequestBody = await req.json();
+        const body: RequestBody = req.body;
         const { baselineFiAge, solutions, preferences } = body;
 
         // Validate request
         if (!solutions || !Array.isArray(solutions) || solutions.length === 0) {
-            return new Response(
-                JSON.stringify({ error: 'Invalid request: solutions array required' }),
-                { status: 400, headers }
-            );
+            return res.status(400).json({ error: 'Invalid request: solutions array required' });
         }
 
         // Get API key from environment (server-side, secure!)
@@ -245,16 +237,13 @@ export default async function handler(req: Request): Promise<Response> {
         if (!GEMINI_API_KEY) {
             console.warn('[API] Gemini API key not configured, using fallback');
             const fallback = getFallbackRecommendation(baselineFiAge, solutions, preferences);
-            return new Response(
-                JSON.stringify({ recommendation: fallback, source: 'fallback' }),
-                { status: 200, headers }
-            );
+            return res.status(200).json({ recommendation: fallback, source: 'fallback' });
         }
 
         console.log('[API] Calling Gemini API...');
 
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const prompt = buildPrompt(baselineFiAge, solutions, preferences);
         const result = await model.generateContent(prompt);
@@ -264,30 +253,21 @@ export default async function handler(req: Request): Promise<Response> {
 
         const recommendation = parseAIResponse(response, solutions);
 
-        return new Response(
-            JSON.stringify({ recommendation, source: 'gemini' }),
-            { status: 200, headers }
-        );
+        return res.status(200).json({ recommendation, source: 'gemini' });
     } catch (error) {
         console.error('[API] Error:', error);
 
         // Try to use fallback
         try {
-            const body: RequestBody = await req.json();
+            const body: RequestBody = req.body;
             const fallback = getFallbackRecommendation(
                 body.baselineFiAge,
                 body.solutions,
                 body.preferences
             );
-            return new Response(
-                JSON.stringify({ recommendation: fallback, source: 'fallback', error: String(error) }),
-                { status: 200, headers }
-            );
+            return res.status(200).json({ recommendation: fallback, source: 'fallback', error: String(error) });
         } catch {
-            return new Response(
-                JSON.stringify({ error: 'Failed to process request' }),
-                { status: 500, headers }
-            );
+            return res.status(500).json({ error: 'Failed to process request' });
         }
     }
 }
