@@ -10,6 +10,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { OptimizationSolution, AIRecommendation } from './types';
 import { buildPrompt, parseAIResponse, getFallbackRecommendation } from './geminiShared';
+import { resolveApiPath } from '../../utils/basePath';
 
 // Local dev API key (only for local testing, not used in production)
 const VITE_GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -69,7 +70,7 @@ const callServerAPI = async (
     solutions: OptimizationSolution[],
     preferences: { preferLowerStepUp: boolean; preferLowerSipIncrease: boolean; targetAge: number }
 ): Promise<{ recommendation: AIRecommendation; source: string } | null> => {
-    const response = await fetch('/api/gemini-recommendation', {
+    const response = await fetch(resolveApiPath('/api/gemini-recommendation'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ baselineFiAge, solutions, preferences })

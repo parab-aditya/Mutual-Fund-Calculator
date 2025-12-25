@@ -5,6 +5,7 @@ import { formatSmartNumber } from '../utils/planMetrics';
 import { PlanDisplayData, FinancialIndependenceInputs } from '../types';
 import { SWP_STEP_UP_PERCENTAGE } from '../constants';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { resolveAssetPath } from '../../../utils/basePath';
 
 interface CurrentPlanCardProps {
     planData: PlanDisplayData;
@@ -53,7 +54,7 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                 <div className="flex-1 flex items-center justify-center -mt-4 mb-4 sm:-mt-4 overflow-hidden">
                     <div className="w-full max-w-[280px]">
                         <DotLottieReact
-                            src="/animations/financial-planning.lottie"
+                            src={resolveAssetPath('/animations/financial-planning.lottie')}
                             loop
                             autoplay
                             speed={0.8}
