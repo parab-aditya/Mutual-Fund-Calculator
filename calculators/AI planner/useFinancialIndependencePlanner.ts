@@ -244,7 +244,7 @@ export const runOptimization = async (
     }
 
     try {
-        const aiRecommendation = await getAIRecommendation(
+        const { recommendation } = await getAIRecommendation(
             effectiveBaseline,
             solutionsForRanking,
             {
@@ -254,15 +254,15 @@ export const runOptimization = async (
             }
         );
 
-        const recommendedSolution = aiRecommendation.recommendedIndex >= 0 && aiRecommendation.recommendedIndex < solutionsForRanking.length
-            ? solutionsForRanking[aiRecommendation.recommendedIndex]
+        const recommendedSolution = recommendation.recommendedIndex >= 0 && recommendation.recommendedIndex < solutionsForRanking.length
+            ? solutionsForRanking[recommendation.recommendedIndex]
             : solutionsForRanking[0];
 
         return {
             baselineFiAge,
             solutions: solutionsForRanking,
             recommendedSolution,
-            recommendation: aiRecommendation,
+            recommendation,
             skipOptimization: false
         };
     } catch (error) {

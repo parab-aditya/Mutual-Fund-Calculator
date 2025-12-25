@@ -63,11 +63,11 @@ const PlanForMePage: React.FC = () => {
 
             try {
                 // Step 1: Try to get solutions from worker (heavy CPU calculations)
-                console.log('[Optimization] Running worker calculations...');
+                console.log('⚙️ [Optimization] Starting: Running worker calculations...');
                 workerResult = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
             } catch (workerError) {
                 // Worker failed - use main-thread fallback
-                console.warn('[Optimization] Worker failed, using main-thread fallback:', workerError);
+                console.warn('⚠️ [Optimization] Worker failed, acting on fallback...');
                 try {
                     workerResult = runOptimizationFallback(fiInputs, fiResult.earliestFinancialIndependenceAge);
                 } catch (fallbackError) {
@@ -92,8 +92,8 @@ const PlanForMePage: React.FC = () => {
             try {
                 // Step 2: If we have solutions, get AI recommendation from Gemini
                 if (workerResult.solutions.length > 0 && !workerResult.skipOptimization) {
-                    console.log('[Optimization] Calculations complete, calling Gemini API...');
-                    const aiRecommendation = await getAIRecommendation(
+                    console.log('🔄 [Optimization] Worker calculations done. Requesting AI recommendation...');
+                    const { recommendation, source } = await getAIRecommendation(
                         workerResult.baselineFiAge ?? 60,
                         workerResult.solutions,
                         {
@@ -106,24 +106,29 @@ const PlanForMePage: React.FC = () => {
                     if (cancelled) return;
 
                     // Enhance result with AI recommendation
-                    const recommendedSolution = aiRecommendation.recommendedIndex >= 0
-                        && aiRecommendation.recommendedIndex < workerResult.solutions.length
-                        ? workerResult.solutions[aiRecommendation.recommendedIndex]
+                    const recommendedSolution = recommendation.recommendedIndex >= 0
+                        && recommendation.recommendedIndex < workerResult.solutions.length
+                        ? workerResult.solutions[recommendation.recommendedIndex]
                         : workerResult.solutions[0];
 
-                    console.log('[Optimization] Complete with AI recommendation');
+                    if (source === 'gemini') {
+                        console.log('🤖✅ [Optimization] Complete! Applied GEMINI AI recommendation.');
+                    } else {
+                        console.log('⚠️🏁 [Optimization] Complete! Applied FALLBACK recommendation (Internal Logic).');
+                    }
+
                     setOptimizationResult({
                         ...workerResult,
-                        recommendation: aiRecommendation,
+                        recommendation,
                         recommendedSolution
                     });
                 } else {
                     // No solutions or skip optimization - use result as-is
-                    console.log('[Optimization] Complete (skipped AI - no solutions or already optimal)');
+                    console.log('🏁 [Optimization] Process Complete (No optimization needed/found).');
                     setOptimizationResult(workerResult);
                 }
             } catch (error) {
-                console.error('[Optimization] AI recommendation failed, using fallback result:', error);
+                console.error('❌ [Optimization] AI recommendation step failed:', error);
                 // Still show the worker result even if AI fails
                 if (!cancelled) {
                     setOptimizationResult(workerResult);
