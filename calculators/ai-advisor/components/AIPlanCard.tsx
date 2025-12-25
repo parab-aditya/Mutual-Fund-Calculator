@@ -174,6 +174,8 @@ export const AIPlanCard = memo<AIPlanCardProps>(function AIPlanCard({
                         monthlyExpense={inputs.monthlyExpense}
                         monthlyInvestment={inputs.monthlyInvestment}
                         healthStatus={inputs.healthStatus}
+                        existingFDCorpus={inputs.existingFDCorpus}
+                        existingMFCorpus={inputs.existingMFCorpus}
                     />
                 )}
             </CardWrapper>

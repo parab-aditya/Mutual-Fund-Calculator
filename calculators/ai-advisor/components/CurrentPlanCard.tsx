@@ -204,6 +204,8 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                 monthlyExpense={inputs.monthlyExpense}
                 monthlyInvestment={inputs.monthlyInvestment}
                 healthStatus={inputs.healthStatus}
+                existingFDCorpus={inputs.existingFDCorpus}
+                existingMFCorpus={inputs.existingMFCorpus}
             />
         </div>
     );

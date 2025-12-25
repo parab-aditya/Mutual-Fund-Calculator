@@ -21,6 +21,8 @@ interface AssumptionsModalProps {
     monthlyExpense: number;
     monthlyInvestment: number;
     healthStatus: HealthStatus;
+    existingFDCorpus?: number;
+    existingMFCorpus?: number;
 }
 
 const CloseIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -43,6 +45,8 @@ export const AssumptionsModal = memo<AssumptionsModalProps>(function Assumptions
     monthlyExpense,
     monthlyInvestment,
     healthStatus,
+    existingFDCorpus,
+    existingMFCorpus,
 }) {
     // Handle escape key
     const handleEscape = useCallback((e: KeyboardEvent) => {
@@ -108,6 +112,18 @@ export const AssumptionsModal = memo<AssumptionsModalProps>(function Assumptions
                                 <span className="text-sm text-slate-600 dark:text-slate-300">Monthly Investment (SIP)</span>
                                 <span className="text-sm font-semibold text-slate-900 dark:text-white">₹{monthlyInvestment.toLocaleString('en-IN')}</span>
                             </div>
+                            {existingFDCorpus !== undefined && existingFDCorpus > 0 ? (
+                                <div className="flex items-center justify-between py-2.5 px-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                    <span className="text-sm text-slate-600 dark:text-slate-300">Existing FD Corpus</span>
+                                    <span className="text-sm font-semibold text-slate-900 dark:text-white">₹{existingFDCorpus.toLocaleString('en-IN')}</span>
+                                </div>
+                            ) : null}
+                            {existingMFCorpus !== undefined && existingMFCorpus > 0 ? (
+                                <div className="flex items-center justify-between py-2.5 px-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                                    <span className="text-sm text-slate-600 dark:text-slate-300">Existing MF Corpus</span>
+                                    <span className="text-sm font-semibold text-slate-900 dark:text-white">₹{existingMFCorpus.toLocaleString('en-IN')}</span>
+                                </div>
+                            ) : null}
                         </div>
                     </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { numberToIndianWords } from '../../../utils/formatters';
 import {
@@ -35,6 +35,11 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
 }) => {
     // Local state for immediate UI updates (no lag while typing)
     const [localFormData, setLocalFormData] = useState(formData);
+
+    // Refs for input fields to handle Enter key navigation
+    const ageInputRef = useRef<HTMLInputElement>(null);
+    const expenditureInputRef = useRef<HTMLInputElement>(null);
+    const investmentInputRef = useRef<HTMLInputElement>(null);
 
     // Debounced callback to parent - 150ms delay for calculations
     const debouncedFormChange = useDebouncedCallback(
@@ -102,6 +107,24 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
         debouncedFormChange(newFormData);
     };
 
+    // Handle Enter key navigation between inputs
+    const handleKeyDown = useCallback((
+        e: React.KeyboardEvent<HTMLInputElement>,
+        nextInputRef?: React.RefObject<HTMLInputElement>
+    ) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (nextInputRef?.current) {
+                nextInputRef.current.focus();
+            } else {
+                // Last input - trigger submit if form is valid
+                if (isFormValid) {
+                    onSubmit();
+                }
+            }
+        }
+    }, [isFormValid, onSubmit]);
+
     const formatCurrency = (value: string): string => {
         if (!value) return '';
         const num = parseInt(value);
@@ -145,10 +168,12 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                                 Your Current Age:
                             </label>
                             <input
+                                ref={ageInputRef}
                                 type="text"
                                 inputMode="numeric"
                                 value={localFormData.age}
                                 onChange={(e) => handleInputChange('age', e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(e, expenditureInputRef)}
                                 placeholder="30"
                                 maxLength={2}
                                 className="w-20 text-xl font-bold bg-white dark:bg-slate-800 rounded-xl px-4 py-2 border border-slate-200 dark:border-slate-600 text-center text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors"
@@ -165,10 +190,12 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                             <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 w-40">
                                 <span className="text-slate-400 font-medium mr-2">₹</span>
                                 <input
+                                    ref={expenditureInputRef}
                                     type="text"
                                     inputMode="numeric"
                                     value={formatCurrency(localFormData.monthlyExpenditure)}
                                     onChange={(e) => handleInputChange('monthlyExpenditure', e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e, investmentInputRef)}
                                     placeholder="1,00,000"
                                     className="w-full text-lg font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
                                 />
@@ -190,10 +217,12 @@ export const FinancialPlannerForm: React.FC<FinancialPlannerFormProps> = ({
                             <div className="flex items-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 w-40">
                                 <span className="text-slate-400 font-medium mr-2">₹</span>
                                 <input
+                                    ref={investmentInputRef}
                                     type="text"
                                     inputMode="numeric"
                                     value={formatCurrency(localFormData.monthlyInvestment)}
                                     onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e)}
                                     placeholder="50,000"
                                     className="w-full text-lg font-bold bg-transparent text-right text-slate-900 dark:text-white focus:outline-none"
                                 />
