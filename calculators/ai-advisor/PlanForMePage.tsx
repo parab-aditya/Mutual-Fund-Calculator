@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useFinancialIndependencePlanner } from './useFinancialIndependencePlanner';
 import { useOptimizationWorker } from './hooks/useOptimizationWorker';
 import { FinancialIndependenceInputs, OptimizationResult, HealthStatus, PlanDisplayData } from './types';
@@ -20,8 +20,10 @@ const PlanForMePage: React.FC = () => {
     });
 
     const [showResults, setShowResults] = useState(false);
-    const [shouldOptimize, setShouldOptimize] = useState(false);
-    const [pendingOptimization, setPendingOptimization] = useState(false); // Used to trigger optimization after fiInputs is computed
+    // Use a unique run ID instead of boolean flags to ensure effect re-runs on every new request
+    // Each "Plan for me" click increments this, guaranteeing the effect dependency changes
+    const [optimizationRunId, setOptimizationRunId] = useState<number | null>(null);
+    const currentRunIdRef = useRef<number | null>(null); // Track current run for cancellation
     const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
 
     // Use Web Worker for optimization
@@ -53,40 +55,39 @@ const PlanForMePage: React.FC = () => {
     // Use the financial independence planner hook
     const fiResult = useFinancialIndependencePlanner(fiInputs);
 
-    // Bridge effect: Wait for fiInputs to be computed before triggering optimization
-    // This fixes the race condition when setting showResults + pendingOptimization in same render
-    useEffect(() => {
-        if (pendingOptimization && fiInputs && fiResult) {
-            console.log('🔀 [Optimization] fiInputs ready, triggering optimization...');
-            setPendingOptimization(false);
-            setShouldOptimize(true);
-        }
-    }, [pendingOptimization, fiInputs, fiResult]);
 
-    // Optimization effect with proper cleanup and trigger pattern
+    // Optimization effect - triggers when optimizationRunId changes
+    // Using a unique run ID ensures the effect ALWAYS re-runs for each new request
     useEffect(() => {
-        if (!shouldOptimize || !fiInputs || !fiResult) return;
+        // Only run if we have a valid run ID and all required data
+        if (optimizationRunId === null || !fiInputs || !fiResult) return;
 
-        let cancelled = false;
+        // Track this run ID for cancellation
+        const thisRunId = optimizationRunId;
+        currentRunIdRef.current = thisRunId;
 
         const fetchOptimization = async () => {
             let workerResult: OptimizationResult | null = null;
 
             try {
                 // Step 1: Try to get solutions from worker (heavy CPU calculations)
-                console.log('⚙️ [Optimization] Starting: Running worker calculations...');
+                console.log(`⚙️ [Optimization] Run #${thisRunId}: Starting worker calculations...`);
                 workerResult = await runOptimization(fiInputs, fiResult.earliestFinancialIndependenceAge);
             } catch (workerError) {
                 // Worker failed - use main-thread fallback
-                console.warn('⚠️ [Optimization] Worker failed, acting on fallback...');
+                console.warn(`⚠️ [Optimization] Run #${thisRunId}: Worker failed, using fallback...`);
                 try {
                     workerResult = runOptimizationFallback(fiInputs, fiResult.earliestFinancialIndependenceAge);
                 } catch (fallbackError) {
-                    console.error('[Optimization] Fallback also failed:', fallbackError);
+                    console.error(`[Optimization] Run #${thisRunId}: Fallback also failed:`, fallbackError);
                 }
             }
 
-            if (cancelled) return;
+            // Check if this run was cancelled (a newer run started)
+            if (currentRunIdRef.current !== thisRunId) {
+                console.log(`🚫 [Optimization] Run #${thisRunId}: Cancelled (newer run started)`);
+                return;
+            }
 
             if (!workerResult) {
                 setOptimizationResult({
@@ -101,9 +102,9 @@ const PlanForMePage: React.FC = () => {
             }
 
             try {
-                // Step 2: If we have solutions, get AI recommendation from Gemini
+                // Step 2: If we have solutions, get AI recommendation
                 if (workerResult.solutions.length > 0 && !workerResult.skipOptimization) {
-                    console.log('🔄 [Optimization] Worker calculations done. Requesting AI recommendation...');
+                    console.log(`🔄 [Optimization] Run #${thisRunId}: Requesting AI recommendation...`);
                     const { recommendation, source } = await getAIRecommendation(
                         workerResult.baselineFiAge ?? 60,
                         workerResult.solutions,
@@ -114,7 +115,11 @@ const PlanForMePage: React.FC = () => {
                         }
                     );
 
-                    if (cancelled) return;
+                    // Check cancellation again after async call
+                    if (currentRunIdRef.current !== thisRunId) {
+                        console.log(`🚫 [Optimization] Run #${thisRunId}: Cancelled after AI call`);
+                        return;
+                    }
 
                     // Enhance result with AI recommendation
                     const recommendedSolution = recommendation.recommendedIndex >= 0
@@ -123,11 +128,11 @@ const PlanForMePage: React.FC = () => {
                         : workerResult.solutions[0];
 
                     if (source === 'openrouter') {
-                        console.log('🤖✅ [Optimization] Complete! Applied OPENROUTER AI recommendation.');
+                        console.log(`🤖✅ [Optimization] Run #${thisRunId}: Complete! (OPENROUTER)`);
                     } else if (source === 'gemini') {
-                        console.log('🤖✅ [Optimization] Complete! Applied GEMINI AI recommendation.');
+                        console.log(`🤖✅ [Optimization] Run #${thisRunId}: Complete! (GEMINI)`);
                     } else {
-                        console.log('⚠️🏁 [Optimization] Complete! Applied FALLBACK recommendation (Internal Logic).');
+                        console.log(`⚠️🏁 [Optimization] Run #${thisRunId}: Complete! (FALLBACK)`);
                     }
 
                     setOptimizationResult({
@@ -137,42 +142,45 @@ const PlanForMePage: React.FC = () => {
                     });
                 } else {
                     // No solutions or skip optimization - use result as-is
-                    console.log('🏁 [Optimization] Process Complete (No optimization needed/found).');
+                    console.log(`🏁 [Optimization] Run #${thisRunId}: Complete (No optimization needed)`);
                     setOptimizationResult(workerResult);
                 }
             } catch (error) {
-                console.error('❌ [Optimization] AI recommendation step failed:', error);
+                console.error(`❌ [Optimization] Run #${thisRunId}: AI step failed:`, error);
                 // Still show the worker result even if AI fails
-                if (!cancelled) {
+                if (currentRunIdRef.current === thisRunId) {
                     setOptimizationResult(workerResult);
-                }
-            } finally {
-                if (!cancelled) {
-                    setShouldOptimize(false);
                 }
             }
         };
 
         fetchOptimization();
 
+        // Cleanup: mark this run as cancelled if effect re-runs
         return () => {
-            cancelled = true;
+            if (currentRunIdRef.current === thisRunId) {
+                currentRunIdRef.current = null;
+            }
         };
-    }, [shouldOptimize, fiInputs, fiResult, runOptimization]);
+    }, [optimizationRunId, fiInputs, fiResult, runOptimization]);
 
     // Handlers - wrapped in useCallback for stable references
     const handlePlanForMe = useCallback(() => {
         if (!isFormValid) return;
         setShowResults(true);
-        // Use pendingOptimization to wait for fiInputs to be computed in the next render
-        setPendingOptimization(true);
+        setOptimizationResult(null);
+        // Increment run ID to trigger a new optimization run
+        // requestAnimationFrame ensures fiInputs is computed before we trigger the effect
+        requestAnimationFrame(() => {
+            setOptimizationRunId(prev => (prev ?? 0) + 1);
+        });
     }, [isFormValid]);
 
     const handleReset = useCallback(() => {
         setShowResults(false);
         setOptimizationResult(null);
-        setShouldOptimize(false);
-        setPendingOptimization(false);
+        setOptimizationRunId(null);
+        currentRunIdRef.current = null;
     }, []);
 
     const handleFormChange = useCallback((newData: FormData) => {
@@ -301,7 +309,7 @@ const PlanForMePage: React.FC = () => {
 
                                 {/* AI Plan Card */}
                                 <AIPlanCard
-                                    isOptimizing={shouldOptimize}
+                                    isOptimizing={optimizationRunId !== null && optimizationResult === null}
                                     planData={aiPlanData}
                                     optimizationResult={optimizationResult}
                                 />
