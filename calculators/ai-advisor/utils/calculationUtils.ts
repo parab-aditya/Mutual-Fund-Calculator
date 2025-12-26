@@ -25,9 +25,11 @@ import {
     MF_ANNUAL_GROWTH_RATE,
     MAX_AGE_MAPPING,
 } from '../constants';
-import { calculateSipCorpus } from '../../sip/useSipCalculator';
-import { calculateSwpSeries } from '../../swp/useSwpCalculator';
+// Import from pure calculation files (no React dependencies) for Web Worker compatibility
+import { calculateSipCorpus } from '../../sip/sipCalculations';
+import { calculateSwpSeries } from '../../swp/swpCalculations';
 import { calculateLumpsumGrowth, inflateToFuture } from '../../../utils/financial';
+
 
 // ============================================
 // Memoization Cache for Performance
