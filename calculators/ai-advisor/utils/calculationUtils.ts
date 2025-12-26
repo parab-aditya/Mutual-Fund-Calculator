@@ -27,6 +27,7 @@ import {
 } from '../constants';
 import { calculateSipCorpus } from '../../sip/useSipCalculator';
 import { calculateSwpSeries } from '../../swp/useSwpCalculator';
+import { calculateLumpsumGrowth, inflateToFuture } from '../../../utils/financial';
 
 // ============================================
 // Memoization Cache for Performance
@@ -65,8 +66,8 @@ export const calculateExistingCorpusGrowth = (
 ): number => {
     if (years <= 0) return fdCorpus + mfCorpus;
 
-    const fdGrown = fdCorpus * Math.pow(1 + FD_ANNUAL_GROWTH_RATE / 100, years);
-    const mfGrown = mfCorpus * Math.pow(1 + MF_ANNUAL_GROWTH_RATE / 100, years);
+    const fdGrown = calculateLumpsumGrowth(fdCorpus, FD_ANNUAL_GROWTH_RATE, years);
+    const mfGrown = calculateLumpsumGrowth(mfCorpus, MF_ANNUAL_GROWTH_RATE, years);
 
     return fdGrown + mfGrown;
 };
@@ -131,7 +132,7 @@ export const getInflationAdjustedExpense = (
     currentExpense: number,
     yearsFromNow: number
 ): number => {
-    return currentExpense * Math.pow(1 + INFLATION_RATE / 100, yearsFromNow);
+    return inflateToFuture(currentExpense, INFLATION_RATE, yearsFromNow);
 };
 
 /**

@@ -114,3 +114,31 @@ export function deflateToBase(amount: number, monthsFromStart: number, annualInf
   const factor = Math.pow(1 + mInfl, monthsFromStart);
   return amount / factor;
 }
+
+/**
+ * Calculate the future value of a lumpsum investment after specified years.
+ * Uses monthly compounding for consistency with SIP calculations.
+ */
+export function calculateLumpsumGrowth(
+  principal: number,
+  annualReturnRate: number,
+  years: number
+): number {
+  if (principal <= 0 || years <= 0) return principal;
+  const months = years * 12;
+  const monthlyRate = Math.pow(1 + annualReturnRate / 100, 1 / 12) - 1;
+  return principal * Math.pow(1 + monthlyRate, months);
+}
+
+/**
+ * Inflate a present value to its future equivalent after specified years.
+ * Inverse of deflateToBase - uses annual compounding for simplicity.
+ */
+export function inflateToFuture(
+  presentValue: number,
+  annualInflationRate: number,
+  years: number
+): number {
+  if (years <= 0) return presentValue;
+  return presentValue * Math.pow(1 + annualInflationRate / 100, years);
+}
