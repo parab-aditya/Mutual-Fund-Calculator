@@ -1,15 +1,11 @@
 import { useMemo } from 'react';
-import { FinancialIndependenceInputs, YearlyBreakdown, FinancialIndependenceResult, OptimizationSolution, OptimizationResult } from './types';
+import { FinancialIndependenceInputs, YearlyBreakdown, FinancialIndependenceResult } from './types';
 import {
     MAX_AGE_MAPPING,
     SIP_RETURN_RATE_SHORT_TERM,
     SIP_RETURN_RATE_LONG_TERM,
     SIP_SHORT_TERM_THRESHOLD,
     LIFESTYLE_BUFFER,
-    STEP_UP_TEST_VALUES,
-    SIP_INCREASE_TEST_VALUES,
-    COMBINED_SCENARIOS,
-    OPTIMIZATION_TARGET_FI_AGE,
     LTCG_TAX_RATE,
 } from './constants';
 import {
@@ -17,161 +13,11 @@ import {
     calculateCorpusWithVariableRate,
     getInflationAdjustedExpense,
     checkSwpSustainability,
-    calculateFiAge,
     calculateMinimumInvestmentForFI,
 } from './utils/calculationUtils';
-import { getAIRecommendation } from './geminiService';
 
 // Re-export for backward compatibility
 export { calculateExistingCorpusGrowth, calculateCorpusWithVariableRate, calculateMinimumInvestmentForFI };
-
-/**
- * Run optimization to find the best step-up and SIP increase combination
- */
-export const runOptimization = async (
-    inputs: FinancialIndependenceInputs,
-    baselineFiAge: number | null
-): Promise<OptimizationResult> => {
-    const { currentAge, monthlyExpense, monthlyInvestment, healthStatus, existingFDCorpus = 0, existingMFCorpus = 0 } = inputs;
-    const maxAge = MAX_AGE_MAPPING[healthStatus] || 80;
-
-    // Step 0: Check if optimization is needed
-    if (baselineFiAge !== null && baselineFiAge <= OPTIMIZATION_TARGET_FI_AGE) {
-        return {
-            baselineFiAge,
-            solutions: [],
-            recommendedSolution: null,
-            recommendation: null,
-            skipOptimization: true,
-            skipReason: `Already optimal! Your financial independence age is ${baselineFiAge} which is already optimised. Keep investing!`
-        };
-    }
-
-    const solutions: OptimizationSolution[] = [];
-    const effectiveBaseline = baselineFiAge ?? 100; // Use high number if no baseline
-
-    // Add baseline as first solution for reference
-    if (baselineFiAge !== null) {
-        solutions.push({
-            fiAge: baselineFiAge,
-            stepUpPercent: 0,
-            sipIncreasePercent: 0,
-            newMonthlySip: monthlyInvestment,
-            improvementYears: 0
-        });
-    }
-
-    // Step 1: Test step-up only scenarios
-    for (const stepUp of STEP_UP_TEST_VALUES) {
-        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
-        if (fiAge !== null && fiAge < effectiveBaseline) {
-            solutions.push({
-                fiAge,
-                stepUpPercent: stepUp,
-                sipIncreasePercent: 0,
-                newMonthlySip: monthlyInvestment,
-                improvementYears: effectiveBaseline - fiAge
-            });
-        }
-    }
-
-    // Step 2: Test SIP increase only scenarios
-    for (const sipIncrease of SIP_INCREASE_TEST_VALUES) {
-        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0, existingFDCorpus, existingMFCorpus);
-        if (fiAge !== null && fiAge < effectiveBaseline) {
-            solutions.push({
-                fiAge,
-                stepUpPercent: 0,
-                sipIncreasePercent: sipIncrease,
-                newMonthlySip: newSip,
-                improvementYears: effectiveBaseline - fiAge
-            });
-        }
-    }
-
-    // Step 3: Test combined scenarios (limited pairs)
-    for (const [stepUp, sipIncrease] of COMBINED_SCENARIOS) {
-        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus);
-        if (fiAge !== null && fiAge < effectiveBaseline) {
-            // Check if we already have this exact combination
-            const exists = solutions.some(s =>
-                s.stepUpPercent === stepUp && s.sipIncreasePercent === sipIncrease
-            );
-            if (!exists) {
-                solutions.push({
-                    fiAge,
-                    stepUpPercent: stepUp,
-                    sipIncreasePercent: sipIncrease,
-                    newMonthlySip: newSip,
-                    improvementYears: effectiveBaseline - fiAge
-                });
-            }
-        }
-    }
-
-    // Remove baseline for AI ranking (we want to compare improvement options)
-    const solutionsForRanking = solutions.filter(s => s.stepUpPercent > 0 || s.sipIncreasePercent > 0);
-
-    // Sort solutions by FI age, then step-up, then SIP increase
-    solutionsForRanking.sort((a, b) => {
-        if (a.fiAge !== b.fiAge) return a.fiAge - b.fiAge;
-        if (a.stepUpPercent !== b.stepUpPercent) return a.stepUpPercent - b.stepUpPercent;
-        return a.sipIncreasePercent - b.sipIncreasePercent;
-    });
-
-    // Step 4: Get AI recommendation
-    if (solutionsForRanking.length === 0) {
-        return {
-            baselineFiAge,
-            solutions: [],
-            recommendedSolution: null,
-            recommendation: null,
-            skipOptimization: false,
-            error: 'No improvement options found within the allowed constraints. Consider increasing your investment significantly or reducing expenses.'
-        };
-    }
-
-    try {
-        const { recommendation } = await getAIRecommendation(
-            effectiveBaseline,
-            solutionsForRanking,
-            {
-                preferLowerStepUp: true,
-                preferLowerSipIncrease: true,
-                targetAge: OPTIMIZATION_TARGET_FI_AGE
-            }
-        );
-
-        const recommendedSolution = recommendation.recommendedIndex >= 0 && recommendation.recommendedIndex < solutionsForRanking.length
-            ? solutionsForRanking[recommendation.recommendedIndex]
-            : solutionsForRanking[0];
-
-        return {
-            baselineFiAge,
-            solutions: solutionsForRanking,
-            recommendedSolution,
-            recommendation,
-            skipOptimization: false
-        };
-    } catch (error) {
-        console.error('Optimization error:', error);
-        // Fallback: just return first solution
-        return {
-            baselineFiAge,
-            solutions: solutionsForRanking,
-            recommendedSolution: solutionsForRanking[0],
-            recommendation: {
-                recommendedIndex: 0,
-                explanation: 'This solution offers the best improvement in your financial independence timeline.',
-                alternatives: [],
-                difficulty: 'Easy' as const
-            },
-            skipOptimization: false
-        };
-    }
-};
 
 export const useFinancialIndependencePlanner = (inputs: FinancialIndependenceInputs | null) => {
     const result = useMemo<FinancialIndependenceResult | null>(() => {

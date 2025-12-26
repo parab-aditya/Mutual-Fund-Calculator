@@ -66,24 +66,63 @@ const runOptimization = async (
         });
     }
 
-    // Test step-up only scenarios (with caching enabled for worker performance)
-    for (const stepUp of STEP_UP_TEST_VALUES) {
-        const fiAge = calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus, true);
+    // ============================================
+    // PARALLEL SCENARIO CALCULATION
+    // Run all scenarios concurrently for faster optimization
+    // ============================================
+
+    // Step-up only scenarios
+    const stepUpPromises = STEP_UP_TEST_VALUES.map(async (stepUp) => ({
+        stepUp,
+        sipIncrease: 0,
+        newSip: monthlyInvestment,
+        fiAge: calculateFiAge(monthlyInvestment, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus, true)
+    }));
+
+    // SIP increase only scenarios
+    const sipIncreasePromises = SIP_INCREASE_TEST_VALUES.map(async (sipIncrease) => {
+        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
+        return {
+            stepUp: 0,
+            sipIncrease,
+            newSip,
+            fiAge: calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0, existingFDCorpus, existingMFCorpus, true)
+        };
+    });
+
+    // Combined scenarios
+    const combinedPromises = COMBINED_SCENARIOS.map(async ([stepUp, sipIncrease]) => {
+        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
+        return {
+            stepUp,
+            sipIncrease,
+            newSip,
+            fiAge: calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus, true)
+        };
+    });
+
+    // Execute all scenarios in parallel
+    const [stepUpResults, sipIncreaseResults, combinedResults] = await Promise.all([
+        Promise.all(stepUpPromises),
+        Promise.all(sipIncreasePromises),
+        Promise.all(combinedPromises)
+    ]);
+
+    // Process step-up results
+    for (const { stepUp, fiAge, newSip } of stepUpResults) {
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
                 stepUpPercent: stepUp,
                 sipIncreasePercent: 0,
-                newMonthlySip: monthlyInvestment,
+                newMonthlySip: newSip,
                 improvementYears: effectiveBaseline - fiAge
             });
         }
     }
 
-    // Test SIP increase only scenarios
-    for (const sipIncrease of SIP_INCREASE_TEST_VALUES) {
-        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, 0, existingFDCorpus, existingMFCorpus, true);
+    // Process SIP increase results
+    for (const { sipIncrease, fiAge, newSip } of sipIncreaseResults) {
         if (fiAge !== null && fiAge < effectiveBaseline) {
             solutions.push({
                 fiAge,
@@ -95,10 +134,8 @@ const runOptimization = async (
         }
     }
 
-    // Test combined scenarios
-    for (const [stepUp, sipIncrease] of COMBINED_SCENARIOS) {
-        const newSip = Math.round(monthlyInvestment * (1 + sipIncrease / 100));
-        const fiAge = calculateFiAge(newSip, monthlyExpense, currentAge, maxAge, stepUp, existingFDCorpus, existingMFCorpus, true);
+    // Process combined results (skip duplicates)
+    for (const { stepUp, sipIncrease, fiAge, newSip } of combinedResults) {
         if (fiAge !== null && fiAge < effectiveBaseline) {
             const exists = solutions.some(s =>
                 s.stepUpPercent === stepUp && s.sipIncreasePercent === sipIncrease

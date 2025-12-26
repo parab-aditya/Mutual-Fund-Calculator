@@ -1,12 +1,16 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, Suspense, lazy } from 'react';
 import { formatToWords } from '../../../utils/formatters';
 import { TrendUpIcon, WalletIcon, ChartIcon, CheckCircleIcon } from './icons';
 import { formatSmartNumber } from '../utils/planMetrics';
 import { PlanDisplayData, FinancialIndependenceInputs, MinimumInvestmentData, HealthStatus } from '../types';
 import { SWP_STEP_UP_PERCENTAGE } from '../constants';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { resolveAssetPath } from '../../../utils/basePath';
 import { AssumptionsModal } from './AssumptionsModal';
+
+// Lazy load Lottie to reduce initial bundle size (~50-100KB saved)
+const DotLottieReact = lazy(() =>
+    import('@lottiefiles/dotlottie-react').then(m => ({ default: m.DotLottieReact }))
+);
 
 interface CurrentPlanCardProps {
     planData: PlanDisplayData | null;
@@ -50,13 +54,15 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                     {/* Lottie Animation */}
                     <div className="flex-1 flex items-center justify-center -mt-2 mb-4 overflow-hidden">
                         <div className="w-full max-w-[200px] opacity-60">
-                            <DotLottieReact
-                                src={resolveAssetPath('/animations/financial-planning.lottie')}
-                                loop
-                                autoplay
-                                speed={0.6}
-                                renderConfig={{ autoResize: true }}
-                            />
+                            <Suspense fallback={<div className="w-full h-32 animate-pulse bg-slate-100 dark:bg-slate-700 rounded-xl" />}>
+                                <DotLottieReact
+                                    src={resolveAssetPath('/animations/financial-planning.lottie')}
+                                    loop
+                                    autoplay
+                                    speed={0.6}
+                                    renderConfig={{ autoResize: true }}
+                                />
+                            </Suspense>
                         </div>
                     </div>
 
@@ -132,13 +138,15 @@ export const CurrentPlanCard = memo<CurrentPlanCardProps>(function CurrentPlanCa
                 {/* Lottie Animation Filler */}
                 <div className="flex-1 flex items-center justify-center -mt-2 mb-3 sm:-mt-2 overflow-hidden">
                     <div className="w-full max-w-[240px]">
-                        <DotLottieReact
-                            src={resolveAssetPath('/animations/financial-planning.lottie')}
-                            loop
-                            autoplay
-                            speed={0.8}
-                            renderConfig={{ autoResize: true }}
-                        />
+                        <Suspense fallback={<div className="w-full h-40 animate-pulse bg-slate-100 dark:bg-slate-700 rounded-xl" />}>
+                            <DotLottieReact
+                                src={resolveAssetPath('/animations/financial-planning.lottie')}
+                                loop
+                                autoplay
+                                speed={0.8}
+                                renderConfig={{ autoResize: true }}
+                            />
+                        </Suspense>
                     </div>
                 </div>
 
